@@ -139,7 +139,7 @@ namespace BitPayAPI
         /// Get the entire set of invoice parameters in a dictionary.
         /// </summary>
         /// <returns>A list of key value pairs.</returns>
-        public Dictionary<string, string> getDictionary()
+	    public Dictionary<string, string> getDictionary()
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
 
