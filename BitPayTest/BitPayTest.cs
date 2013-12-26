@@ -24,25 +24,25 @@ namespace BitPayTest
         [TestMethod]
         public void testShouldGetInvoiceId()
         {
-            Assert.IsNotNull(basicInvoice.getId(), "Invoice created with id=NULL");
+            Assert.IsNotNull(basicInvoice.id, "Invoice created with id=NULL");
         }
 
         [TestMethod]
         public void testShouldGetInvoiceURL()
         {
-            Assert.IsNotNull(basicInvoice.getUrl(), "Invoice created with url=NULL");
+            Assert.IsNotNull(basicInvoice.url, "Invoice created with url=NULL");
         }
 
         [TestMethod]
         public void testShouldGetInvoiceStatusL()
         {
-            Assert.IsNotNull(basicInvoice.getStatus(), "Invoice created with status=NULL");
+            Assert.IsNotNull(basicInvoice.status, "Invoice created with status=NULL");
         }
 
         [TestMethod]
         public void testShouldGetInvoiceBTCPrice()
         {
-            Assert.IsNotNull(basicInvoice.getBtcPrice(), "Invoice created with btcPrice=NULL");
+            Assert.IsNotNull(basicInvoice.btcPrice, "Invoice created with btcPrice=NULL");
         }
 
         [TestMethod]
@@ -59,7 +59,7 @@ namespace BitPayTest
                 Invoice invoice = this.bitpay.createInvoice(price);
 
                 // Assert
-                double actual = invoice.getBtcPrice();
+                double actual = invoice.btcPrice;
                 Assert.AreEqual(expected, actual, BTC_EPSILON, "Invoice not created correctly: 0.1BTC");
             }
             catch (BitPayException ex)
@@ -82,7 +82,7 @@ namespace BitPayTest
                 Invoice invoice = this.bitpay.createInvoice(price);
 
                 // Assert
-                double actual = invoice.getPrice();
+                double actual = invoice.price;
                 Assert.AreEqual(expected, actual, EPSILON, "Invoice not created correctly: 100USD");
             }
             catch (BitPayException ex)
@@ -105,7 +105,7 @@ namespace BitPayTest
                 Invoice invoice = this.bitpay.createInvoice(price);
 
                 // Assert
-                double actual = invoice.getPrice();
+                double actual = invoice.price;
                 Assert.AreEqual(expected, actual, EPSILON, "Invoice not created correctly: 100EUR");
             }
             catch (BitPayException ex)
@@ -125,11 +125,11 @@ namespace BitPayTest
                 // Act
                 this.bitpay = new BitPay(API_KEY, "EUR");
                 Invoice invoice = this.bitpay.createInvoice(price);
-                Invoice retreivedInvoice = this.bitpay.getInvoice(invoice.getId());
+                Invoice retreivedInvoice = this.bitpay.getInvoice(invoice.id);
 
                 // Assert
-                string expected = invoice.getId();
-                string actual = retreivedInvoice.getId();
+                string expected = invoice.id;
+                string actual = retreivedInvoice.id;
                 Assert.AreEqual(expected, actual, "Expected invoice not retreived");
             }
             catch (BitPayException ex)
@@ -146,10 +146,10 @@ namespace BitPayTest
                 // Arrange
                 double price = 100.0;
                 InvoiceParams parameters = new InvoiceParams();
-                parameters.setBuyerName("Satoshi");
-                parameters.setBuyerEmail("satoshi@bitpay.com");
-                parameters.setFullNotifications(true);
-                parameters.setNotificationEmail("satoshi@bitpay.com");
+                parameters.buyerName = "Satoshi";
+                parameters.buyerEmail = "satoshi@bitpay.com";
+                parameters.fullNotifications = true;
+                parameters.notificationEmail = "satoshi@bitpay.com";
 
                 // Act
                 this.bitpay = new BitPay(API_KEY, "USD");

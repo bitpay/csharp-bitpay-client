@@ -124,11 +124,11 @@ namespace BitPayAPI
         /// <param name="price">The invoice price.</param>
         /// <param name="currency">The invoice currency.</param>
         /// <returns>A list of key/value pairs.</returns>
-	    private List<KeyValuePair<string, string>> getParams(double price, String currency)
+	    private Dictionary<string, string> getParams(double price, String currency)
         {
-		    List<KeyValuePair<string, string>> parameters = new List<KeyValuePair<string, string>>();
-		    parameters.Add(new KeyValuePair<string, string>("price", price + ""));
-		    parameters.Add(new KeyValuePair<string, string>("currency", currency));
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+		    parameters.Add("price", price + "");
+		    parameters.Add("currency", currency);
 		    return parameters;
 	    }
 
@@ -139,10 +139,11 @@ namespace BitPayAPI
         /// <param name="currency">The invoice currency.</param>
         /// <param name="optionalParams">A populated InvoiceParams object.</param>
         /// <returns>A list of key/value pairs.</returns>
-	    private List<KeyValuePair<string, string>> getParams(double price, string currency, InvoiceParams optionalParams)
+        private Dictionary<string, string> getParams(double price, string currency, InvoiceParams invoiceParams)
         {
-            List<KeyValuePair<string, string>> parameters = this.getParams(price, currency);
-            parameters.AddRange(optionalParams.getKeyValuePairs());
+            var parameters = invoiceParams.getDictionary();
+            parameters.Add("price", price.ToString());
+            parameters.Add("currency", currency);
 		    return parameters;
 	    }
 
