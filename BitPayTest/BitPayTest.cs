@@ -10,7 +10,7 @@ namespace BitPayTest
     {
         private BitPay bitpay;
         private Invoice basicInvoice;
-        private static String API_KEY = "g5K2XC8scMIU92qvaTLUfP08YQQlX78OBkzJ0Xt7qU";
+        private static String API_KEY = "Your BitPay API Key";
         private static double BTC_EPSILON = .000000001;
         private static double EPSILON = .001;
 
