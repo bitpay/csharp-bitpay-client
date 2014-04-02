@@ -146,10 +146,10 @@ namespace BitPayTest
                 // Arrange
                 double price = 100.0;
                 InvoiceParams parameters = new InvoiceParams();
-                parameters.setBuyerName("Satoshi");
-                parameters.setBuyerEmail("satoshi@bitpay.com");
-                parameters.setFullNotifications(true);
-                parameters.setNotificationEmail("satoshi@bitpay.com");
+                parameters.buyerName = "Satoshi";
+                parameters.buyerEmail = "satoshi@bitpay.com";
+                parameters.fullNotifications = true;
+                parameters.notificationEmail = "satoshi@bitpay.com";
 
                 // Act
                 this.bitpay = new BitPay(API_KEY);
