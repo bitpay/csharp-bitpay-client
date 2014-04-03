@@ -17,7 +17,6 @@ namespace BitPayAPI
 	    private string apiKey;
 	    private HttpClient client;
 	    private string auth;
-	    private string currency;
 
         /// <summary>
         /// Constructor. Baselines the API key and currencies for all invoices created using this instance.
@@ -26,9 +25,8 @@ namespace BitPayAPI
         /// <param name="currency">This is the currency code set for the price setting.  The pricing currencies
         /// currently supported are USD, EUR, BTC, and all of the codes listed on this page:
         /// https://bitpay.com/bitcoin­exchange­rates. </param>
-	    public BitPay(string apiKey, string currency) {
+	    public BitPay(string apiKey) {
 		    this.apiKey = apiKey;
-		    this.currency = currency;
             byte[] encodedByte = System.Text.ASCIIEncoding.ASCII.GetBytes(this.apiKey + ": ");
             this.auth = Convert.ToBase64String(encodedByte);
 		    client = new HttpClient();
@@ -44,14 +42,15 @@ namespace BitPayAPI
 	    /// <returns>A BitPay server populated Invoice object.</returns>
         /// <exception cref="BitPayAPI.BitPayException">Handles only errors that occur in the returned data.
         /// Does not handle programming or communication errors.</exception>
-        public Invoice createInvoice(double price)
+        public Invoice createInvoice(double price, string currency)
         {
 		    if(currency.Length > 3) {
 			    throw new ArgumentException("Must be a valid currency code");
 		    }
 
-            var content = new FormUrlEncodedContent(this.getParams(price, this.currency));
+            var content = new FormUrlEncodedContent(this.getParams(price, currency));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", this.auth);
+            client.DefaultRequestHeaders.Add("X-BitPay-Plugin-Info", "CSharplib");
 
             var result = client.PostAsync("invoice", content).Result;
             HttpContent response = result.Content;
@@ -69,15 +68,16 @@ namespace BitPayAPI
         /// <returns>A BitPay server populated Invoice object.</returns>
         /// <exception cref="BitPayAPI.BitPayException">Handles only errors that occur in the returned data.
         /// Does not handle programming or communication errors.</exception>
-        public Invoice createInvoice(double price, InvoiceParams parameters)
+        public Invoice createInvoice(double price, string currency, InvoiceParams parameters)
         {
             if (currency.Length > 3)
             {
                 throw new ArgumentException("Must be a valid currency code");
             }
 
-            var content = new FormUrlEncodedContent(this.getParams(price, this.currency, parameters));
+            var content = new FormUrlEncodedContent(this.getParams(price, currency, parameters));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", this.auth);
+            client.DefaultRequestHeaders.Add("X-BitPay-Plugin-Info", "CSharplib");
 
             var result = client.PostAsync("invoice", content).Result;
             HttpContent response = result.Content;
@@ -96,6 +96,7 @@ namespace BitPayAPI
         {
             string url = BASE_URL + "invoice/" + invoiceId;
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", this.auth);
+            client.DefaultRequestHeaders.Add("X-BitPay-Plugin-Info", "CSharplib");
 
             var result = client.GetAsync(url).Result;
             HttpContent response = result.Content;

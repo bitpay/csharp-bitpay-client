@@ -17,8 +17,8 @@ namespace BitPayTest
         public BitPayTest()
         {
             double price = 100.0;
-            this.bitpay = new BitPay(API_KEY, "USD");
-            basicInvoice = this.bitpay.createInvoice(price);
+            this.bitpay = new BitPay(API_KEY);
+            basicInvoice = this.bitpay.createInvoice(price, "USD");
         }
 
         [TestMethod]
@@ -55,8 +55,8 @@ namespace BitPayTest
                 double expected = 0.1;
 
                 // Act
-                this.bitpay = new BitPay(API_KEY, "BTC");
-                Invoice invoice = this.bitpay.createInvoice(price);
+                this.bitpay = new BitPay(API_KEY);
+                Invoice invoice = this.bitpay.createInvoice(price, "BTC");
 
                 // Assert
                 double actual = invoice.btcPrice;
@@ -78,8 +78,8 @@ namespace BitPayTest
                 double expected = 100.0;
 
                 // Act
-                this.bitpay = new BitPay(API_KEY, "USD");
-                Invoice invoice = this.bitpay.createInvoice(price);
+                this.bitpay = new BitPay(API_KEY);
+                Invoice invoice = this.bitpay.createInvoice(price, "USD");
 
                 // Assert
                 double actual = invoice.price;
@@ -101,8 +101,8 @@ namespace BitPayTest
                 double expected = 100.0;
 
                 // Act
-                this.bitpay = new BitPay(API_KEY, "EUR");
-                Invoice invoice = this.bitpay.createInvoice(price);
+                this.bitpay = new BitPay(API_KEY);
+                Invoice invoice = this.bitpay.createInvoice(price, "EUR");
 
                 // Assert
                 double actual = invoice.price;
@@ -123,8 +123,8 @@ namespace BitPayTest
                 double price = 100.0;
 
                 // Act
-                this.bitpay = new BitPay(API_KEY, "EUR");
-                Invoice invoice = this.bitpay.createInvoice(price);
+                this.bitpay = new BitPay(API_KEY);
+                Invoice invoice = this.bitpay.createInvoice(price, "EUR");
                 Invoice retreivedInvoice = this.bitpay.getInvoice(invoice.id);
 
                 // Assert
@@ -152,8 +152,8 @@ namespace BitPayTest
                 parameters.notificationEmail = "satoshi@bitpay.com";
 
                 // Act
-                this.bitpay = new BitPay(API_KEY, "USD");
-                Invoice invoice = this.bitpay.createInvoice(price, parameters);
+                this.bitpay = new BitPay(API_KEY);
+                Invoice invoice = this.bitpay.createInvoice(price, "USD", parameters);
 
                 // Assert
                 Assert.IsNotNull(invoice, "Invoice not created");
@@ -172,7 +172,7 @@ namespace BitPayTest
                 // Arrange
 
                 // Act
-                this.bitpay = new BitPay(API_KEY, "EUR");		
+                this.bitpay = new BitPay(API_KEY);		
                 Rates rates = this.bitpay.getRates();		
 
                 // Assert
@@ -191,7 +191,7 @@ namespace BitPayTest
             // Arrange
 
             // Act
-            this.bitpay = new BitPay(API_KEY, "USD");		
+            this.bitpay = new BitPay(API_KEY);		
             Rates rates = this.bitpay.getRates();
 
             // Assert
@@ -205,7 +205,7 @@ namespace BitPayTest
             // Arrange
 
             // Act
-            this.bitpay = new BitPay(API_KEY, "EUR");		
+            this.bitpay = new BitPay(API_KEY);		
             Rates rates = this.bitpay.getRates();
 
             // Assert
@@ -219,7 +219,7 @@ namespace BitPayTest
             // Arrange
 
             // Act
-            this.bitpay = new BitPay(API_KEY, "CNY");
+            this.bitpay = new BitPay(API_KEY);
             Rates rates = this.bitpay.getRates();
 
             // Assert
@@ -233,7 +233,7 @@ namespace BitPayTest
             // Arrange
 
             // Act
-            this.bitpay = new BitPay(API_KEY, "EUR");		
+            this.bitpay = new BitPay(API_KEY);		
             Rates rates = this.bitpay.getRates();		
             rates.update();
 		
