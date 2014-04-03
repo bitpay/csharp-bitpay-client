@@ -7,44 +7,16 @@ namespace BitPayAPI
     /// </summary>
     public class Invoice
     {
-	    private string id;
-	    private string url;
-	    private string status;
-	    private string btcPrice;
-	    private string price;
-	    private string currency;
-	
         /// <summary>
-        /// Constructor.  Initializes the invoice object.
-        /// </summary>
-        /// <param name="obj">A decoded JSON object.</param>
-	    public Invoice(dynamic obj)
-        {
-            this.id = (string)obj.id;
-            this.url = (string)obj.url;
-            this.status = (string)obj.status;
-            this.btcPrice = (string)obj.btcPrice;
-            this.price = Convert.ToString(obj.price);
-            this.currency = (string)obj.currency;
-	    }
-
-	    /// <summary>
         /// The unique id of the invoice assigned by bitpay.com.
-	    /// </summary>
-	    /// <returns>The invoice Id.</returns>
-	    public string getId() 
-        {
-		    return id;
-	    }
+        /// </summary>
+        /// 
+        public string id { get; set; }
 
         /// <summary>
         /// An https URL where the invoice can be viewed.
         /// </summary>
-        /// <returns>The invoice URL.</returns>
-	    public string getUrl()
-        {
-		    return url;
-	    }
+        public string url { get; set; }
 
         /// <summary>
         /// The current invoice status.
@@ -81,42 +53,37 @@ namespace BitPayAPI
         /// will make arrangements with the merchant regarding the funds (which can either be credited to the
         /// merchant account on another invoice, or returned to the buyer).
         /// </summary>
-        /// <returns>The status of the invoice.</returns>
-	    public string getStatus()
-        {
-		    return status;
-	    }
+        public string status { get; set; }
 
         /// <summary>
         /// The amount of bitcoins being requested for payment of this invoice (same as the price if the
         /// merchant set the price in BTC).
         /// </summary>
-        /// <returns>The bitcoin price on the invoice.</returns>
-	    public double getBtcPrice()
-        {
-            double val;
-            Double.TryParse(this.btcPrice, out val);
-		    return val;
-	    }
+        public double btcPrice { get; set; }
 
         /// <summary>
         /// The price set by the merchant (in terms of the provided currency).
         /// </summary>
-        /// <returns>The price on the invoice.</returns>
-	    public double getPrice()
-        {
-            double val;
-            Double.TryParse(this.price, out val);
-		    return val;
-	    }
+        public double price { get; set; }
 
         /// <summary>
         /// The 3 letter currency code in which the invoice was priced.
         /// </summary>
-        /// <returns>The currency code.</returns>
-	    public string getCurrency()
+        public string currency { get; set; }
+	
+        /// <summary>
+        /// Constructor.  Initializes the invoice object.
+        /// </summary>
+        /// <param name="obj">A decoded JSON object.</param>
+	    public Invoice(dynamic obj)
         {
-		    return currency;
+            this.id = (string)obj.id;
+            this.url = (string)obj.url;
+            this.status = (string)obj.status;
+            this.btcPrice = Convert.ToDouble(obj.btcPrice);
+            this.price = Convert.ToDouble(obj.price);
+            this.currency = (string)obj.currency;
 	    }
+
     }
 }
