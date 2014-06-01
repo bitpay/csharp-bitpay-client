@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPay", "BitPay\BitPay.csproj", "{D88A49C3-0280-4320-B120-AE519B2DB219}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPayTest", "BitPayTest\BitPayTest.csproj", "{71166BF5-DA31-4BFD-90E6-16172E894EAA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D88A49C3-0280-4320-B120-AE519B2DB219}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D88A49C3-0280-4320-B120-AE519B2DB219}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D88A49C3-0280-4320-B120-AE519B2DB219}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D88A49C3-0280-4320-B120-AE519B2DB219}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71166BF5-DA31-4BFD-90E6-16172E894EAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71166BF5-DA31-4BFD-90E6-16172E894EAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71166BF5-DA31-4BFD-90E6-16172E894EAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71166BF5-DA31-4BFD-90E6-16172E894EAA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
