@@ -12,26 +12,38 @@ namespace BitPayAPI
     /// </summary>
     public class BitPay
     {
-        private static readonly string BASE_URL = "https://bitpay.com/api/";
+        private static readonly string BASE_URL = "https://test.bitpay.com/";
 	
-	    private string apiKey;
 	    private HttpClient client;
-	    private string auth;
+        private ECKey privateKey;
+        private long nonce;
+        private String SIN;
 
         /// <summary>
-        /// Constructor. Baselines the API key and currencies for all invoices created using this instance.
+        /// Constructor. Baselines the cryptographic key and SIN for all API calls using this instance.
         /// </summary>
-        /// <param name="apiKey">Your API access key as defined at https://bitpay.com/api-keys. </param>
-        /// <param name="currency">This is the currency code set for the price setting.  The pricing currencies
-        /// currently supported are USD, EUR, BTC, and all of the codes listed on this page:
-        /// https://bitpay.com/bitcoin­exchange­rates. </param>
-	    public BitPay(string apiKey) {
-		    this.apiKey = apiKey;
-            byte[] encodedByte = System.Text.ASCIIEncoding.ASCII.GetBytes(this.apiKey + ": ");
-            this.auth = Convert.ToBase64String(encodedByte);
+        /// <param name="privateKey"></param>
+        /// <param name="SIN"></param>
+        public BitPay(ECKey privateKey, String SIN)
+        {
+            this.SIN = SIN;
+            this.nonce = DateTime.Now.Ticks;
+            this.privateKey = privateKey;
 		    client = new HttpClient();
             client.BaseAddress = new Uri(BASE_URL);
 	    }
+
+        public AccessKey submitAccessKey(String accountEmail, String SIN, String label)
+        {
+            HttpContent response = this.post("keys", this.getParams(accountEmail, SIN, label), false);
+            return createAccessKeyObjectFromResponse(response);
+	    }
+
+        public String getTokens()
+        {
+            HttpContent response = this.post("tokens", this.getParams(), false);
+		    return response.ToString();
+    	}
 
 	    /// <summary>
         /// Creates an invoice using the BitPay Payment Gateway API.
@@ -44,17 +56,12 @@ namespace BitPayAPI
         /// Does not handle programming or communication errors.</exception>
         public Invoice createInvoice(double price, string currency)
         {
-		    if(currency.Length > 3) {
+		    if(currency.Length > 3)
+            {
 			    throw new ArgumentException("Must be a valid currency code");
 		    }
 
-            var content = new FormUrlEncodedContent(this.getParams(price, currency));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", this.auth);
-            client.DefaultRequestHeaders.Add("X-BitPay-Plugin-Info", "CSharplib");
-
-            var result = client.PostAsync("invoice", content).Result;
-            HttpContent response = result.Content;
-
+            HttpContent response = this.post("invoices", this.getParams(price, currency), true);
             return createInvoiceObjectFromResponse(response);
 	    }
 
@@ -75,13 +82,7 @@ namespace BitPayAPI
                 throw new ArgumentException("Must be a valid currency code");
             }
 
-            var content = new FormUrlEncodedContent(this.getParams(price, currency, parameters));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", this.auth);
-            client.DefaultRequestHeaders.Add("X-BitPay-Plugin-Info", "CSharplib");
-
-            var result = client.PostAsync("invoice", content).Result;
-            HttpContent response = result.Content;
-
+            HttpContent response = this.post("invoices", this.getParams(price, currency, parameters), true);
             return createInvoiceObjectFromResponse(response);
         }
 
@@ -94,8 +95,7 @@ namespace BitPayAPI
         /// Does not handle programming or communication errors.</exception>
         public Invoice getInvoice(string invoiceId)
         {
-            string url = BASE_URL + "invoice/" + invoiceId;
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", this.auth);
+            string url = BASE_URL + "invoices/" + invoiceId;
             client.DefaultRequestHeaders.Add("X-BitPay-Plugin-Info", "CSharplib");
 
             var result = client.GetAsync(url).Result;
@@ -111,12 +111,24 @@ namespace BitPayAPI
         public Rates getRates()
         {
             string url = BASE_URL + "rates";
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", this.auth);
-
             var result = client.GetAsync(url).Result;
             HttpContent response = result.Content;
 
             return new Rates(response, this);
+        }
+
+        private Dictionary<string, string> getParams()
+        {
+            return new Dictionary<string, string>();
+        }
+
+        private Dictionary<string, string> getParams(string email, string SIN, string label)
+        {
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("sin", SIN);
+            parameters.Add("email", email);
+            parameters.Add("label", label);
+            return parameters;
         }
 
         /// <summary>
@@ -148,6 +160,54 @@ namespace BitPayAPI
 		    return parameters;
 	    }
 
+        private String signData(String url)
+        {
+            return KeyUtils.signString(privateKey, url);
+        }
+
+        private String signData(String url, Dictionary<string, string> body)
+        {
+            String data = url + "{";
+            foreach (KeyValuePair<string, string> entry in body)
+            {
+                data += '"' + entry.Key + "\":\"" + entry.Value + "\",";
+            }
+            data = data.Substring(0, data.Length - 1);
+            data += "}";
+            return KeyUtils.signString(privateKey, data);
+        }
+
+        private HttpContent post(String uri, Dictionary<string, string> parameters, bool shouldSignData)
+        {
+            try
+            {
+                parameters.Add("guid", Guid.NewGuid().ToString());
+                parameters.Add("nonce", this.nonce + "");
+                this.nonce++;
+
+                var content = new FormUrlEncodedContent(parameters);
+
+                if (shouldSignData)
+                {
+                    String signature = signData(BASE_URL + uri, parameters);
+                    client.DefaultRequestHeaders.Add("X-signature", signature);
+                    client.DefaultRequestHeaders.Add("X-pubkey", KeyUtils.bytesToHex(privateKey.pubKey));
+                }
+
+                client.DefaultRequestHeaders.Add("X-BitPay-Plugin-Info", "CSharplib");
+                var result = client.PostAsync(uri, content).Result;
+                HttpContent response = result.Content;
+                return response;
+
+            }
+            catch (Exception e)
+            {
+                Console.Write(e.ToString());
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Determines whether or not the given dynamic object key collection includes the specified member name.
         /// </summary>
@@ -158,6 +218,17 @@ namespace BitPayAPI
         {
             Dictionary<string, object>.KeyCollection kc = obj.GetDynamicMemberNames();
             return kc.Contains(name);
+        }
+
+        private AccessKey createAccessKeyObjectFromResponse(HttpContent response)
+        {
+            dynamic obj = Json.Decode(response.ReadAsStringAsync().Result);
+            if (dynamicObjectHasProperty(obj, "error"))
+            {
+                throw new BitPayException("Error: " + obj.error.message);
+            }
+
+            return new AccessKey(obj);
         }
 
         /// <summary>
@@ -172,10 +243,11 @@ namespace BitPayAPI
             dynamic obj = Json.Decode(response.ReadAsStringAsync().Result);
             if (dynamicObjectHasProperty(obj, "error"))
             {
-                throw new BitPayException("Error: " + obj.error.message);
+                throw new BitPayException("Error: " + obj.error);
             }
 
             return new Invoice(obj);
 	    }
+
     }
 }

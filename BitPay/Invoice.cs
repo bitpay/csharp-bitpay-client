@@ -10,7 +10,6 @@ namespace BitPayAPI
         /// <summary>
         /// The unique id of the invoice assigned by bitpay.com.
         /// </summary>
-        /// 
         public string id { get; set; }
 
         /// <summary>
