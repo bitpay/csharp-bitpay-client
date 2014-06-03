@@ -28,15 +28,23 @@ namespace BitPayAPI
         public string token { get; set; }
 
         /// <summary>
-        /// Constructor.  Initializes the access key object.
+        /// Update this instance with a JSON object from the BitPay server.
         /// </summary>
         /// <param name="obj">A decoded JSON object.</param>
-	    public AccessKey(dynamic obj)
+        public void updateWithObject(dynamic obj)
         {
             this.id = (string)obj.data.id;
             this.label = (string)obj.data.label;
             this.approved = Convert.ToBoolean(obj.data.approved);
             this.token = (string)obj.data.token;
-	    }
+        }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public AccessKey()
+        {
+
+        }
     }
 }

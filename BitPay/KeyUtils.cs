@@ -8,27 +8,28 @@ using System.Globalization;
 using System.IO;
 using System.Numerics;
 
+using System.Security.Cryptography;
+
 namespace BitPayAPI
 {
     public class KeyUtils
     {
-        private static char[] hexArray = "0123456789abcdef".ToCharArray();
 
-	    public KeyUtils() {
+        private static char[] hexArray = "0123456789abcdef".ToCharArray();       
+
+	    public KeyUtils() 
+        {
 
 	    }
 
-	    public static ECKey loadKeys(String privateKey, String publicKey) {
-//J             BigInteger privKey = new BigInteger(privateKey, 16);
-//C#            BigInteger privKey = BigInteger.Parse(privateKey, NumberStyles.HexNumber); 
-
-//J            ECKey key = new ECKey(privKey, null, true);
-            ECKey key = new ECKey(getBytes(privateKey), null, true);
-
+	    public static ECKey loadKeys(String privateKey)
+        {
+            ECKey key = new ECKey(hexToBytes(privateKey), null, true);
 		    return key;
 	    }
 
-	    public static String readKeyFromFile(String filename) {
+	    public static String readKeyFromFile(String filename)
+        {
 		    StreamReader sr;
 	        try {
 	    	    sr = new StreamReader(filename);
@@ -41,18 +42,51 @@ namespace BitPayAPI
 	        return "";
 	    }
 
-	    public static String signString(ECKey key, String input) {
-		    Console.WriteLine("Signing string: " + input);
-		    byte[] data = getBytes(input);
-            //byte[] data = Utils.formatMessageForSigning(input);
-//            Sha256Hash hash = Sha256Hash.create(data);
-//            ECDSASignature sig = key.sign(hash, null);
-//            byte[] bytes = sig.encodeToDER();
-
-            return bytesToHex(key.signData(data));
+	    public static String signString(ECKey key, String input) 
+        {
+		    Console.Out.WriteLine("Signing string: " + input);
+            String hash = sha256(input);
+            return bytesToHex(key.signData(hexToBytes(hash)));
 	    }
 
-	    public static String bytesToHex(byte[] bytes) {
+        private static String sha256(String value)
+        {
+            StringBuilder Sb = new StringBuilder();
+
+            using (SHA256 hash = SHA256Managed.Create())
+            {
+                Encoding enc = Encoding.UTF8;
+                Byte[] result = hash.ComputeHash(enc.GetBytes(value));
+
+                foreach (Byte b in result)
+                    Sb.Append(b.ToString("x2"));
+            }
+            return Sb.ToString();
+        }
+
+        private static int getHexVal(char hex)
+        {
+            int val = (int)hex;
+            return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
+        }
+
+        public static byte[] hexToBytes(string hex)
+        {
+            if (hex.Length % 2 == 1)
+            {
+                throw new Exception("The binary key cannot have an odd number of digits");
+            }
+            byte[] arr = new byte[hex.Length >> 1];
+
+            for (int i = 0; i < hex.Length >> 1; ++i)
+            {
+                arr[i] = (byte)((getHexVal(hex[i << 1]) << 4) + (getHexVal(hex[(i << 1) + 1])));
+            }
+            return arr;
+        }
+
+        public static String bytesToHex(byte[] bytes)
+        {
 	        char[] hexChars = new char[bytes.Length * 2];
 	        for ( int j = 0; j < bytes.Length; j++ ) {
 	            int v = bytes[j] & 0xFF;
@@ -61,20 +95,5 @@ namespace BitPayAPI
 	        }
 	        return new String(hexChars);
 	    }
-
-        private static byte[] getBytes(string str)
-        {
-            byte[] bytes = new byte[str.Length * sizeof(char)];
-            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-            return bytes;
-        }
-
-        static string getString(byte[] bytes)
-        {
-            char[] chars = new char[bytes.Length / sizeof(char)];
-            System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
-            return new string(chars);
-        }
-
     }
 }

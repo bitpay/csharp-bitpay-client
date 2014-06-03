@@ -23,12 +23,16 @@ namespace BitPayTest
         public BitPayTest()
         {
             String privateKey = KeyUtils.readKeyFromFile(privKeyFile);
-            String publicKey = KeyUtils.readKeyFromFile(pubKeyFile);
-            ECKey privKey = KeyUtils.loadKeys(privateKey, publicKey);
+            ECKey privKey = KeyUtils.loadKeys(privateKey);
+
             bitpay = new BitPay(privKey, SIN);
 
-//            bitpay.getAccessKeys();
-            accessKey = bitpay.submitAccessKey(merchantAccountEmail, SIN, "CSharp API Tester");
+            // Retrieve a list of access tokens.  Each token represents access to the specified facade.
+//            List<Token> tokens = bitpay.getTokens();
+
+//            List<AccessKey> accessKeys = bitpay.getAccessKeys();
+
+//            accessKey = bitpay.submitAccessKey(merchantAccountEmail, SIN, "CSharp API Tester");
 //            bitpay.approveAccessKey();
 
             double price = 100.0;

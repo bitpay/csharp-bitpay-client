@@ -12,6 +12,7 @@ namespace BitPayAPI
     /// </summary>
     public class BitPay
     {
+
         private static readonly string BASE_URL = "https://test.bitpay.com/";
 	
 	    private HttpClient client;
@@ -33,16 +34,33 @@ namespace BitPayAPI
             client.BaseAddress = new Uri(BASE_URL);
 	    }
 
+        public List<AccessKey> getAccessKeys()
+        {
+            HttpContent response = this.get("keys", this.getParams(), true);
+            return createAccessKeyListFromResponse(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="accountEmail"></param>
+        /// <param name="SIN"></param>
+        /// <param name="label"></param>
+        /// <returns></returns>
         public AccessKey submitAccessKey(String accountEmail, String SIN, String label)
         {
             HttpContent response = this.post("keys", this.getParams(accountEmail, SIN, label), false);
             return createAccessKeyObjectFromResponse(response);
 	    }
 
-        public String getTokens()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public List<Token> getTokens()
         {
-            HttpContent response = this.post("tokens", this.getParams(), false);
-		    return response.ToString();
+            HttpContent response = this.get("tokens", this.getParams(), true);
+            return createTokenListFromResponse(response);
     	}
 
 	    /// <summary>
@@ -177,6 +195,40 @@ namespace BitPayAPI
             return KeyUtils.signString(privateKey, data);
         }
 
+        private HttpContent get(String uri, Dictionary<string, string> parameters, bool shouldSignData)
+        {
+            try
+            {
+                parameters.Add("nonce", this.nonce + "");
+                this.nonce++;
+
+                String fullURL = BASE_URL + uri + "?";
+		        foreach (KeyValuePair<string, string> entry in parameters)
+                {
+			        fullURL += entry.Key + "=" + entry.Value + "&";
+		        }
+		        fullURL = fullURL.Substring(0, fullURL.Length - 1);
+
+                if (shouldSignData)
+                {
+                    String signature = signData(fullURL);
+                    client.DefaultRequestHeaders.Add("X-signature", signature);
+                    client.DefaultRequestHeaders.Add("X-pubkey", KeyUtils.bytesToHex(privateKey.pubKey));
+                }
+
+                client.DefaultRequestHeaders.Add("X-BitPay-Plugin-Info", "CSharplib");
+                var result = client.GetAsync(fullURL).Result;
+                HttpContent response = result.Content;
+                return response;
+            }
+            catch (Exception e)
+            {
+                Console.Out.Write(e.ToString());
+            }
+
+            return null;
+        }
+
         private HttpContent post(String uri, Dictionary<string, string> parameters, bool shouldSignData)
         {
             try
@@ -198,11 +250,10 @@ namespace BitPayAPI
                 var result = client.PostAsync(uri, content).Result;
                 HttpContent response = result.Content;
                 return response;
-
             }
             catch (Exception e)
             {
-                Console.Write(e.ToString());
+                Console.Out.Write(e.ToString());
             }
 
             return null;
@@ -220,15 +271,90 @@ namespace BitPayAPI
             return kc.Contains(name);
         }
 
-        private AccessKey createAccessKeyObjectFromResponse(HttpContent response)
+        private List<Token> createTokenListFromResponse(HttpContent response)
         {
+            if (response == null)
+            {
+                return null;
+            }
+
             dynamic obj = Json.Decode(response.ReadAsStringAsync().Result);
             if (dynamicObjectHasProperty(obj, "error"))
             {
-                throw new BitPayException("Error: " + obj.error.message);
+                throw new BitPayException("Error: " + obj.error);
             }
 
-            return new AccessKey(obj);
+            // Sample JSON response
+            // {
+            //   "data":
+            //     [
+            //       {"merchant": "5PAgL9amg5EgEzrvR2NBvwprC2XEVvpFQoLpQVu9x3Ck"}
+            //     ]
+            // }
+            List<Token> tokens = new List<Token>();
+
+            for (int i = 0; i < obj.data.Length; i++)
+            {
+                Token t = new Token();
+                t.updateWithObject(obj.data[i]);
+                tokens.Add(t);
+            }
+
+            return tokens;
+        }
+
+        private List<AccessKey> createAccessKeyListFromResponse(HttpContent response)
+        {
+            if (response == null)
+            {
+                return null;
+            }
+
+            dynamic obj = Json.Decode(response.ReadAsStringAsync().Result);
+            if (dynamicObjectHasProperty(obj, "error"))
+            {
+                throw new BitPayException("Error: " + obj.error);
+            }
+
+            // Sample JSON response
+            // {
+            //     "facade": "user/sin",
+            //     "data": [
+            //         {
+            //             "id": "Teys7dby6EXdxDGnypFozhtMbvYNydxbaXf",
+            //             "label": "CSharp API Tester",
+            //             "approved": true,
+            //             "token": "2XmXFUpsApquF83qNWHVsDF2DoZ1iTDPCao4hMMLgTfjKgznHU9QnTJh9RJqVq2Lkk"
+            //         }
+            //     ]
+            // }
+            List<AccessKey> accessKeys = new List<AccessKey>();
+
+            for (int i = 0; i < obj.data.Length; i++)
+            {
+                AccessKey k = new AccessKey();
+                k.updateWithObject(obj.data[i]);
+                accessKeys.Add(k);
+            }
+
+            return accessKeys;
+        }
+
+        private AccessKey createAccessKeyObjectFromResponse(HttpContent response)
+        {
+            if (response == null)
+            {
+                return null;
+            }
+
+            dynamic obj = Json.Decode(response.ReadAsStringAsync().Result);
+            if (dynamicObjectHasProperty(obj, "error"))
+            {
+                throw new BitPayException("Error: " + obj.error);
+            }
+
+            AccessKey accessKey = new AccessKey();
+            return accessKey.updateWithObject(obj);
         }
 
         /// <summary>
