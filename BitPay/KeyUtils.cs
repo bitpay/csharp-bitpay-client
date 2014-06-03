@@ -44,7 +44,6 @@ namespace BitPayAPI
 
 	    public static String signString(ECKey key, String input) 
         {
-		    Console.Out.WriteLine("Signing string: " + input);
             String hash = sha256(input);
             return bytesToHex(key.signData(hexToBytes(hash)));
 	    }

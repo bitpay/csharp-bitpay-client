@@ -9,7 +9,6 @@ namespace BitPayTest
     public class BitPayTest
     {
         private BitPay bitpay;
-        private AccessKey accessKey;
         private Invoice basicInvoice;
         private static double BTC_EPSILON = .000000001;
         private static double EPSILON = .001;
@@ -27,12 +26,24 @@ namespace BitPayTest
 
             bitpay = new BitPay(privKey, SIN);
 
-            // Retrieve a list of access tokens.  Each token represents access to the specified facade.
-//            List<Token> tokens = bitpay.getTokens();
+            // Generate the SIN and keys if they don't exist.
+            //
+            // There is currently no C# implementation for bitcore (the library used to generate a SIN).
+            // Create the SIN and keys on the BitPay server at https://test.bitpay.com/key-generator
 
-//            List<AccessKey> accessKeys = bitpay.getAccessKeys();
 
-//            accessKey = bitpay.submitAccessKey(merchantAccountEmail, SIN, "CSharp API Tester");
+            // Associate the SIN with a BitPay merchant account.
+            //
+            // Using the "public" facade, POST to /keys the following: SIN, email, label
+            AccessKey accessKey = bitpay.submitAccessKey(merchantAccountEmail, SIN, "CSharp API Tester");
+
+            List<AccessKey> accessKeys = bitpay.getAccessKeys();
+
+
+
+            // Approve the SIN for the merchant account.
+            //
+            // Using the "user" facade, POST to /keys/:keyId the following: approved,
 //            bitpay.approveAccessKey();
 
             double price = 100.0;

@@ -22,7 +22,7 @@ namespace BitPayAPI
         /// Update this instance with a JSON object from the BitPay server.
         /// </summary>
         /// <param name="obj">A decoded JSON object.</param>
-        public void updateWithObject(dynamic obj)
+        public Token updateWithObject(dynamic obj)
         {
             Dictionary<string, object>.KeyCollection kc = obj.GetDynamicMemberNames();
 
@@ -36,6 +36,7 @@ namespace BitPayAPI
                 this.facade = key;
                 this.token = obj[key];
             }
+            return this;
         }
 
         /// <summary>

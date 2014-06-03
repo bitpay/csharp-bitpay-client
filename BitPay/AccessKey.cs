@@ -8,6 +8,11 @@ namespace BitPayAPI
     public class AccessKey
     {
         /// <summary>
+        /// <summary>
+        /// The facade.
+        /// </summary>
+        public string facade { get; set; }
+
         /// The SIN.
         /// </summary>
         public string id { get; set; }
@@ -31,20 +36,22 @@ namespace BitPayAPI
         /// Update this instance with a JSON object from the BitPay server.
         /// </summary>
         /// <param name="obj">A decoded JSON object.</param>
-        public void updateWithObject(dynamic obj)
+        public AccessKey updateWithObject(dynamic obj)
         {
-            this.id = (string)obj.data.id;
-            this.label = (string)obj.data.label;
-            this.approved = Convert.ToBoolean(obj.data.approved);
-            this.token = (string)obj.data.token;
+            this.id = (string)obj.id;
+            this.label = (string)obj.label;
+            this.approved = Convert.ToBoolean(obj.approved);
+            this.token = (string)obj.token;
+            return this;
         }
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        public AccessKey()
+        /// <param name="facade">The facade to which this access key applies.</param>
+        public AccessKey(string facade)
         {
-
+            this.facade = facade;
         }
     }
 }

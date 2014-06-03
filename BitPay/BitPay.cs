@@ -28,7 +28,7 @@ namespace BitPayAPI
         public BitPay(ECKey privateKey, String SIN)
         {
             this.SIN = SIN;
-            this.nonce = DateTime.Now.Ticks;
+            this.nonce = DateTime.Now.Ticks / 1000;
             this.privateKey = privateKey;
 		    client = new HttpClient();
             client.BaseAddress = new Uri(BASE_URL);
@@ -79,7 +79,20 @@ namespace BitPayAPI
 			    throw new ArgumentException("Must be a valid currency code");
 		    }
 
-            HttpContent response = this.post("invoices", this.getParams(price, currency), true);
+            // Requires the merchant facade.
+            // Attempt to retrieve my token for the merchant facade.
+            string token = null;
+            List<Token> tokens = getTokens();
+
+            foreach (Token t in tokens)
+            {
+                if (t.facade.Equals("merchant"))
+                {
+                    token = t.token;
+                }
+            }
+
+            HttpContent response = this.post("invoices", this.getParams(token, price, currency), true);
             return createInvoiceObjectFromResponse(response);
 	    }
 
@@ -152,14 +165,16 @@ namespace BitPayAPI
         /// <summary>
         /// Creates a list of key/value parameters.
         /// </summary>
+        /// <param name="token">The facade access token.</param>
         /// <param name="price">The invoice price.</param>
         /// <param name="currency">The invoice currency.</param>
         /// <returns>A list of key/value pairs.</returns>
-	    private Dictionary<string, string> getParams(double price, String currency)
+	    private Dictionary<string, string> getParams(string token, double price, String currency)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-		    parameters.Add("price", price + "");
-		    parameters.Add("currency", currency);
+            parameters.Add("token", token);
+            parameters.Add("price", price + "");
+            parameters.Add("currency", currency);
 		    return parameters;
 	    }
 
@@ -192,6 +207,9 @@ namespace BitPayAPI
             }
             data = data.Substring(0, data.Length - 1);
             data += "}";
+
+            System.Diagnostics.Debug.WriteLine("Signing string:\n" + data);
+
             return KeyUtils.signString(privateKey, data);
         }
 
@@ -199,6 +217,8 @@ namespace BitPayAPI
         {
             try
             {
+                client.DefaultRequestHeaders.Clear();
+
                 parameters.Add("nonce", this.nonce + "");
                 this.nonce++;
 
@@ -217,6 +237,10 @@ namespace BitPayAPI
                 }
 
                 client.DefaultRequestHeaders.Add("X-BitPay-Plugin-Info", "CSharplib");
+
+                System.Diagnostics.Debug.WriteLine(fullURL);
+                System.Diagnostics.Debug.WriteLine(client.DefaultRequestHeaders.ToString());
+
                 var result = client.GetAsync(fullURL).Result;
                 HttpContent response = result.Content;
                 return response;
@@ -229,15 +253,37 @@ namespace BitPayAPI
             return null;
         }
 
+        static byte[] GetBytes(string str)
+        {
+            byte[] bytes = new byte[str.Length * sizeof(char)];
+            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
+            return bytes;
+        }
+
         private HttpContent post(String uri, Dictionary<string, string> parameters, bool shouldSignData)
         {
             try
             {
+                client.DefaultRequestHeaders.Clear();
+
                 parameters.Add("guid", Guid.NewGuid().ToString());
                 parameters.Add("nonce", this.nonce + "");
                 this.nonce++;
 
-                var content = new FormUrlEncodedContent(parameters);
+//                var bodyContent = new FormUrlEncodedContent(parameters);
+                var jsonStr = "{";
+                foreach (var param in parameters)
+                {
+                    jsonStr += "\"" + param.Key + "\":\"" + param.Value + "\",";
+                }
+                jsonStr = jsonStr.Substring(0, jsonStr.Length - 2);
+                jsonStr += "}";
+                var bodyContent = new ByteArrayContent(GetBytes(jsonStr));
+
+                if (uri.Equals("invoices"))
+                {
+                    bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                }
 
                 if (shouldSignData)
                 {
@@ -247,7 +293,14 @@ namespace BitPayAPI
                 }
 
                 client.DefaultRequestHeaders.Add("X-BitPay-Plugin-Info", "CSharplib");
-                var result = client.PostAsync(uri, content).Result;
+
+                System.Diagnostics.Debug.WriteLine(uri);
+                System.Diagnostics.Debug.WriteLine(client.DefaultRequestHeaders.ToString());
+
+
+                System.Diagnostics.Debug.WriteLine("body content: " + bodyContent.ToString());
+
+                var result = client.PostAsync(uri, bodyContent).Result;
                 HttpContent response = result.Content;
                 return response;
             }
@@ -332,7 +385,7 @@ namespace BitPayAPI
 
             for (int i = 0; i < obj.data.Length; i++)
             {
-                AccessKey k = new AccessKey();
+                AccessKey k = new AccessKey(obj.facade);
                 k.updateWithObject(obj.data[i]);
                 accessKeys.Add(k);
             }
@@ -353,8 +406,8 @@ namespace BitPayAPI
                 throw new BitPayException("Error: " + obj.error);
             }
 
-            AccessKey accessKey = new AccessKey();
-            return accessKey.updateWithObject(obj);
+            AccessKey accessKey = new AccessKey(obj.facade);
+            return accessKey.updateWithObject(obj.data);
         }
 
         /// <summary>
