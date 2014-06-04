@@ -48,7 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccessKey.cs" />
+    <Compile Include="Key.cs" />
     <Compile Include="BitPay.cs" />
     <Compile Include="BitPayException.cs" />
     <Compile Include="ECKey.cs" />

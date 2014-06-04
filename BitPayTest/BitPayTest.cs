@@ -15,63 +15,97 @@ namespace BitPayTest
 
         private static String SIN = "Teys7dby6EXdxDGnypFozhtMbvYNydxbaXf";
         private static String privKeyFile = "C:\\Users\\Andy\\Documents\\Visual Studio 2012\\Projects\\bitpay-csharp-client-csr\\BitPayTest\\key.priv";
-        private static String pubKeyFile = "C:\\Users\\Andy\\Documents\\Visual Studio 2012\\Projects\\bitpay-csharp-client-csr\\BitPayTest\\key.pub";
-        private static String merchantAccountEmail = "andy@bitpay.com";
-
+        private static String accountEmail = "andy@bitpay.com";
 
         public BitPayTest()
         {
             String privateKey = KeyUtils.readKeyFromFile(privKeyFile);
             ECKey privKey = KeyUtils.loadKeys(privateKey);
-
             bitpay = new BitPay(privKey, SIN);
-
-            // Generate the SIN and keys if they don't exist.
-            //
-            // There is currently no C# implementation for bitcore (the library used to generate a SIN).
-            // Create the SIN and keys on the BitPay server at https://test.bitpay.com/key-generator
-
-
-            // Associate the SIN with a BitPay merchant account.
-            //
-            // Using the "public" facade, POST to /keys the following: SIN, email, label
-            AccessKey accessKey = bitpay.submitAccessKey(merchantAccountEmail, SIN, "CSharp API Tester");
-
-            List<AccessKey> accessKeys = bitpay.getAccessKeys();
-
-
-
-            // Approve the SIN for the merchant account.
-            //
-            // Using the "user" facade, POST to /keys/:keyId the following: approved,
-//            bitpay.approveAccessKey();
-
-            double price = 100.0;
-            basicInvoice = bitpay.createInvoice(price, "USD");
         }
+
+        [TestMethod]
+        public void testShouldGetTokens()
+        {
+            try
+            {
+		        List<Token> tokens = this.bitpay.getTokens();
+		        Assert.IsTrue(tokens.Count > 0, "List of tokens is empty");
+            }
+            catch (BitPayException ex)
+            {
+                Assert.Fail(ex.getMessage());
+            }
+        }
+
+        [TestMethod]
+	    public void testShouldSubmitKey()
+        {
+            try
+            {
+		        Key key = this.bitpay.submitKey(accountEmail, SIN, "test");
+		        Assert.IsNotNull(key, "Submit key failed to return a response");
+            }
+            catch (BitPayException ex)
+            {
+                Assert.Fail(ex.getMessage());
+            }
+	    }
 
         [TestMethod]
         public void testShouldGetInvoiceId()
         {
-            Assert.IsNotNull(basicInvoice.id, "Invoice created with id=NULL");
+            try
+            {
+                basicInvoice = bitpay.createInvoice(50, "USD"); 
+                Assert.IsNotNull(basicInvoice.id, "Invoice created with id=NULL");
+            }
+            catch (BitPayException ex)
+            {
+                Assert.Fail(ex.getMessage());
+            }
         }
 
         [TestMethod]
         public void testShouldGetInvoiceURL()
         {
-            Assert.IsNotNull(basicInvoice.url, "Invoice created with url=NULL");
+            try
+            {
+                basicInvoice = bitpay.createInvoice(50, "USD");
+                Assert.IsNotNull(basicInvoice.url, "Invoice created with url=NULL");
+            }
+            catch (BitPayException ex)
+            {
+                Assert.Fail(ex.getMessage());
+            }
         }
 
         [TestMethod]
         public void testShouldGetInvoiceStatusL()
         {
-            Assert.IsNotNull(basicInvoice.status, "Invoice created with status=NULL");
+            try
+            {
+                basicInvoice = bitpay.createInvoice(50, "USD");
+                Assert.IsNotNull(basicInvoice.status, "Invoice created with status=NULL");
+            }
+            catch (BitPayException ex)
+            {
+                Assert.Fail(ex.getMessage());
+            }
         }
 
         [TestMethod]
         public void testShouldGetInvoiceBTCPrice()
         {
-            Assert.IsNotNull(basicInvoice.btcPrice, "Invoice created with btcPrice=NULL");
+            try
+            {
+                basicInvoice = bitpay.createInvoice(50, "USD");
+                Assert.IsNotNull(basicInvoice.btcPrice, "Invoice created with btcPrice=NULL");
+            }
+            catch (BitPayException ex)
+            {
+                Assert.Fail(ex.getMessage());
+            }
         }
 
         [TestMethod]
@@ -79,17 +113,8 @@ namespace BitPayTest
         {
             try
             {
-                // Arrange
-                double price = 0.1;
-                double expected = 0.1;
-
-                // Act
-//                this.bitpay = new BitPay(API_KEY);
-                Invoice invoice = this.bitpay.createInvoice(price, "BTC");
-
-                // Assert
-                double actual = invoice.btcPrice;
-                Assert.AreEqual(expected, actual, BTC_EPSILON, "Invoice not created correctly: 0.1BTC");
+                Invoice invoice = this.bitpay.createInvoice(0.1, "BTC");
+                Assert.AreEqual(0.1, invoice.btcPrice, BTC_EPSILON, "Invoice not created correctly: 0.1BTC");
             }
             catch (BitPayException ex)
             {
@@ -102,17 +127,8 @@ namespace BitPayTest
         {
             try
             {
-                // Arrange
-                double price = 100.0;
-                double expected = 100.0;
-
-                // Act
-//                this.bitpay = new BitPay(API_KEY);
-                Invoice invoice = this.bitpay.createInvoice(price, "USD");
-
-                // Assert
-                double actual = invoice.price;
-                Assert.AreEqual(expected, actual, EPSILON, "Invoice not created correctly: 100USD");
+                Invoice invoice = this.bitpay.createInvoice(100.0, "USD");
+                Assert.AreEqual(100.0, invoice.price, EPSILON, "Invoice not created correctly: 100USD");
             }
             catch (BitPayException ex)
             {
@@ -125,17 +141,8 @@ namespace BitPayTest
         {
             try
             {
-                // Arrange
-                double price = 100.0;
-                double expected = 100.0;
-
-                // Act
-//                this.bitpay = new BitPay(API_KEY);
-                Invoice invoice = this.bitpay.createInvoice(price, "EUR");
-
-                // Assert
-                double actual = invoice.price;
-                Assert.AreEqual(expected, actual, EPSILON, "Invoice not created correctly: 100EUR");
+                Invoice invoice = this.bitpay.createInvoice(100.0, "EUR");
+                Assert.AreEqual(100.0, invoice.price, EPSILON, "Invoice not created correctly: 100EUR");
             }
             catch (BitPayException ex)
             {
@@ -148,18 +155,9 @@ namespace BitPayTest
         {
             try
             {
-                // Arrange
-                double price = 100.0;
-
-                // Act
-//                this.bitpay = new BitPay(API_KEY);
-                Invoice invoice = this.bitpay.createInvoice(price, "EUR");
+                Invoice invoice = this.bitpay.createInvoice(100.0, "EUR");
                 Invoice retreivedInvoice = this.bitpay.getInvoice(invoice.id);
-
-                // Assert
-                string expected = invoice.id;
-                string actual = retreivedInvoice.id;
-                Assert.AreEqual(expected, actual, "Expected invoice not retreived");
+                Assert.AreEqual(invoice.id, retreivedInvoice.id, "Expected invoice not retreived");
             }
             catch (BitPayException ex)
             {
@@ -172,19 +170,12 @@ namespace BitPayTest
         {
             try
             {
-                // Arrange
-                double price = 100.0;
                 InvoiceParams parameters = new InvoiceParams();
                 parameters.buyerName = "Satoshi";
                 parameters.buyerEmail = "satoshi@bitpay.com";
                 parameters.fullNotifications = true;
                 parameters.notificationEmail = "satoshi@bitpay.com";
-
-                // Act
-//                this.bitpay = new BitPay(API_KEY);
-                Invoice invoice = this.bitpay.createInvoice(price, "USD", parameters);
-
-                // Assert
+                Invoice invoice = this.bitpay.createInvoice(100.0, "USD", parameters);
                 Assert.IsNotNull(invoice, "Invoice not created");
             }
             catch (BitPayException ex)
@@ -198,15 +189,8 @@ namespace BitPayTest
         {
             try
             {
-                // Arrange
-
-                // Act
-//                this.bitpay = new BitPay(API_KEY);		
-                Rates rates = this.bitpay.getRates();		
-
-                // Assert
-                List<Rate> listRates = rates.getRates();
-                Assert.IsNotNull(listRates, "Exchange rates not retrieved");
+                Rates rates = this.bitpay.getRates();
+                Assert.IsNotNull(rates.getRates(), "Exchange rates not retrieved");
             }
             catch (BitPayException ex)
             {
@@ -217,58 +201,30 @@ namespace BitPayTest
         [TestMethod]
         public void testShouldGetUSDExchangeRate()
         {
-            // Arrange
-
-            // Act
-//            this.bitpay = new BitPay(API_KEY);		
             Rates rates = this.bitpay.getRates();
-
-            // Assert
-            decimal rate = rates.getRate("USD");
-            Assert.IsTrue(rate != 0, "Exchange rate not retrieved: USD");
+            Assert.IsTrue(rates.getRate("USD") != 0, "Exchange rate not retrieved: USD");
         }
 	
         [TestMethod]
         public void testShouldGetEURExchangeRate()
         {
-            // Arrange
-
-            // Act
-//            this.bitpay = new BitPay(API_KEY);		
             Rates rates = this.bitpay.getRates();
-
-            // Assert
-            decimal rate = rates.getRate("EUR");
-            Assert.IsTrue(rate != 0, "Exchange rate not retrieved: EUR");
+            Assert.IsTrue(rates.getRate("EUR") != 0, "Exchange rate not retrieved: EUR");
         }
 	
         [TestMethod]
         public void testShouldGetCNYExchangeRate() 
         {
-            // Arrange
-
-            // Act
-//            this.bitpay = new BitPay(API_KEY);
             Rates rates = this.bitpay.getRates();
-
-            // Assert
-            decimal rate = rates.getRate("CNY");
-            Assert.IsTrue(rate != 0, "Exchange rate not retrieved: CNY");
+            Assert.IsTrue(rates.getRate("CNY") != 0, "Exchange rate not retrieved: CNY");
         }
 	
         [TestMethod]
         public void testShouldUpdateExchangeRates() 
         {
-            // Arrange
-
-            // Act
-//            this.bitpay = new BitPay(API_KEY);		
             Rates rates = this.bitpay.getRates();		
             rates.update();
-		
-            // Assert
-            List<Rate> listRates = rates.getRates();
-            Assert.IsNotNull(listRates, "Exchange rates not retrieved after update");
+            Assert.IsNotNull(rates.getRates(), "Exchange rates not retrieved after update");
         }
     }
 }

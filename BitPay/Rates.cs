@@ -18,9 +18,8 @@ namespace BitPayAPI
         /// </summary>
         /// <param name="response">The raw HTTP response from BitPay server api/rates call.</param>
         /// <param name="bp">bp - used to update self.</param>
-        public Rates(HttpContent response, BitPay bp)
+        public Rates(dynamic obj, BitPay bp)
         {
-            dynamic obj = Json.Decode(response.ReadAsStringAsync().Result);
             this._bp = bp;
 
             _rates = new List<Rate>();

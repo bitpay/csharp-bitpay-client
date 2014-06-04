@@ -5,26 +5,37 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Helpers;
 
+using System.Web.Script.Serialization;
+
+/**
+ * @author Andy Phillipson
+ * @date 6.4.2014
+ * 
+ * Wrapper for BitPay's *new* BitAuth API.
+ * 
+ * In order to authenticate with the new API, you must generate a
+ * public/private key pair using ECDSA curve secp256k1 and derive 
+ * your SIN. The SIN is defined as the base58 check representation 
+ * of: 	0x0F + 0x02 + RIPEMD-160(SHA-256(public key)), and using
+ * the submiyKey method, then approve your key at 
+ * bitpay.com/key-manager.
+ * 
+ * See bitpay.com/api for more information.
+ */
+
 namespace BitPayAPI
 {
-    /// <summary>
-    /// Provides an abstraction of the BitPay server.
-    /// </summary>
+
     public class BitPay
     {
 
-        private static readonly string BASE_URL = "https://test.bitpay.com/";
-	
+        private static readonly String BASE_URL = "https://test.bitpay.com/";
 	    private HttpClient client;
         private ECKey privateKey;
         private long nonce;
         private String SIN;
+        private String merchantToken;
 
-        /// <summary>
-        /// Constructor. Baselines the cryptographic key and SIN for all API calls using this instance.
-        /// </summary>
-        /// <param name="privateKey"></param>
-        /// <param name="SIN"></param>
         public BitPay(ECKey privateKey, String SIN)
         {
             this.SIN = SIN;
@@ -32,401 +43,274 @@ namespace BitPayAPI
             this.privateKey = privateKey;
 		    client = new HttpClient();
             client.BaseAddress = new Uri(BASE_URL);
+            this.merchantToken = this.getToken(this.getTokens(), "merchant");
 	    }
 
-        public List<AccessKey> getAccessKeys()
+        public Key submitKey(String accountEmail, String SIN, String label)
         {
-            HttpContent response = this.get("keys", this.getParams(), true);
-            return createAccessKeyListFromResponse(response);
+            Dictionary<String, String> parameters = this.getParams(accountEmail, SIN, label);
+            HttpContent response = this.post("keys", parameters, false);
+            return responseToKey(response);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="accountEmail"></param>
-        /// <param name="SIN"></param>
-        /// <param name="label"></param>
-        /// <returns></returns>
-        public AccessKey submitAccessKey(String accountEmail, String SIN, String label)
+        public List<Key> getKeys()
         {
-            HttpContent response = this.post("keys", this.getParams(accountEmail, SIN, label), false);
-            return createAccessKeyObjectFromResponse(response);
-	    }
+            Dictionary<String, String> parameters = this.getParams();
+            HttpContent response = this.get("keys", parameters);
+            return responseToKeyList(response);
+        }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public List<Token> getTokens()
         {
-            HttpContent response = this.get("tokens", this.getParams(), true);
-            return createTokenListFromResponse(response);
-    	}
+            Dictionary<String, String> parameters = this.getParams();
+            HttpContent response = this.get("tokens", parameters);
+            return responseToTokenList(response);
+        }
 
-	    /// <summary>
-        /// Creates an invoice using the BitPay Payment Gateway API.
-	    /// </summary>
-	    /// <param name="price">This is the amount that is required to be collected from the buyer. Note, if this
-        /// is specified in a currency other than BTC, the price will be converted into BTC at market exchange
-        /// rates to determine the amount collected from the buyer.</param>
-	    /// <returns>A BitPay server populated Invoice object.</returns>
-        /// <exception cref="BitPayAPI.BitPayException">Handles only errors that occur in the returned data.
-        /// Does not handle programming or communication errors.</exception>
-        public Invoice createInvoice(double price, string currency)
+        public String getToken(List<Token> tokens, String key) 
+        {
+            string tokenValue = "";
+            foreach (Token t in tokens)
+            {
+                if (t.facade.Equals(key))
+                {
+                    tokenValue = t.token;
+                }
+            }
+            return tokenValue;
+	    }
+
+        public Invoice createInvoice(double price, String currency)
         {
 		    if(currency.Length > 3)
             {
 			    throw new ArgumentException("Must be a valid currency code");
 		    }
-
-            // Requires the merchant facade.
-            // Attempt to retrieve my token for the merchant facade.
-            string token = null;
-            List<Token> tokens = getTokens();
-
-            foreach (Token t in tokens)
-            {
-                if (t.facade.Equals("merchant"))
-                {
-                    token = t.token;
-                }
-            }
-
-            HttpContent response = this.post("invoices", this.getParams(token, price, currency), true);
-            return createInvoiceObjectFromResponse(response);
+            Dictionary<String, String> parameters = this.getParams(price, currency);
+            parameters.Add("token", this.merchantToken);
+            HttpContent response = this.post("invoices", parameters, true);
+            return responseToInvoice(response);
 	    }
 
-	    /// <summary>
-        /// Creates an invoice using the BitPay Payment Gateway API.
-	    /// </summary>
-        /// <param name="price">This is the amount that is required to be collected from the buyer. Note, if this
-        /// is specified in a currency other than BTC, the price will be converted into BTC at market exchange
-        /// rates to determine the amount collected from the buyer.</param>
-        /// <param name="parameters">Optional payment notification (IPN) parameters.</param>
-        /// <returns>A BitPay server populated Invoice object.</returns>
-        /// <exception cref="BitPayAPI.BitPayException">Handles only errors that occur in the returned data.
-        /// Does not handle programming or communication errors.</exception>
-        public Invoice createInvoice(double price, string currency, InvoiceParams parameters)
+        public Invoice createInvoice(double price, String currency, InvoiceParams invoiceParams)
         {
             if (currency.Length > 3)
             {
                 throw new ArgumentException("Must be a valid currency code");
             }
-
-            HttpContent response = this.post("invoices", this.getParams(price, currency, parameters), true);
-            return createInvoiceObjectFromResponse(response);
+            Dictionary<String, String> parameters = this.getParams(price, currency, invoiceParams);
+            parameters.Add("token", this.merchantToken);
+            HttpContent response = this.post("invoices", parameters, true);
+            return responseToInvoice(response);
         }
 
-	    /// <summary>
-	    /// Get an existing Invoice by it's Id. The Id is used in the url: "https://bitpay.com/invoice?id=<ID>".
-	    /// </summary>
-	    /// <param name="invoiceId">The Id for the invoice to fetch from the BitPay server.</param>
-	    /// <returns>A BitPay server populated Invoice object.</returns>
-        /// <exception cref="BitPayAPI.BitPayException">Handles only errors that occur in the returned data.
-        /// Does not handle programming or communication errors.</exception>
-        public Invoice getInvoice(string invoiceId)
+        public Invoice getInvoice(String invoiceId)
         {
-            string url = BASE_URL + "invoices/" + invoiceId;
-            client.DefaultRequestHeaders.Add("X-BitPay-Plugin-Info", "CSharplib");
-
-            var result = client.GetAsync(url).Result;
-            HttpContent response = result.Content;
-
-            return createInvoiceObjectFromResponse(response);
+            Dictionary<String, String> parameters = this.getParams();
+            parameters.Add("token", this.merchantToken);
+            HttpContent response = this.get("invoices/" + invoiceId, parameters);
+            return responseToInvoice(response);
         }
 
-	    /// <summary>
-        /// Get the current Bitcoin Exchange rates in dozens of currencies based on several exchanges.
-	    /// </summary>
-	    /// <returns>A BitPay server populated Rates object.</returns>
+        public List<Invoice> getInvoices(String javascriptDateString)
+        {
+            Dictionary<String, String> parameters = this.getParams();
+            parameters.Add("dateStart", javascriptDateString);
+            parameters.Add("token", this.merchantToken);
+            HttpContent response = this.get("invoices", parameters);
+            return responseToInvoiceList(response);
+        }
+
         public Rates getRates()
         {
-            string url = BASE_URL + "rates";
-            var result = client.GetAsync(url).Result;
-            HttpContent response = result.Content;
-
-            return new Rates(response, this);
+            HttpContent response = this.get("rates");
+            return responseToRatesObject(response);
         }
 
         private Dictionary<string, string> getParams()
         {
-            return new Dictionary<string, string>();
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("nonce", this.nonce + "");
+            this.nonce++;
+            return parameters;
         }
 
         private Dictionary<string, string> getParams(string email, string SIN, string label)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
+            parameters.Add("nonce", this.nonce + "");
             parameters.Add("sin", SIN);
             parameters.Add("email", email);
             parameters.Add("label", label);
+            this.nonce++;
             return parameters;
         }
 
-        /// <summary>
-        /// Creates a list of key/value parameters.
-        /// </summary>
-        /// <param name="token">The facade access token.</param>
-        /// <param name="price">The invoice price.</param>
-        /// <param name="currency">The invoice currency.</param>
-        /// <returns>A list of key/value pairs.</returns>
-	    private Dictionary<string, string> getParams(string token, double price, String currency)
+	    private Dictionary<string, string> getParams(double price, String currency)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("token", token);
+            parameters.Add("nonce", this.nonce + "");
             parameters.Add("price", price + "");
             parameters.Add("currency", currency);
-		    return parameters;
+            this.nonce++;
+            return parameters;
 	    }
 
-        /// <summary>
-        /// Creates a list of key/value parameters including optional API parameters.
-        /// </summary>
-        /// <param name="price">The invoice price.</param>
-        /// <param name="currency">The invoice currency.</param>
-        /// <param name="optionalParams">A populated InvoiceParams object.</param>
-        /// <returns>A list of key/value pairs.</returns>
         private Dictionary<string, string> getParams(double price, string currency, InvoiceParams invoiceParams)
         {
             var parameters = invoiceParams.getDictionary();
+            parameters.Add("nonce", this.nonce + "");
             parameters.Add("price", price.ToString());
             parameters.Add("currency", currency);
-		    return parameters;
+            this.nonce++;
+            return parameters;
 	    }
 
-        private String signData(String url)
-        {
-            return KeyUtils.signString(privateKey, url);
-        }
-
-        private String signData(String url, Dictionary<string, string> body)
-        {
-            String data = url + "{";
-            foreach (KeyValuePair<string, string> entry in body)
-            {
-                data += '"' + entry.Key + "\":\"" + entry.Value + "\",";
-            }
-            data = data.Substring(0, data.Length - 1);
-            data += "}";
-
-            System.Diagnostics.Debug.WriteLine("Signing string:\n" + data);
-
-            return KeyUtils.signString(privateKey, data);
-        }
-
-        private HttpContent get(String uri, Dictionary<string, string> parameters, bool shouldSignData)
+        private HttpContent get(String uri)
         {
             try
             {
+                String fullURL = BASE_URL + uri;
                 client.DefaultRequestHeaders.Clear();
-
-                parameters.Add("nonce", this.nonce + "");
-                this.nonce++;
-
-                String fullURL = BASE_URL + uri + "?";
-		        foreach (KeyValuePair<string, string> entry in parameters)
-                {
-			        fullURL += entry.Key + "=" + entry.Value + "&";
-		        }
-		        fullURL = fullURL.Substring(0, fullURL.Length - 1);
-
-                if (shouldSignData)
-                {
-                    String signature = signData(fullURL);
-                    client.DefaultRequestHeaders.Add("X-signature", signature);
-                    client.DefaultRequestHeaders.Add("X-pubkey", KeyUtils.bytesToHex(privateKey.pubKey));
-                }
-
-                client.DefaultRequestHeaders.Add("X-BitPay-Plugin-Info", "CSharplib");
-
-                System.Diagnostics.Debug.WriteLine(fullURL);
-                System.Diagnostics.Debug.WriteLine(client.DefaultRequestHeaders.ToString());
-
                 var result = client.GetAsync(fullURL).Result;
                 HttpContent response = result.Content;
                 return response;
             }
             catch (Exception e)
             {
-                Console.Out.Write(e.ToString());
+                throw new BitPayException("Error: " + e.ToString());
             }
-
-            return null;
         }
 
-        static byte[] GetBytes(string str)
-        {
-            byte[] bytes = new byte[str.Length * sizeof(char)];
-            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-            return bytes;
-        }
-
-        private HttpContent post(String uri, Dictionary<string, string> parameters, bool shouldSignData)
+        private HttpContent get(String uri, Dictionary<string, string> parameters)
         {
             try
             {
+                String fullURL = BASE_URL + uri + "?";
+		        foreach (KeyValuePair<string, string> entry in parameters)
+                {
+			        fullURL += entry.Key + "=" + entry.Value + "&";
+		        }
+		        fullURL = fullURL.Substring(0, fullURL.Length - 1);
+                String signature = KeyUtils.signString(privateKey, fullURL);
                 client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Add("X-signature", signature);
+                client.DefaultRequestHeaders.Add("X-pubkey", KeyUtils.bytesToHex(privateKey.pubKey));
+                client.DefaultRequestHeaders.Add("X-BitPay-Plugin-Info", "CSharplib");
+                var result = client.GetAsync(fullURL).Result;
+                HttpContent response = result.Content;
+                return response;
+            }
+            catch (Exception e)
+            {
+                throw new BitPayException("Error: " + e.ToString());
+            }
+        }
 
+        private HttpContent post(String uri, Dictionary<string, string> parameters, bool signatureRequired)
+        {
+            try
+            {
                 parameters.Add("guid", Guid.NewGuid().ToString());
-                parameters.Add("nonce", this.nonce + "");
-                this.nonce++;
-
-//                var bodyContent = new FormUrlEncodedContent(parameters);
-                var jsonStr = "{";
-                foreach (var param in parameters)
+                string json = new JavaScriptSerializer().Serialize(parameters);
+                var bodyContent = new StringContent(json);
+                client.DefaultRequestHeaders.Clear();
+                if (signatureRequired)
                 {
-                    jsonStr += "\"" + param.Key + "\":\"" + param.Value + "\",";
-                }
-                jsonStr = jsonStr.Substring(0, jsonStr.Length - 2);
-                jsonStr += "}";
-                var bodyContent = new ByteArrayContent(GetBytes(jsonStr));
-
-                if (uri.Equals("invoices"))
-                {
-                    bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                }
-
-                if (shouldSignData)
-                {
-                    String signature = signData(BASE_URL + uri, parameters);
+                    String signature = KeyUtils.signString(privateKey, BASE_URL + uri + json);
                     client.DefaultRequestHeaders.Add("X-signature", signature);
                     client.DefaultRequestHeaders.Add("X-pubkey", KeyUtils.bytesToHex(privateKey.pubKey));
                 }
-
                 client.DefaultRequestHeaders.Add("X-BitPay-Plugin-Info", "CSharplib");
-
-                System.Diagnostics.Debug.WriteLine(uri);
-                System.Diagnostics.Debug.WriteLine(client.DefaultRequestHeaders.ToString());
-
-
-                System.Diagnostics.Debug.WriteLine("body content: " + bodyContent.ToString());
-
+                bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 var result = client.PostAsync(uri, bodyContent).Result;
                 HttpContent response = result.Content;
                 return response;
             }
             catch (Exception e)
             {
-                Console.Out.Write(e.ToString());
+                throw new BitPayException("Error: " + e.ToString());
             }
-
-            return null;
         }
 
-        /// <summary>
-        /// Determines whether or not the given dynamic object key collection includes the specified member name.
-        /// </summary>
-        /// <param name="obj">Expected to be a JSON decoded object.</param>
-        /// <param name="name">The name of a key in the JSON object.</param>
-        /// <returns></returns>
         private static bool dynamicObjectHasProperty(dynamic obj, string name)
         {
             Dictionary<string, object>.KeyCollection kc = obj.GetDynamicMemberNames();
             return kc.Contains(name);
         }
 
-        private List<Token> createTokenListFromResponse(HttpContent response)
+        private dynamic responseToObject(HttpContent response)
         {
             if (response == null)
             {
-                return null;
+                throw new BitPayException("Error: HTTP response is null");
             }
-
             dynamic obj = Json.Decode(response.ReadAsStringAsync().Result);
             if (dynamicObjectHasProperty(obj, "error"))
             {
                 throw new BitPayException("Error: " + obj.error);
             }
+            return obj;
+        }
 
-            // Sample JSON response
-            // {
-            //   "data":
-            //     [
-            //       {"merchant": "5PAgL9amg5EgEzrvR2NBvwprC2XEVvpFQoLpQVu9x3Ck"}
-            //     ]
-            // }
+        private List<Token> responseToTokenList(HttpContent response)
+        {
+            dynamic obj = responseToObject(response);
             List<Token> tokens = new List<Token>();
-
             for (int i = 0; i < obj.data.Length; i++)
             {
-                Token t = new Token();
-                t.updateWithObject(obj.data[i]);
-                tokens.Add(t);
+                Token token = new Token(obj.data[i]);
+                tokens.Add(token);
             }
-
             return tokens;
         }
 
-        private List<AccessKey> createAccessKeyListFromResponse(HttpContent response)
+        private List<Key> responseToKeyList(HttpContent response)
         {
-            if (response == null)
-            {
-                return null;
-            }
-
-            dynamic obj = Json.Decode(response.ReadAsStringAsync().Result);
-            if (dynamicObjectHasProperty(obj, "error"))
-            {
-                throw new BitPayException("Error: " + obj.error);
-            }
-
-            // Sample JSON response
-            // {
-            //     "facade": "user/sin",
-            //     "data": [
-            //         {
-            //             "id": "Teys7dby6EXdxDGnypFozhtMbvYNydxbaXf",
-            //             "label": "CSharp API Tester",
-            //             "approved": true,
-            //             "token": "2XmXFUpsApquF83qNWHVsDF2DoZ1iTDPCao4hMMLgTfjKgznHU9QnTJh9RJqVq2Lkk"
-            //         }
-            //     ]
-            // }
-            List<AccessKey> accessKeys = new List<AccessKey>();
-
+            dynamic obj = responseToObject(response);
+            List<Key> keys = new List<Key>();
             for (int i = 0; i < obj.data.Length; i++)
             {
-                AccessKey k = new AccessKey(obj.facade);
-                k.updateWithObject(obj.data[i]);
-                accessKeys.Add(k);
+                Key key = new Key(obj.data[i]);
+                key.facade = obj.facade;
+                keys.Add(key);
             }
-
-            return accessKeys;
+            return keys;
         }
 
-        private AccessKey createAccessKeyObjectFromResponse(HttpContent response)
+        private Key responseToKey(HttpContent response)
         {
-            if (response == null)
-            {
-                return null;
-            }
-
-            dynamic obj = Json.Decode(response.ReadAsStringAsync().Result);
-            if (dynamicObjectHasProperty(obj, "error"))
-            {
-                throw new BitPayException("Error: " + obj.error);
-            }
-
-            AccessKey accessKey = new AccessKey(obj.facade);
-            return accessKey.updateWithObject(obj.data);
+            dynamic obj = this.responseToObject(response);
+            Key key = new Key(obj.data);
+            key.facade = obj.facade;
+            return key;
         }
 
-        /// <summary>
-        /// Creates an invoice object given the BitPay server response.
-        /// Throws a BitPayException if the content of the response indicates an error occurred.
-        /// </summary>
-        /// <param name="response">The HTTP response object from the BitPay server when attempting to create
-        /// an invoice.</param>
-        /// <returns>A populated Inovice object.</returns>
-	    private Invoice createInvoiceObjectFromResponse(HttpContent response)
+	    private Invoice responseToInvoice(HttpContent response)
         {
-            dynamic obj = Json.Decode(response.ReadAsStringAsync().Result);
-            if (dynamicObjectHasProperty(obj, "error"))
-            {
-                throw new BitPayException("Error: " + obj.error);
-            }
-
-            return new Invoice(obj);
+            dynamic obj = this.responseToObject(response);
+            Invoice invoice = new Invoice(obj.data);
+            invoice.facade = obj.facade;
+            return invoice;
 	    }
+
+        private List<Invoice> responseToInvoiceList(HttpContent response)
+        {
+            dynamic obj = responseToObject(response);
+            List<Invoice> invoices = new List<Invoice>();
+            for (int i = 0; i < obj.data.Length; i++)
+            {
+                Invoice invoice = new Invoice(obj.data[i]);
+                invoices.Add(invoice);
+            }
+            return invoices;
+        }
+
+        private Rates responseToRatesObject(HttpContent response)
+        {
+            dynamic obj = responseToObject(response);
+            return new Rates(obj.data, this);
+        }
 
     }
 }

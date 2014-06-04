@@ -8,6 +8,32 @@ namespace BitPayAPI
     public class Invoice
     {
         /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="obj">A decoded JSON object.</param>
+        public Invoice(dynamic obj)
+        {
+            this.id = obj.id;
+            this.url = obj.url;
+            this.status = obj.status;
+            this.btcPrice = Convert.ToDouble(obj.btcPrice);
+            this.price = Convert.ToDouble(obj.price);
+            this.currency = obj.currency;
+            this.invoiceTime = obj.invoiceTime;
+            this.expirationTime = obj.expirationTime;
+            this.currentTime = obj.currentTime;
+            this.btcPaid = obj.btcPaid;
+            this.rate = obj.rate;
+            this.exceptionStatus = Convert.ToString(obj.exceptionStatus);
+            this.guid = obj.guid;
+            this.token = obj.token;
+            /*
+            this.exRates = obj.exRates;
+            this.transactions = obj.transactions;
+             */
+        }
+
+        /// <summary>
         /// The unique id of the invoice assigned by bitpay.com.
         /// </summary>
         public string id { get; set; }
@@ -69,20 +95,61 @@ namespace BitPayAPI
         /// The 3 letter currency code in which the invoice was priced.
         /// </summary>
         public string currency { get; set; }
-	
+
         /// <summary>
-        /// Constructor.  Initializes the invoice object.
+        /// The time the invoice was created in milliseconds since midnight January 1, 1970.
+        /// Time format is "2014-01-01T19:01:01.123Z".
         /// </summary>
-        /// <param name="obj">A decoded JSON object.</param>
-	    public Invoice(dynamic obj)
-        {
-            this.id = (string)obj.id;
-            this.url = (string)obj.url;
-            this.status = (string)obj.status;
-            this.btcPrice = Convert.ToDouble(obj.btcPrice);
-            this.price = Convert.ToDouble(obj.price);
-            this.currency = (string)obj.currency;
-	    }
+        public long invoiceTime { get; set; }
+
+        /// <summary>
+        /// The time at which the invoice expires and no further payment will be accepted (in milliseconds
+        /// since midnight January 1, 1970). Currently, all invoices are valid for 15 minutes.
+        /// Time format is "2014-01-01T19:01:01.123Z".
+        /// </summary>
+        public long expirationTime { get; set; }
+        
+        /// <summary>
+        /// The current time on the BitPay.com system (by subtracting the current time from the expiration
+        /// time, the amount of time remaining for payment can be determined).
+        /// Time format is "2014-01-01T19:01:01.123Z".
+        /// </summary>
+        public long currentTime { get; set; }
+
+        /// <summary>
+        /// The total amount of BTC paid to this invoice (the sum of all transactions).
+        /// </summary>
+        public string btcPaid { get; set; }
+
+        /// <summary>
+        /// The exchange rate for this invoice.
+        /// </summary>
+        public decimal rate { get; set; }
+
+        /// <summary>
+        /// The current invoice exception status.
+        /// 
+        /// "false" The invoice is not in an exception state.
+        /// "paidPartial" Amount paid is less than the requested invoice amount.
+        /// "paidOver" Amount paid is greater than the requested invoice amount.
+        /// "paidLate"
+        /// </summary>
+        public string exceptionStatus { get; set; }
+
+        /// <summary>
+        /// The API facade associated with this object.
+        /// </summary>
+        public string facade { get; set; }
+
+        /// <summary>
+        /// The API GUID for this object.
+        /// </summary>
+        public string guid { get; set; }
+
+        /// <summary>
+        /// The API resource token for this object.
+        /// </summary>
+        public string token { get; set; }
 
     }
 }
