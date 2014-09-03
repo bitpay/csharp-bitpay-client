@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace BitPayAPI
@@ -8,35 +9,59 @@ namespace BitPayAPI
     /// </summary>
     public class Token
     {
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="obj">A decoded JSON object.</param>        
-        public Token(dynamic obj)
-        {
-            Dictionary<string, object>.KeyCollection kc = obj.GetDynamicMemberNames();
+        public Token() {}
 
-            if (kc.Count > 1)
-            {
-                Console.Out.WriteLine("Size of Token object is unexpected.  Expected one entry, got " + kc.Count + " entries.");
-            }
+        // API fields
+        //
 
-            foreach (string key in kc)
-            {
-                this.facade = key;
-                this.token = obj[key];
-            }
-        }
+        [JsonProperty(PropertyName = "guid")]
+        public string Guid { get; set; }
+        public bool ShouldSerializeGuid() { return true; }
 
-        /// <summary>
-        /// The API facade associated with this object.
-        /// </summary>
-        public string facade { get; set; }
+        [JsonProperty(PropertyName = "nonce")]
+        public long Nonce { get; set; }
+        public bool ShouldSerializeNonce() { return Nonce != 0; }
 
-        /// <summary>
-        /// The token used to reference the facade.
-        /// </summary>
-        public string token { get; set; }
+        // Required fields
+        //
 
+        [JsonProperty(PropertyName = "id")]
+        public string Id { get; set; }
+        public bool ShouldSerializeId() { return !String.IsNullOrEmpty(Id); }
+
+        [JsonProperty(PropertyName = "pairingCode")]
+        public string PairingCode { get; set; }
+        public bool ShouldSerializePairingCode() { return !String.IsNullOrEmpty(PairingCode); }
+
+        [JsonProperty(PropertyName = "facade")]
+        public string Facade { get; set; }
+        public bool ShouldSerializeFacade() { return !String.IsNullOrEmpty(Facade); }
+
+        [JsonProperty(PropertyName = "label")]
+        public string Label { get; set; }
+        public bool ShouldSerializeLabel() { return !String.IsNullOrEmpty(Label); }
+
+        [JsonProperty(PropertyName = "count")]
+        public string Count { get; set; }
+        public bool ShouldSerializeCount() { return Count != null; }
+
+        // Response fields
+        //
+
+        [JsonProperty(PropertyName = "policies")]
+        public List<Policy> Policies { get; set; }
+        public bool ShouldSerializePolicies() { return false; }
+
+        [JsonProperty(PropertyName = "resource")]
+        public string Resource { get; set; }
+        public bool ShouldSerializeResource() { return false; }
+
+        [JsonProperty(PropertyName = "token")]
+        public string Value { get; set; }
+        public bool ShouldSerializeValue() { return false; }
+
+        [JsonProperty(PropertyName = "dateCreated")]
+        public long DateCreated { get; set; }
+        public bool ShouldSerializeDateCreated() { return false; }
     }
 }

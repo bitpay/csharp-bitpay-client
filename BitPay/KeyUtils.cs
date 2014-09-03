@@ -1,57 +1,118 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using BitCoinSharp;
+using Org.BouncyCastle.Math;
+using System;
 using System.Text;
-using System.Threading.Tasks;
-
-using System.Globalization;
 using System.IO;
-using System.Numerics;
-
 using System.Security.Cryptography;
 
 namespace BitPayAPI
 {
     public class KeyUtils
     {
+        private static char[] hexArray = "0123456789abcdef".ToCharArray();
+        private static String PRIV_KEY_FILENAME = "bitpay_private.key";
 
-        private static char[] hexArray = "0123456789abcdef".ToCharArray();       
+	    public KeyUtils() {}
 
-	    public KeyUtils() 
+        public static bool privateKeyExists()
         {
+            return File.Exists(PRIV_KEY_FILENAME);
+        }
 
+        public static EcKey createEcKey()
+        {
+            //Default constructor uses SecureRandom numbers.
+            return new EcKey();
+        }
+
+        public static EcKey createEcKeyFromHexString(String privateKey)
+        {
+            BigInteger pkey = new BigInteger(privateKey, 16);
+            EcKey key = new EcKey(pkey, true);
+            return key;
+        }
+
+        // Convenience method.
+        public static EcKey createEcKeyFromHexStringFile(String privKeyFile)
+        {
+            String privateKey = getKeyStringFromFile(privKeyFile);
+            return createEcKeyFromHexString(privateKey);
+        }
+
+        public static EcKey loadEcKey()
+        {
+            using (FileStream fs = File.OpenRead(PRIV_KEY_FILENAME))
+            {
+                byte[] b = new byte[1024];
+                fs.Read(b, 0, b.Length);
+                EcKey key = EcKey.FromAsn1(b);
+                return key;
+            }
 	    }
 
-	    public static ECKey loadKeys(String privateKey)
+        public static String getKeyStringFromFile(String filename)
         {
-            ECKey key = new ECKey(hexToBytes(privateKey), null, true);
-		    return key;
-	    }
-
-	    public static String readKeyFromFile(String filename)
-        {
-		    StreamReader sr;
-	        try {
-	    	    sr = new StreamReader(filename);
+            StreamReader sr;
+            try
+            {
+                sr = new StreamReader(filename);
                 String line = sr.ReadToEnd();
-	            sr.Close();
-	            return line;
-	        } catch (IOException e) {
+                sr.Close();
+                return line;
+            }
+            catch (IOException e)
+            {
                 Console.Write(e.Message);
-		    }
-	        return "";
-	    }
+            }
+            return "";
+        }
 
-	    public static String signString(ECKey key, String input) 
+        public static void saveEcKey(EcKey ecKey)
         {
-            String hash = sha256(input);
-            return bytesToHex(key.signData(hexToBytes(hash)));
+		    byte[] bytes = ecKey.ToAsn1();
+            FileStream fs = new FileStream(PRIV_KEY_FILENAME, FileMode.Create, FileAccess.Write);
+            fs.Write(bytes, 0, bytes.Length);
+            fs.Close();
+        }
+
+        public static String deriveSIN(EcKey ecKey)
+        {
+            // Get sha256 hash and then the RIPEMD-160 hash of the public key (this call gets the result in one step).
+            byte[] pubKeyHash = ecKey.PubKeyHash; 
+
+            // Convert binary pubKeyHash, SINtype and version to Hex
+            String version = "0F";
+            String SINtype = "02";
+            String pubKeyHashHex = bytesToHex(pubKeyHash);
+
+            // Concatenate all three elements
+            String preSIN = version + SINtype + pubKeyHashHex;
+
+            // Convert the hex string back to binary and double sha256 hash it leaving in binary both times
+            byte[] preSINbyte = hexToBytes(preSIN);
+            byte[] hash2Bytes = Utils.DoubleDigest(preSINbyte);
+
+            // Convert back to hex and take first four bytes
+            String hashString = bytesToHex(hash2Bytes);
+            String first4Bytes = hashString.Substring(0, 8);
+
+            // Append first four bytes to fully appended SIN string
+            String unencoded = preSIN + first4Bytes;
+            byte[] unencodedBytes = new BigInteger(unencoded, 16).ToByteArray();
+            String encoded = Base58.Encode(unencodedBytes);
+
+            return encoded;
+        }
+
+ 	    public static String sign(EcKey ecKey, String input) 
+        {
+            String hash = sha256Hash(input);
+            return bytesToHex(ecKey.Sign(hexToBytes(hash)));
 	    }
 
-        private static String sha256(String value)
+        private static String sha256Hash(String value)
         {
             StringBuilder Sb = new StringBuilder();
-
             using (SHA256 hash = SHA256Managed.Create())
             {
                 Encoding enc = Encoding.UTF8;
@@ -94,5 +155,12 @@ namespace BitPayAPI
 	        }
 	        return new String(hexChars);
 	    }
+
+        static byte[] getBytes(string str)
+        {
+            byte[] bytes = new byte[str.Length * sizeof(char)];
+            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
+            return bytes;
+        }
     }
 }

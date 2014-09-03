@@ -30,10 +30,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BitCoinSharp">
+      <HintPath>..\redist\BitCoinSharp.dll</HintPath>
+    </Reference>
     <Reference Include="BouncyCastle.Crypto">
-      <HintPath>..\BouncyCastle.Crypto.dll</HintPath>
+      <HintPath>..\redist\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\redist\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
@@ -48,12 +57,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Key.cs" />
     <Compile Include="BitPay.cs" />
     <Compile Include="BitPayException.cs" />
     <Compile Include="ECKey.cs" />
     <Compile Include="Invoice.cs" />
-    <Compile Include="InvoiceParams.cs" />
+    <Compile Include="InvoicePaymentUrls.cs" />
+    <Compile Include="Policy.cs" />
     <Compile Include="KeyUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rate.cs" />
@@ -62,6 +71,9 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
