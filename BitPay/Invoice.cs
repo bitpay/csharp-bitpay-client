@@ -1,155 +1,170 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Web.Script.Serialization;
 
 namespace BitPayAPI
 {
-    /// <summary>
-    /// Provides an interface to the BitPay server to create an invoice for payment.
-    /// </summary>
     public class Invoice
     {
         /// <summary>
-        /// Constructor.
+        /// Creates an uninitialized invoice request object.
         /// </summary>
-        /// <param name="obj">A decoded JSON object.</param>
-        public Invoice(dynamic obj)
+        public Invoice() {}
+
+        // Creates a minimal inovice request object.
+        public Invoice(double price, String currency)
         {
-            this.id = obj.id;
-            this.url = obj.url;
-            this.status = obj.status;
-            this.btcPrice = Convert.ToDouble(obj.btcPrice);
-            this.price = Convert.ToDouble(obj.price);
-            this.currency = obj.currency;
-            this.invoiceTime = obj.invoiceTime;
-            this.expirationTime = obj.expirationTime;
-            this.currentTime = obj.currentTime;
-            this.btcPaid = obj.btcPaid;
-            this.rate = obj.rate;
-            this.exceptionStatus = Convert.ToString(obj.exceptionStatus);
-            this.guid = obj.guid;
-            this.token = obj.token;
-            /*
-            this.exRates = obj.exRates;
-            this.transactions = obj.transactions;
-             */
+            Price = price;
+            Currency = currency;
         }
 
-        /// <summary>
-        /// The unique id of the invoice assigned by bitpay.com.
-        /// </summary>
-        public string id { get; set; }
+        // API fields
+        //
 
-        /// <summary>
-        /// An https URL where the invoice can be viewed.
-        /// </summary>
-        public string url { get; set; }
+        [JsonProperty(PropertyName = "guid")]
+        public string Guid { get; set; }
 
-        /// <summary>
-        /// The current invoice status.
-        /// 
-        /// "new" An invoice starts in this state.  When in this state and only in this state, payments to the
-        /// associated bitcoin address are credited to the invoice.  If an invoice has received a partial
-        /// payment, it will still reflect a status of new to the merchant (from a merchant system perspective, 
-        /// an invoice is either paid or not paid, partial payments and over payments are handled by bitpay.com
-        /// by either refunding the customer or applying the funds to a new invoice.
-        /// 
-        /// "paid" As soon as full payment (or over payment) is received, an invoice goes into the paid status.
-        /// 
-        /// "confirmed" The transaction speed preference of an invoice determines when an invoice is confirmed.
-        /// For the high speed setting, it will confirmed as soon as full payment is received on the bitcoin
-        /// network (note, the invoice will go from a status of new to confirmed, bypassing the paid status).
-        /// For the medium speed setting, the invoice is confirmed after the payment transaction(s) have been
-        /// confrimed by 1 block on the bitcoin network.  For the low speed setting, 6 blocks on the bitcoin
-        /// network are required.  Invoices are considered complete after 6 blocks on the bitcoin network, 
-        /// therefore an invoice will go from a paid status directly to a complete status if the transaction
-        /// speed is set to low.
-        /// 
-        /// "complete" When an invoice is complete, it means that BitPay.com has credited the merchant’s account
-        /// for the invoice.  Currently, 6 confirmation blocks on the bitcoin network are required for an invoice
-        /// to be complete.  Note, in the future (for qualified payers), invoices may move to a complete status 
-        /// immediately upon payment, in which case the invoice will move directly from a new status to a 
-        /// complete status.
-        /// 
-        /// "expired" An expired invoice is one where payment was not received and the 15 minute payment window
-        /// has elapsed.
-        /// 
-        /// "invalid" An invoice is considered invalid when it was paid, but payment was not confirmed within 1
-        /// hour after receipt.  It is possible that some transactions on the bitcoin network can take longer 
-        /// than 1 hour to be included in a block.  In such circumstances, once payment is confirmed, BitPay.com
-        /// will make arrangements with the merchant regarding the funds (which can either be credited to the
-        /// merchant account on another invoice, or returned to the buyer).
-        /// </summary>
-        public string status { get; set; }
+        [JsonProperty(PropertyName = "nonce")]
+        public long Nonce { get; set; }
+        public bool ShouldSerializeNonce() { return Nonce != 0; }
 
-        /// <summary>
-        /// The amount of bitcoins being requested for payment of this invoice (same as the price if the
-        /// merchant set the price in BTC).
-        /// </summary>
-        public double btcPrice { get; set; }
+        [JsonProperty(PropertyName = "token")]
+        public string Token { get; set; }
 
-        /// <summary>
-        /// The price set by the merchant (in terms of the provided currency).
-        /// </summary>
-        public double price { get; set; }
+        // Required fields
+        //
 
-        /// <summary>
-        /// The 3 letter currency code in which the invoice was priced.
-        /// </summary>
-        public string currency { get; set; }
+        [JsonProperty(PropertyName = "price")]
+        public double Price { get; set; }
 
-        /// <summary>
-        /// The time the invoice was created in milliseconds since midnight January 1, 1970.
-        /// Time format is "2014-01-01T19:01:01.123Z".
-        /// </summary>
-        public long invoiceTime { get; set; }
+        String _currency = "";
+        [JsonProperty(PropertyName = "currency")]
+        public string Currency
+        {
+            get { return _currency; }
+            set
+            {
+                if (value.Length > 3)
+                {
+                    throw new ArgumentException("Must be a valid currency code");
+                }
+                _currency = value;
+            }
+        }
 
-        /// <summary>
-        /// The time at which the invoice expires and no further payment will be accepted (in milliseconds
-        /// since midnight January 1, 1970). Currently, all invoices are valid for 15 minutes.
-        /// Time format is "2014-01-01T19:01:01.123Z".
-        /// </summary>
-        public long expirationTime { get; set; }
+        // Optional fields
+        //
+
+        [JsonProperty(PropertyName = "orderId")]
+        public string OrderId { get; set; }
+        public bool ShouldSerializeOrderId() { return !String.IsNullOrEmpty(OrderId); }
+
+        [JsonProperty(PropertyName = "itemDesc")]
+        public string ItemDesc { get; set; }
+        public bool ShouldSerializeItemDesc() { return !String.IsNullOrEmpty(ItemDesc); }
+
+        [JsonProperty(PropertyName = "itemCode")]
+        public string ItemCode { get; set; }
+        public bool ShouldSerializeItemCode() { return !String.IsNullOrEmpty(ItemCode); }
+
+        [JsonProperty(PropertyName = "posData")]
+        public string PosData { get; set; }
+        public bool ShouldSerializePosData() { return !String.IsNullOrEmpty(PosData); }
+
+        [JsonProperty(PropertyName = "notificationURL")]
+        public string NotificationURL { get; set; }
+        public bool ShouldSerializeNotificationURL() { return !String.IsNullOrEmpty(NotificationURL); }
+
+        [JsonProperty(PropertyName = "transactionSpeed")]
+        public string TransactionSpeed { get; set; }
+        public bool ShouldSerializeTransactionSpeed() { return !String.IsNullOrEmpty(TransactionSpeed); }
+
+        [JsonProperty(PropertyName = "fullNotifications")]
+        public bool FullNotifications { get; set; }
+        public bool ShouldSerializeFullNotifications() { return FullNotifications; }
+
+        [JsonProperty(PropertyName = "notificationEmail")]
+        public string NotificationEmail { get; set; }
+        public bool ShouldSerializeNotificationEmail() { return !String.IsNullOrEmpty(NotificationEmail); }
+
+        [JsonProperty(PropertyName = "redirectURL")]
+        public string RedirectURL { get; set; }
+        public bool ShouldSerializeRedirectURL() { return !String.IsNullOrEmpty(RedirectURL); }
+
+        [JsonProperty(PropertyName = "physical")]
+        public bool Physical { get; set; }
+        public bool ShouldSerializePhysical() { return Physical; }
+
+        [JsonProperty(PropertyName = "buyerName")]
+        public string BuyerName { get; set; }
+        public bool ShouldSerializeBuyerName() { return !String.IsNullOrEmpty(BuyerName); }
+
+        [JsonProperty(PropertyName = "buyerAddess1")]
+        public string BuyerAddress1 { get; set; }
+        public bool ShouldSerializeBuyerAddress1() { return !String.IsNullOrEmpty(BuyerAddress1); }
+
+        [JsonProperty(PropertyName = "buyerAddess2")]
+        public string BuyerAddress2 { get; set; }
+        public bool ShouldSerializeBuyerAddress2() { return !String.IsNullOrEmpty(BuyerAddress2); }
+
+        [JsonProperty(PropertyName = "buyerCity")]
+        public string BuyerCity { get; set; }
+        public bool ShouldSerializeBuyerCity() { return !String.IsNullOrEmpty(BuyerCity); }
+
+        [JsonProperty(PropertyName = "buyerState")]
+        public string BuyerState { get; set; }
+        public bool ShouldSerializeBuyerState() { return !String.IsNullOrEmpty(BuyerState); }
+
+        [JsonProperty(PropertyName = "buyerZip")]
+        public string BuyerZip { get; set; }
+        public bool ShouldSerializeBuyerZip() { return !String.IsNullOrEmpty(BuyerZip); }
+
+        [JsonProperty(PropertyName = "buyerCountry")]
+        public string BuyerCountry { get; set; }
+        public bool ShouldSerializeBuyerCountry() { return !String.IsNullOrEmpty(BuyerCountry); }
+
+        [JsonProperty(PropertyName = "buyerEmail")]
+        public string BuyerEmail { get; set; }
+        public bool ShouldSerializeBuyerEmail() { return !String.IsNullOrEmpty(BuyerEmail); }
+
+        [JsonProperty(PropertyName = "buyerPhone")]
+        public string BuyerPhone { get; set; }
+        public bool ShouldSerializeBuyerPhone() { return !String.IsNullOrEmpty(BuyerPhone); }
+
+        // Response fields
+        //
+
+        public string Id { get; set; }
+        public bool ShouldSerializeId() { return false; }
+
+        public string Url { get; set; }
+        public bool ShouldSerializeUrl() { return false; }
+
+        public string Status { get; set; }
+        public bool ShouldSerializeStatus() { return false; }
+
+        public double BtcPrice { get; set; }
+        public bool ShouldSerializeBtcPrice() { return false; }
+
+        public long InvoiceTime { get; set; }
+        public bool ShouldSerializeInvoiceTime() { return false; }
+
+        public long ExpirationTime { get; set; }
+        public bool ShouldSerializeExpirationTime() { return false; }
         
-        /// <summary>
-        /// The current time on the BitPay.com system (by subtracting the current time from the expiration
-        /// time, the amount of time remaining for payment can be determined).
-        /// Time format is "2014-01-01T19:01:01.123Z".
-        /// </summary>
-        public long currentTime { get; set; }
+        public long CurrentTime { get; set; }
+        public bool ShouldSerializeCurrentTime() { return false; }
 
-        /// <summary>
-        /// The total amount of BTC paid to this invoice (the sum of all transactions).
-        /// </summary>
-        public string btcPaid { get; set; }
+        public double BtcPaid { get; set; }
+        public bool ShouldSerializeBtcPaid() { return false; }
 
-        /// <summary>
-        /// The exchange rate for this invoice.
-        /// </summary>
-        public decimal rate { get; set; }
+        public decimal Rate { get; set; }
+        public bool ShouldSerializeRate() { return false; }
 
-        /// <summary>
-        /// The current invoice exception status.
-        /// 
-        /// "false" The invoice is not in an exception state.
-        /// "paidPartial" Amount paid is less than the requested invoice amount.
-        /// "paidOver" Amount paid is greater than the requested invoice amount.
-        /// "paidLate"
-        /// </summary>
-        public string exceptionStatus { get; set; }
+        public string ExceptionStatus { get; set; }
+        public bool ShouldSerializeExceptionStatus() { return false; }
 
-        /// <summary>
-        /// The API facade associated with this object.
-        /// </summary>
-        public string facade { get; set; }
-
-        /// <summary>
-        /// The API GUID for this object.
-        /// </summary>
-        public string guid { get; set; }
-
-        /// <summary>
-        /// The API resource token for this object.
-        /// </summary>
-        public string token { get; set; }
-
+        public InvoicePaymentUrls paymentUrls { get; set; }
+        public bool ShouldSerializeExceptionInvoicePaymentUrls() { return false; }
     }
 }
