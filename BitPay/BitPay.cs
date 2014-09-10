@@ -143,7 +143,6 @@ namespace BitPayAPI
             invoice.Nonce = NextNonce;
             String json = JsonConvert.SerializeObject(invoice);
             HttpResponseMessage response = this.postWithSignature("invoices", json);
-//            return JsonConvert.DeserializeObject<Invoice>(this.responseToJsonString(response));
             JsonConvert.PopulateObject(this.responseToJsonString(response), invoice);
             return invoice;
         }
