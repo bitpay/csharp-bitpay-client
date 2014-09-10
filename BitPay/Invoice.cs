@@ -1,11 +1,21 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Web.Script.Serialization;
 
 namespace BitPayAPI
 {
     public class Invoice
     {
+	    public const String STATUS_NEW = "new";
+	    public const String STATUS_PAID = "paid";
+	    public const String STATUS_CONFIRMED = "confirmed";
+	    public const String STATUS_COMPLETE = "complete";
+	    public const String STATUS_INVALID = "invalid";
+	    public const String EXSTATUS_FALSE = "false";
+	    public const String EXSTATUS_PAID_OVER = "paidOver";
+        public const String EXSTATUS_PAID_PARTIAL = "paidPartial";
+
         /// <summary>
         /// Creates an uninitialized invoice request object.
         /// </summary>
@@ -44,9 +54,9 @@ namespace BitPayAPI
             get { return _currency; }
             set
             {
-                if (value.Length > 3)
+                if (value.Length != 3)
                 {
-                    throw new ArgumentException("Must be a valid currency code");
+                    throw new BitPayException("Error: currency code must be exactly three characters");
                 }
                 _currency = value;
             }
@@ -99,11 +109,11 @@ namespace BitPayAPI
         public string BuyerName { get; set; }
         public bool ShouldSerializeBuyerName() { return !String.IsNullOrEmpty(BuyerName); }
 
-        [JsonProperty(PropertyName = "buyerAddess1")]
+        [JsonProperty(PropertyName = "buyerAddress1")]
         public string BuyerAddress1 { get; set; }
         public bool ShouldSerializeBuyerAddress1() { return !String.IsNullOrEmpty(BuyerAddress1); }
 
-        [JsonProperty(PropertyName = "buyerAddess2")]
+        [JsonProperty(PropertyName = "buyerAddress2")]
         public string BuyerAddress2 { get; set; }
         public bool ShouldSerializeBuyerAddress2() { return !String.IsNullOrEmpty(BuyerAddress2); }
 
@@ -158,13 +168,22 @@ namespace BitPayAPI
         public double BtcPaid { get; set; }
         public bool ShouldSerializeBtcPaid() { return false; }
 
+        public double BtcDue { get; set; }
+        public bool ShouldSerializeBtcDue() { return false; }
+
+        public List<InvoiceTransaction> Transactions { get; set; }
+        public bool ShouldSerializeTransactions() { return false; }
+
         public decimal Rate { get; set; }
         public bool ShouldSerializeRate() { return false; }
+
+        public Dictionary<string, string> ExRates { get; set; }
+        public bool ShouldSerializeExRates() { return false; }
 
         public string ExceptionStatus { get; set; }
         public bool ShouldSerializeExceptionStatus() { return false; }
 
-        public InvoicePaymentUrls paymentUrls { get; set; }
+        public InvoicePaymentUrls PaymentUrls { get; set; }
         public bool ShouldSerializeExceptionInvoicePaymentUrls() { return false; }
     }
 }

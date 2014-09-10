@@ -23,7 +23,8 @@ namespace BitPayAPI
 
     public class BitPay
     {
-        private const String BITPAY_PLUGIN_INFO = "BitPay CSharp Client v2";
+        private const String BITPAY_API_VERSION = "2.0.0";
+        private const String BITPAY_PLUGIN_INFO = "BitPay CSharp Client " + BITPAY_API_VERSION;
         private const String BITPAY_URL = "https://bitpay.com/";
 
         public const String FACADE_PAYROLL  = "payroll";
@@ -142,7 +143,9 @@ namespace BitPayAPI
             invoice.Nonce = NextNonce;
             String json = JsonConvert.SerializeObject(invoice);
             HttpResponseMessage response = this.postWithSignature("invoices", json);
-            return JsonConvert.DeserializeObject<Invoice>(this.responseToJsonString(response));
+//            return JsonConvert.DeserializeObject<Invoice>(this.responseToJsonString(response));
+            JsonConvert.PopulateObject(this.responseToJsonString(response), invoice);
+            return invoice;
         }
 
         /// <summary>
@@ -160,12 +163,14 @@ namespace BitPayAPI
         /// Retrieve a list of invoice by date range using the merchant facade.
         /// </summary>
         /// <param name="dateStart">The start date for the query in javascript.</param>
+        /// <param name="dateEnd">The end date for the query in javascript.</param>
         /// <returns>A list of invoice objects retrieved from the server.</returns>
-        public List<Invoice> getInvoices(String dateStart)
+        public List<Invoice> getInvoices(String dateStart, String dateEnd)
         {
             Dictionary<String, String> parameters = this.getParams();
-            parameters.Add("dateStart", dateStart);
             parameters.Add("token", this.getAccessToken(FACADE_MERCHANT));
+            parameters.Add("dateStart", dateStart);
+            parameters.Add("dateEnd", dateEnd);
             HttpResponseMessage response = this.get("invoices", parameters);
             return JsonConvert.DeserializeObject<List<Invoice>>(this.responseToJsonString(response));
         }
@@ -273,7 +278,7 @@ namespace BitPayAPI
                 }
                 else
                 {
-                    // Propogate all other errors.
+                    // Propagate all other errors.
                     throw ex;
                 }
             }
@@ -310,6 +315,7 @@ namespace BitPayAPI
             {
                 String fullURL = _baseUrl + uri;
                 _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Add("x-accept-version", BITPAY_API_VERSION);
                 _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", BITPAY_PLUGIN_INFO);
                 if (parameters != null)
                 {
@@ -344,6 +350,7 @@ namespace BitPayAPI
             {
                 var bodyContent = new StringContent(json);
                 _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Add("x-accept-version", BITPAY_API_VERSION);
                 _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", BITPAY_PLUGIN_INFO);
                 bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 if (signatureRequired)

@@ -62,6 +62,7 @@
     <Compile Include="ECKey.cs" />
     <Compile Include="Invoice.cs" />
     <Compile Include="InvoicePaymentUrls.cs" />
+    <Compile Include="InvoiceTransaction.cs" />
     <Compile Include="Policy.cs" />
     <Compile Include="KeyUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
