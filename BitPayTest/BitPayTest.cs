@@ -13,7 +13,7 @@ namespace BitPayTest
         private static double BTC_EPSILON = .000000001;
         private static double EPSILON = .001;
 
-        private static String pairingCode = "yDvzodt";
+        private static String pairingCode = "p7CQzny";
         private static String clientName = "BitPay C# Library Tester on " + System.Environment.MachineName;
 
         public BitPayTest()
@@ -67,12 +67,12 @@ namespace BitPayTest
         }
 
         [TestMethod]
-        public void testShouldGetInvoiceStatusL()
+        public void testShouldGetInvoiceStatus()
         {
             try
             {
                 basicInvoice = bitpay.createInvoice(new Invoice(50.0, "USD"));
-                Assert.IsNotNull(basicInvoice.Status, "Invoice created with status=NULL");
+                Assert.AreEqual(Invoice.STATUS_NEW, basicInvoice.Status, "Status is incorrect");
             }
             catch (Exception ex)
             {
@@ -161,8 +161,14 @@ namespace BitPayTest
                 invoice.BuyerEmail = "satoshi@bitpay.com";
                 invoice.FullNotifications = true;
                 invoice.NotificationEmail = "satoshi@bitpay.com";
+                invoice.PosData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
                 invoice = this.bitpay.createInvoice(invoice);
-                Assert.IsNotNull(invoice, "Invoice not created");
+                Assert.AreEqual(Invoice.STATUS_NEW, invoice.Status, "Status is incorrect");
+                Assert.AreEqual("Satoshi", invoice.BuyerName, "BuyerName is incorrect");
+                Assert.AreEqual("satoshi@bitpay.com", invoice.BuyerEmail, "BuyerEmail is incorrect");
+                Assert.AreEqual(true, invoice.FullNotifications, "FullNotifications is incorrect");
+                Assert.AreEqual("satoshi@bitpay.com", invoice.NotificationEmail, "NotificationEmail is incorrect");
+                Assert.AreEqual("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", invoice.PosData, "PosData is incorrect");
             }
             catch (Exception ex)
             {
@@ -212,5 +218,15 @@ namespace BitPayTest
             rates.update();
             Assert.IsNotNull(rates.getRates(), "Exchange rates not retrieved after update");
         }
+
+        /*
+        [TestMethod]
+        public void testShouldGetInvoices()
+        {
+		    List<Invoice> invoices = null;
+			invoices = this.bitpay.getInvoices("2014-01-01", "2014-09-01");
+            Assert.IsTrue(invoices.Count > 0, "No invoices returned");
+        }
+         */
     }
 }
