@@ -15,20 +15,22 @@ THE SOFTWARE.
 
 Bitcoin C# payment library using the bitpay.com service.
 
+This library implementation is provided as a sample and may not be complete or fit for your implementation.  This library may or may not implement the complete BitPay API specification.
 
 Installation
 ------------
-Import these files into your custom shopping cart implementation project.
+Import these files into your C# implementation solution or project, or create a reditributable library file from this sample library for import into your projects.
 
 
 Configuration
 -------------
-1. Create an API key at bitpay.com by clicking My Account > API Access Keys > Add New API Key
+1. Create an API pairing code at https://bitpay.com/api-tokens.  Click "Add new token.
+2. Copy the pairing code into BitPayTest.cs "pairingCode".
 
 
 Usage
 -----
-1. See API documentation at https://bitpay.com/bitcoin-payment-gateway-api
+1. See API documentation at https://bitpay.com/api
 
 
 Troubleshooting
@@ -59,3 +61,6 @@ Version 1
 
 Version 1.1, rich@bitpay.com
   - Improved documentation
+
+Version 2, andy@bitpay.com
+  - Updated to match BitPay Cryptographically Secure API specification at bitpay.com/api
