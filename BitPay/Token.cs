@@ -29,6 +29,8 @@ namespace BitPayAPI
         public string Id { get; set; }
         public bool ShouldSerializeId() { return !String.IsNullOrEmpty(Id); }
 
+        // Optional fields
+
         [JsonProperty(PropertyName = "pairingCode")]
         public string PairingCode { get; set; }
         public bool ShouldSerializePairingCode() { return !String.IsNullOrEmpty(PairingCode); }
@@ -42,11 +44,15 @@ namespace BitPayAPI
         public bool ShouldSerializeLabel() { return !String.IsNullOrEmpty(Label); }
 
         [JsonProperty(PropertyName = "count")]
-        public string Count { get; set; }
-        public bool ShouldSerializeCount() { return Count != null; }
+        public int Count { get; set; }
+        public bool ShouldSerializeCount() { return Count != 0; }
 
         // Response fields
         //
+
+        [JsonProperty(PropertyName = "pairingExpiration")]
+        public long PairingExpiration { get; set; }
+        public bool ShouldSerializePairingExpiration() { return false; }
 
         [JsonProperty(PropertyName = "policies")]
         public List<Policy> Policies { get; set; }
