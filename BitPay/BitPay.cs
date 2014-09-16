@@ -54,7 +54,12 @@ namespace BitPayAPI
             {
                 clientName += " on " + System.Environment.MachineName;
             }
-            _clientName = clientName;
+            // Eliminate special characters from the client name (used as a token label).  Trim to 60 chars.
+            string _clientName = new Regex("[^a-zA-Z0-9_ ]").Replace(clientName, "_");
+            if (_clientName.Length > 60)
+            {
+                _clientName = _clientName.Substring(0, 60);
+            }
 
             _baseUrl = envUrl;
     	    _httpClient = new HttpClient();
@@ -121,6 +126,32 @@ namespace BitPayAPI
             }
         }
         
+        /// <summary>
+        /// Request authorization (a token) for this client in the specified facade.
+        /// </summary>
+        /// <param name="facade">The facade for which authorization is requested.</param>
+        /// <returns>A pairing code for this client.  This code must be used to authorize this client at BitPay.com/api-tokens.</returns>
+        public String requestClientAuthorization(String facade)
+        {
+            Token token = new Token();
+            token.Id = _identity;
+            token.Guid = Guid.NewGuid().ToString();
+            token.Nonce = NextNonce;
+            token.Facade = facade;
+            token.Count = 1;
+            token.Label = _clientName;
+            String json = JsonConvert.SerializeObject(token);
+            HttpResponseMessage response = this.post("tokens", json);
+            List<Token> tokens = JsonConvert.DeserializeObject<List<Token>>(this.responseToJsonString(response));
+            // Expecting a single token resource.
+            if (tokens.Count != 1)
+            {
+                throw new BitPayException("Error - failed to get token resource; expected 1 token, got " + tokens.Count);
+            }
+            _tokenCache.Add(tokens[0].Facade, tokens[0].Value);
+            return tokens[0].PairingCode;
+        }
+
         /// <summary>
         /// Specified whether the client has authorization (a token) for the specified facade.
         /// </summary>
