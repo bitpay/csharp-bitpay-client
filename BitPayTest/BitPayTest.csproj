@@ -54,6 +54,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BitPayTest.cs" />
+    <Compile Include="BitPayTest2.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
