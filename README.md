@@ -24,8 +24,16 @@ Import these files into your C# implementation solution or project, or create a 
 
 Configuration
 -------------
+
+BitPayTest:
 1. Create an API pairing code at https://bitpay.com/api-tokens.  Click "Add new token.
 2. Copy the pairing code into BitPayTest.cs "pairingCode".
+
+BitPayTest2:
+1. Run the test.  The test will fail but produce an output message with a pairing code.
+2. Access your BitPay dashboard at https://bitpay.com/api-tokens.
+3. Enter the pairing code output from (1) and approve it for use.
+4. Rerun the test.
 
 
 Usage
