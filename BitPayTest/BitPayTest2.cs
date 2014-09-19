@@ -55,12 +55,26 @@ namespace BitPayTest
         }
 
         [TestMethod]
+        public void testShouldGetInvoices()
+        {
+            try
+            {
+                List<Invoice> invoices = bitpay.getInvoices(new DateTime(2014, 8, 1), new DateTime(2014, 8, 31));
+                Assert.IsTrue(invoices.Count > 0, "No invoices retrieved");
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail(ex.Message);
+            }
+        }
+
+        [TestMethod]
         public void testShouldGetBTCLedger()
         {
             try
             {
                 Ledger ledger = this.bitpay.getLedger(Ledger.LEDGER_BTC, new DateTime(2014, 8, 1), new DateTime(2014, 8, 31));
-                Assert.IsTrue(ledger.Entries.Count > 0, "No invoices returned");
+                Assert.IsTrue(ledger.Entries.Count > 0, "Ledger is empty");
             }
             catch (Exception ex)
             {

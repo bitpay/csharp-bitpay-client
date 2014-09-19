@@ -193,15 +193,15 @@ namespace BitPayAPI
         /// <summary>
         /// Retrieve a list of invoices by date range using the merchant facade.
         /// </summary>
-        /// <param name="dateStart">The start date for the query in UNIX epoch time.</param>
-        /// <param name="dateEnd">The end date for the query in UNIX epoch time.</param>
+        /// <param name="dateStart">The start date for the query.</param>
+        /// <param name="dateEnd">The end date for the query.</param>
         /// <returns>A list of invoice objects retrieved from the server.</returns>
-        public List<Invoice> getInvoices(String dateStart, String dateEnd)
+        public List<Invoice> getInvoices(DateTime dateStart, DateTime dateEnd)
         {
             Dictionary<String, String> parameters = this.getParams();
             parameters.Add("token", this.getAccessToken(FACADE_MERCHANT));
-            parameters.Add("dateStart", dateStart);
-            parameters.Add("dateEnd", dateEnd);
+            parameters.Add("dateStart", dateStart.ToShortDateString());
+            parameters.Add("dateEnd", dateEnd.ToShortDateString());
             HttpResponseMessage response = this.get("invoices", parameters);
             return JsonConvert.DeserializeObject<List<Invoice>>(this.responseToJsonString(response));
         }
@@ -221,8 +221,8 @@ namespace BitPayAPI
         /// Retrieve a list of ledgers by date range using the merchant facade.
         /// </summary>
         /// <param name="currency">The three digit currency string for the ledger to retrieve.</param>
-        /// <param name="dateStart">The start date for the query in UNIX epoch time.</param>
-        /// <param name="dateEnd">The end date for the query in UNIX epoch time.</param>
+        /// <param name="dateStart">The start date for the query.</param>
+        /// <param name="dateEnd">The end date for the query.</param>
         /// <returns>A list of invoice objects retrieved from the server.</returns>
         public Ledger getLedger(String currency, DateTime dateStart, DateTime dateEnd)
         {
