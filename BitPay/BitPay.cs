@@ -1,7 +1,8 @@
 ﻿using BitCoinSharp;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -190,10 +191,10 @@ namespace BitPayAPI
         }
 
         /// <summary>
-        /// Retrieve a list of invoice by date range using the merchant facade.
+        /// Retrieve a list of invoices by date range using the merchant facade.
         /// </summary>
-        /// <param name="dateStart">The start date for the query in javascript.</param>
-        /// <param name="dateEnd">The end date for the query in javascript.</param>
+        /// <param name="dateStart">The start date for the query in UNIX epoch time.</param>
+        /// <param name="dateEnd">The end date for the query in UNIX epoch time.</param>
         /// <returns>A list of invoice objects retrieved from the server.</returns>
         public List<Invoice> getInvoices(String dateStart, String dateEnd)
         {
@@ -214,6 +215,24 @@ namespace BitPayAPI
             HttpResponseMessage response = this.get("rates");
             List<Rate> rates = JsonConvert.DeserializeObject<List<Rate>>(this.responseToJsonString(response));
             return new Rates(rates, this);
+        }
+
+        /// <summary>
+        /// Retrieve a list of ledgers by date range using the merchant facade.
+        /// </summary>
+        /// <param name="currency">The three digit currency string for the ledger to retrieve.</param>
+        /// <param name="dateStart">The start date for the query in UNIX epoch time.</param>
+        /// <param name="dateEnd">The end date for the query in UNIX epoch time.</param>
+        /// <returns>A list of invoice objects retrieved from the server.</returns>
+        public Ledger getLedger(String currency, DateTime dateStart, DateTime dateEnd)
+        {
+            Dictionary<String, String> parameters = this.getParams();
+            parameters.Add("token", this.getAccessToken(FACADE_MERCHANT));
+            parameters.Add("startDate", "" + dateStart.ToShortDateString());
+            parameters.Add("endDate", "" + dateEnd.ToShortDateString());
+            HttpResponseMessage response = this.get("ledgers/" + currency, parameters);
+            List<LedgerEntry> entries = JsonConvert.DeserializeObject<List<LedgerEntry>>(this.responseToJsonString(response));
+            return new Ledger(entries);
         }
 
         private void initKeys()
@@ -259,6 +278,10 @@ namespace BitPayAPI
             // The response is expected to be an array of key/value pairs (facade name = token).
             dynamic obj = Json.Decode(responseToJsonString(response));
 
+            if (obj.GetType() != typeof(DynamicJsonArray))
+            {
+                throw new BitPayException("Error: Response to GET /tokens is expected to be an array, got a " + obj.GetType());
+            }
             try
             {
                 for (int i = 0; i < obj.Length; i++)
@@ -266,7 +289,7 @@ namespace BitPayAPI
                     Dictionary<string, object>.KeyCollection kc = obj[i].GetDynamicMemberNames();
                     if (kc.Count > 1)
                     {
-                        throw new BitPayException("Size of Token object is unexpected.  Expected one entry, got " + kc.Count + " entries.");
+                        throw new BitPayException("Error: Size of Token object is unexpected.  Expected one entry, got " + kc.Count + " entries.");
                     }
                     foreach (string key in kc)
                     {
@@ -405,9 +428,9 @@ namespace BitPayAPI
                 throw new BitPayException("Error: HTTP response is null");
             }
 
-            // Get the response as a dynamic object for detecting a possible "error" or "data" object.
-            // An "error" object raises an exception.
-            // A "data" object has its content extracted (we throw away the "data" wrapper object).
+            // Get the response as a dynamic object for detecting possible error(s) or data object.
+            // An error(s) object raises an exception.
+            // A data object has its content extracted (throw away the data wrapper object).
             String responseString = response.Content.ReadAsStringAsync().Result;
             dynamic obj = Json.Decode(responseString);
 
@@ -426,23 +449,23 @@ namespace BitPayAPI
                 throw new BitPayException(message);
             }
 
-            // Get a JSON string representation of the object.
-            Newtonsoft.Json.Linq.JObject j = Newtonsoft.Json.Linq.JObject.Parse(responseString);
-            String jsonString = j.ToString();
-
             // Check for and exclude a "data" object from the response.
             if (dynamicObjectHasProperty(obj, "data"))
             {
-                jsonString = (String)j.SelectToken("data").ToString();
+                responseString = JObject.Parse(responseString).SelectToken("data").ToString();
             }
-
-            return Regex.Replace(jsonString, @"\r\n", "");
+            return Regex.Replace(responseString, @"\r\n", "");
         }
 
         private static bool dynamicObjectHasProperty(dynamic obj, string name)
         {
-            Dictionary<string, object>.KeyCollection kc = obj.GetDynamicMemberNames();
-            return kc.Contains(name);
+            bool result = false;
+            if (obj.GetType() == typeof(DynamicJsonObject))
+            {
+                Dictionary<string, object>.KeyCollection kc = obj.GetDynamicMemberNames();
+                result = kc.Contains(name);
+            }
+            return result;
         }
 
         private void IgnoreBadCertificates()

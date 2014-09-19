@@ -63,6 +63,8 @@
     <Compile Include="Invoice.cs" />
     <Compile Include="InvoicePaymentUrls.cs" />
     <Compile Include="InvoiceTransaction.cs" />
+    <Compile Include="Ledger.cs" />
+    <Compile Include="LedgerEntry.cs" />
     <Compile Include="Policy.cs" />
     <Compile Include="KeyUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -75,6 +77,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Utils\BitPayExtensions.csproj">
+      <Project>{97707074-7e0e-4185-a37f-bd9215baefa9}</Project>
+      <Name>BitPayExtensions</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

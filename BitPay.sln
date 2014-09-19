@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPay", "BitPay\BitPay.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPayTest", "BitPayTest\BitPayTest.csproj", "{71166BF5-DA31-4BFD-90E6-16172E894EAA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPayExtensions", "Utils\BitPayExtensions.csproj", "{97707074-7E0E-4185-A37F-BD9215BAEFA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{71166BF5-DA31-4BFD-90E6-16172E894EAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71166BF5-DA31-4BFD-90E6-16172E894EAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71166BF5-DA31-4BFD-90E6-16172E894EAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97707074-7E0E-4185-A37F-BD9215BAEFA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97707074-7E0E-4185-A37F-BD9215BAEFA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97707074-7E0E-4185-A37F-BD9215BAEFA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97707074-7E0E-4185-A37F-BD9215BAEFA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
