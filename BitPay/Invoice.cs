@@ -22,7 +22,7 @@ namespace BitPayAPI
         public Invoice() {}
 
         // Creates a minimal inovice request object.
-        public Invoice(double price, String currency)
+        public Invoice(decimal price, String currency)
         {
             Price = price;
             Currency = currency;
@@ -45,7 +45,7 @@ namespace BitPayAPI
         //
 
         [JsonProperty(PropertyName = "price")]
-        public double Price { get; set; }
+        public decimal Price { get; set; }
 
         String _currency = "";
         [JsonProperty(PropertyName = "currency")]
@@ -153,7 +153,7 @@ namespace BitPayAPI
         public string Status { get; set; }
         public bool ShouldSerializeStatus() { return false; }
 
-        public double BtcPrice { get; set; }
+        public decimal BtcPrice { get; set; }
         public bool ShouldSerializeBtcPrice() { return false; }
 
         public long InvoiceTime { get; set; }
@@ -165,10 +165,10 @@ namespace BitPayAPI
         public long CurrentTime { get; set; }
         public bool ShouldSerializeCurrentTime() { return false; }
 
-        public double BtcPaid { get; set; }
+        public decimal BtcPaid { get; set; }
         public bool ShouldSerializeBtcPaid() { return false; }
 
-        public double BtcDue { get; set; }
+        public decimal BtcDue { get; set; }
         public bool ShouldSerializeBtcDue() { return false; }
 
         public List<InvoiceTransaction> Transactions { get; set; }

@@ -45,7 +45,7 @@ namespace BitPayTest
         {
             try
             {
-                Invoice invoice = bitpay.createInvoice(new Invoice(50.0, "USD"));
+                Invoice invoice = bitpay.createInvoice(new Invoice(50.0m, "USD"));
                 Assert.IsNotNull(invoice.Id, "Invoice created with id=NULL");
             }
             catch (Exception ex)
