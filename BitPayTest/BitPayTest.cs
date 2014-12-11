@@ -215,15 +215,5 @@ namespace BitPayTest
             rates.update();
             Assert.IsNotNull(rates.getRates(), "Exchange rates not retrieved after update");
         }
-
-        /*
-        [TestMethod]
-        public void testShouldGetInvoices()
-        {
-		    List<Invoice> invoices = null;
-			invoices = this.bitpay.getInvoices("2014-01-01", "2014-09-01");
-            Assert.IsTrue(invoices.Count > 0, "No invoices returned");
-        }
-         */
     }
 }
