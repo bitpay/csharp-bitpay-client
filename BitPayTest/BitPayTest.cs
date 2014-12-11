@@ -1,7 +1,6 @@
 ﻿using BitPayAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 
 namespace BitPayTest
 {
@@ -10,8 +9,6 @@ namespace BitPayTest
     {
         private BitPay bitpay;
         private Invoice basicInvoice;
-        private static double BTC_EPSILON = .000000001;
-        private static double EPSILON = .001;
 
         private static String pairingCode = "p7CQzny";
         private static String clientName = "BitPay C# Library Tester on " + System.Environment.MachineName;
@@ -43,7 +40,7 @@ namespace BitPayTest
         {
             try
             {
-                basicInvoice = bitpay.createInvoice(new Invoice(50.0, "USD"));
+                basicInvoice = bitpay.createInvoice(new Invoice(50.0m, "USD"));
                 Assert.IsNotNull(basicInvoice.Id, "Invoice created with id=NULL");
             }
             catch (Exception ex)
@@ -57,7 +54,7 @@ namespace BitPayTest
         {
             try
             {
-                basicInvoice = bitpay.createInvoice(new Invoice(50.0, "USD"));
+                basicInvoice = bitpay.createInvoice(new Invoice(50.0m, "USD"));
                 Assert.IsNotNull(basicInvoice.Url, "Invoice created with url=NULL");
             }
             catch (Exception ex)
@@ -71,7 +68,7 @@ namespace BitPayTest
         {
             try
             {
-                basicInvoice = bitpay.createInvoice(new Invoice(50.0, "USD"));
+                basicInvoice = bitpay.createInvoice(new Invoice(50.0m, "USD"));
                 Assert.AreEqual(Invoice.STATUS_NEW, basicInvoice.Status, "Status is incorrect");
             }
             catch (Exception ex)
@@ -85,7 +82,7 @@ namespace BitPayTest
         {
             try
             {
-                basicInvoice = bitpay.createInvoice(new Invoice(50.0, "USD"));
+                basicInvoice = bitpay.createInvoice(new Invoice(50.0m, "USD"));
                 Assert.IsNotNull(basicInvoice.BtcPrice, "Invoice created with btcPrice=NULL");
             }
             catch (Exception ex)
@@ -99,8 +96,8 @@ namespace BitPayTest
         {
             try
             {
-                Invoice invoice = this.bitpay.createInvoice(new Invoice(0.1, "BTC"));
-                Assert.AreEqual(0.1, invoice.BtcPrice, BTC_EPSILON, "Invoice not created correctly: 0.1BTC");
+                Invoice invoice = this.bitpay.createInvoice(new Invoice(0.1m, "BTC"));
+                Assert.AreEqual(0.1, invoice.BtcPrice, "Invoice not created correctly: 0.1BTC");
             }
             catch (Exception ex)
             {
@@ -113,8 +110,8 @@ namespace BitPayTest
         {
             try
             {
-                Invoice invoice = this.bitpay.createInvoice(new Invoice(100.0, "USD"));
-                Assert.AreEqual(100.0, invoice.Price, EPSILON, "Invoice not created correctly: 100USD");
+                Invoice invoice = this.bitpay.createInvoice(new Invoice(100.0m, "USD"));
+                Assert.AreEqual(100.0, invoice.Price, "Invoice not created correctly: 100USD");
             }
             catch (Exception ex)
             {
@@ -127,8 +124,8 @@ namespace BitPayTest
         {
             try
             {
-                Invoice invoice = this.bitpay.createInvoice(new Invoice(100.0, "EUR"));
-                Assert.AreEqual(100.0, invoice.Price, EPSILON, "Invoice not created correctly: 100EUR");
+                Invoice invoice = this.bitpay.createInvoice(new Invoice(100.0m, "EUR"));
+                Assert.AreEqual(100.0, invoice.Price, "Invoice not created correctly: 100EUR");
             }
             catch (Exception ex)
             {
@@ -141,7 +138,7 @@ namespace BitPayTest
         {
             try
             {
-                Invoice invoice = this.bitpay.createInvoice(new Invoice(100.0, "EUR"));
+                Invoice invoice = this.bitpay.createInvoice(new Invoice(100.0m, "EUR"));
                 Invoice retreivedInvoice = this.bitpay.getInvoice(invoice.Id);
                 Assert.AreEqual(invoice.Id, retreivedInvoice.Id, "Expected invoice not retreived");
             }
@@ -156,7 +153,7 @@ namespace BitPayTest
         {
             try
             {
-                Invoice invoice = new Invoice(100.0, "USD");
+                Invoice invoice = new Invoice(100.0m, "USD");
                 invoice.BuyerName = "Satoshi";
                 invoice.BuyerEmail = "satoshi@bitpay.com";
                 invoice.FullNotifications = true;

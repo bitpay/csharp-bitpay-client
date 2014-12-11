@@ -1,6 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 
 namespace BitPayAPI
 {
@@ -9,8 +7,6 @@ namespace BitPayAPI
     /// </summary>
     public class InvoiceTransaction
     {
-        public InvoiceTransaction() { }
-
         [JsonProperty(PropertyName = "txid")]
         public string Txid { get; set; }
 
@@ -18,6 +14,6 @@ namespace BitPayAPI
         public string Type { get; set; }
 
         [JsonProperty(PropertyName = "amount")]
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
     }
 }
