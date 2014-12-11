@@ -270,7 +270,10 @@ namespace BitPayAPI
                     }
                     foreach (string key in kc)
                     {
-                        _tokenCache.Add(key, obj[i][key]);
+                        if (!_tokenCache.ContainsKey(key))
+                        {
+                            _tokenCache.Add(key, obj[i][key]);
+                        }
                     }
                 }
             }
