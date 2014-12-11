@@ -1,5 +1,7 @@
 ©2013,2014 BITPAY, INC.
 
+The MIT License
+
 Permission is hereby granted to any person obtaining a copy of this software
 and associated documentation for use and/or modification in association with
 the bitpay.com service.
@@ -16,6 +18,7 @@ THE SOFTWARE.
 Bitcoin C# payment library using the bitpay.com service.
 
 This library implementation is provided as a sample and may not be complete or fit for your implementation.  This library may or may not implement the complete BitPay API specification.
+
 
 Installation
 ------------
@@ -44,11 +47,11 @@ Usage
 Troubleshooting
 ---------------
 The official BitPay API documentation should always be your first reference for development:
-https://bitpay.com/downloads/bitpayApi.pdf
+https://bitpay.com/api
 
 1. Verify that your "notificationURL" for the invoice is "https://" (not "http://")
 2. Ensure a valid SSL certificate is installed on your server. Also ensure your root CA cert is
-   updated. If your CA cert is not current, you will see curl SSL verification errors.
+   updated.
 3. Verify that your callback handler at the "notificationURL" is properly receiving POSTs. You
    can verify this by POSTing your own messages to the server from a tool like Chrome Postman.
 4. Verify that the POST data received is properly parsed and that the logic that updates the
@@ -57,18 +60,18 @@ https://bitpay.com/downloads/bitpayApi.pdf
    recognize. Double check this on the firewall as well, if one is being used.
 6. Use the logging functionality to log errors during development. If you contact BitPay support,
    they will ask to see the log file to help diagnose any problems.
-7. Check the version of this PHP library agains the official repository to ensure you are using
+7. Check the version of this library against the official repository to ensure you are using
    the latest version. Your issue might have been addressed in a newer version of the library.
 8. If all else fails, send an email describing your issue *in detail* to support@bitpay.com
 
 
 Change Log
 ----------
-Version 1
-  - Initial version, Supported with Visual Studio 2012, .Net 4.5
+Version 2.0.0, andy@bitpay.com
+  - Updated to match BitPay Cryptographically Secure API specification at bitpay.com/api
 
-Version 1.1, rich@bitpay.com
+Version 1.1.0, rich@bitpay.com
   - Improved documentation
 
-Version 2, andy@bitpay.com
-  - Updated to match BitPay Cryptographically Secure API specification at bitpay.com/api
+Version 1.0.0
+  - Initial version, Supported with Visual Studio 2012, .Net 4.5
