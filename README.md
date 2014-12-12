@@ -22,7 +22,7 @@ This library implementation is provided as a sample and may not be complete or f
 
 Installation
 ------------
-Import these files into your C# implementation solution or project, or create a reditributable library file from this sample library for import into your projects.
+Import these files into your C# implementation solution or project, or create a redistributable library file from this sample library for import into your projects.
 
 
 Configuration
