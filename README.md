@@ -1,77 +1,147 @@
-©2013,2014 BITPAY, INC.
+csharp-bitpay-client
+==================
 
-The MIT License
+This is the C# client library for the BitPay Payment Gateway.  This library implements BitPay's [Cryptographically Secure RESTful API](https://bitpay.com/api).
 
-Permission is hereby granted to any person obtaining a copy of this software
-and associated documentation for use and/or modification in association with
-the bitpay.com service.
+Dependencies
+------------
+You must have a BitPay merchant account to use this SDK.  It's free to [sign-up for a BitPay merchant account](https://bitpay.com/start).
+
+Getting Started
+---------------
+
+This SDK provides a convenient abstraction of BitPay's [cryptographically-secure API](https://bitpay.com/api) and allows payment gateway developers to focus on payment flow/e-commerce integration rather than on the specific details of client-server interaction using the API.  This SDK optionally provides the flexibility for developers to have control over important details, including the handling of private keys needed for client-server communication.
+
+This SDK implements BitPay's remote client authentication and authorization strategy.  No private or shared-secret information is ever transmitted over the wire.
+
+####Handling your client private key
+Each client paired with the BitPay server requires a ECDSA key.  This key provides the security mechanism for all client interaction with the BitPay server. The public key is used to derive the specific client identity that is displayed on your BitPay dashboard.  The public key is also used for securely signing all API requests from the client.  See the [BitPay API](https://bitpay.com/api) for more information.
+
+The private key should be stored in the client environment such that it cannot be compromised.  If your private key is compromised you should revoke the compromised client identity from the BitPay server and re-pair your client, see the [API tokens](https://bitpay.com/api-tokens) for more information.
+
+This SDK provides the capability of internally storing the private key on the client local file system.  If the local file system is secure then this is a good option.  It is also possible to generate the key yourself (using the SDK) and store the key as required.  It is not recommended to transmit the private key over any public or unsecure networks.
+
+```c#
+// Let the SDK store the private key on the clients local file system.
+BitPay bitpay = new BitPay();
+```
+
+```c#
+// Create the private key using the SDK, store it as required, and inject the private key into the SDK.
+ECKey key = KeyUtils.createEcKey();
+this.bitpay = new BitPay(key);
+```
+
+```c#
+// Create the private key external to the SDK, store it in a file, and inject the private key into the SDK.
+String privateKey = KeyUtils.getKeyStringFromFile(privateKeyFile);
+ECKey key = KeyUtils.createEcKeyFromHexString(privateKey);
+this.bitpay = new BitPay(key);
+```
+
+####Pair your client with BitPay
+Your client must be paired with the BitPay server.  The pairing initializes authentication and authorization for your client to communicate with BitPay for your specific merchant account.  There are two pairing modes available; client initiated and server initiated.
+
+#####Client initiated pairing
+Pairing is accomplished by having your client request a pairing code from the BitPay server.  The pairing code is then entered into the BitPay merchant dashboard for the desired merchant.  Your interactive authentication at https://bitpay.com/login provides the authentication needed to create finalize the client-server pairing request.
+
+```c#
+String clientName = "server 1";
+BitPay bitpay = new BitPay(clientName);        
+        
+if (!bitpay.clientIsAuthorized(BitPay.FACADE_POS))
+{
+  // Get POS facade authorization code.
+  String pairingCode = bitpay.requestClientAuthorization(BitPay.FACADE_POS);
+  
+  // Signal the device operator that this client needs to be paired with a merchant account.
+  System.Diagnostics.Debug.WriteLine("Info: Pair this client with your merchant account using the pairing code: " + pairingCode);
+  throw new BitPayException("Error: client is not authorized for POS facade.");
+}
+```
+
+#####Server initiated pairing
+Pairing is accomplished by obtaining a pairing code from the BitPay server.  The pairing code is then injected into your client (typically during client initialization/configuration).  Your interactive authentication at https://bitpay.com/login provides the authentication needed to create finalize the client-server pairing request.
+
+```c#
+// Obtain a pairingCode from your BitPay account administrator. 
+String pairingCode = "xxxxxxx";
+String clientName = "server 1";
+BitPay bitpay = new BitPay(clientName);
+
+// Is this client already authorized to use the POS facade?
+if (!bitpay.clientIsAuthorized(BitPay.FACADE_POS))
+{
+  // Get POS facade authorization.
+  bitpay.authorizeClient(pairingCode);
+}	
+```
+
+####Create an invoice
+```c#
+Invoice invoice = bitpay.createInvoice(100, "USD");
+
+String invoiceUrl = invoice.getURL();
+
+String status = invoice.getStatus();
+```
+
+####Retreive an invoice
+```c#
+Invoice invoice = bitpay.getInvoice(invoice.getId());
+```
+####Exchange Rates
+
+You can retrieve BitPay's [BBB exchange rates](https://bitpay.com/bitcoin-exchange-rates).
+```c#
+Rates rates = this.bitpay.getRates();
+
+double rate = rates.getRate("USD");
+
+rates.update();
+```
+####Advanced Invoices
+
+You can add optional attributes to the invoice.  Atributes that are not set are ignored or given default values.
+```c#
+InvoiceBuyer buyer = new InvoiceBuyer();
+buyer.setName("Satoshi");
+buyer.setEmail("satoshi@bitpay.com");
+	
+Invoice invoice = new Invoice(100.0, "USD");
+invoice.setBuyer(buyer);
+invoice.setFullNotifications(true);
+invoice.setNotificationEmail("satoshi@bitpay.com");
+invoice.setPosData("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
+
+invoice = this.bitpay.createInvoice(invoice);
+```
+
+# Support
+
+* https://github.com/bitpay/java-bitpay-client/issues
+* https://support.bitpay.com/
+
+# License
+
+The MIT License (MIT)
+
+Copyright (c) 2013-2015 BitPay, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-
-Bitcoin C# payment library using the bitpay.com service.
-
-This library implementation is provided as a sample and may not be complete or fit for your implementation.  This library may or may not implement the complete BitPay API specification.
-
-
-Installation
-------------
-Import these files into your C# implementation solution or project, or create a redistributable library file from this sample library for import into your projects.
-
-
-Configuration
--------------
-
-BitPayTest:
-1. Create an API pairing code at https://bitpay.com/api-tokens.  Click "Add new token.
-2. Copy the pairing code into BitPayTest.cs "pairingCode".
-
-BitPayTest2:
-1. Run the test.  The test will fail but produce an output message with a pairing code.
-2. Access your BitPay dashboard at https://bitpay.com/api-tokens.
-3. Enter the pairing code output from (1) and approve it for use.
-4. Rerun the test.
-
-
-Usage
------
-1. See API documentation at https://bitpay.com/api
-
-
-Troubleshooting
----------------
-The official BitPay API documentation should always be your first reference for development:
-https://bitpay.com/api
-
-1. Verify that your "notificationURL" for the invoice is "https://" (not "http://")
-2. Ensure a valid SSL certificate is installed on your server. Also ensure your root CA cert is
-   updated.
-3. Verify that your callback handler at the "notificationURL" is properly receiving POSTs. You
-   can verify this by POSTing your own messages to the server from a tool like Chrome Postman.
-4. Verify that the POST data received is properly parsed and that the logic that updates the
-   order status on the merchants web server is correct.
-5. Verify that the merchants web server is not blocking POSTs from servers it may not
-   recognize. Double check this on the firewall as well, if one is being used.
-6. Use the logging functionality to log errors during development. If you contact BitPay support,
-   they will ask to see the log file to help diagnose any problems.
-7. Check the version of this library against the official repository to ensure you are using
-   the latest version. Your issue might have been addressed in a newer version of the library.
-8. If all else fails, send an email describing your issue *in detail* to support@bitpay.com
-
-
-Change Log
-----------
-Version 2.0.0, andy@bitpay.com
-  - Updated to match BitPay Cryptographically Secure API specification at bitpay.com/api
-
-Version 1.1.0, rich@bitpay.com
-  - Improved documentation
-
-Version 1.0.0
-  - Initial version, Supported with Visual Studio 2012, .Net 4.5
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
