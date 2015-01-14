@@ -79,7 +79,7 @@ if (!bitpay.clientIsAuthorized(BitPay.FACADE_POS))
 
 ####Create an invoice
 ```c#
-Invoice invoice = bitpay.createInvoice(100, "USD");
+Invoice invoice = bitpay.createInvoice(100.0m, "USD");
 
 String invoiceUrl = invoice.getURL();
 
