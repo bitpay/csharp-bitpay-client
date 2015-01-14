@@ -86,21 +86,7 @@ String invoiceUrl = invoice.getURL();
 String status = invoice.getStatus();
 ```
 
-####Retreive an invoice
-```c#
-Invoice invoice = bitpay.getInvoice(invoice.getId());
-```
-####Exchange Rates
-
-You can retrieve BitPay's [BBB exchange rates](https://bitpay.com/bitcoin-exchange-rates).
-```c#
-Rates rates = this.bitpay.getRates();
-
-double rate = rates.getRate("USD");
-
-rates.update();
-```
-####Advanced Invoices
+####Create an invoice (extended)
 
 You can add optional attributes to the invoice.  Atributes that are not set are ignored or given default values.
 ```c#
@@ -112,6 +98,22 @@ invoice.NotificationEmail = "satoshi@bitpay.com";
 invoice.PosData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
 invoice = this.bitpay.createInvoice(invoice);
+```
+
+####Retreive an invoice
+```c#
+Invoice invoice = bitpay.getInvoice(invoice.getId());
+```
+
+####Get exchange rates
+You can retrieve BitPay's [BBB exchange rates](https://bitpay.com/bitcoin-exchange-rates).
+
+```c#
+Rates rates = this.bitpay.getRates();
+
+double rate = rates.getRate("USD");
+
+rates.update();
 ```
 
 # Support
