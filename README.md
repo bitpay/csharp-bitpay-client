@@ -104,15 +104,12 @@ rates.update();
 
 You can add optional attributes to the invoice.  Atributes that are not set are ignored or given default values.
 ```c#
-InvoiceBuyer buyer = new InvoiceBuyer();
-buyer.setName("Satoshi");
-buyer.setEmail("satoshi@bitpay.com");
-	
-Invoice invoice = new Invoice(100.0, "USD");
-invoice.setBuyer(buyer);
-invoice.setFullNotifications(true);
-invoice.setNotificationEmail("satoshi@bitpay.com");
-invoice.setPosData("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
+Invoice invoice = new Invoice(100.0m, "USD");
+invoice.BuyerName = "Satoshi";
+invoice.BuyerEmail = "satoshi@bitpay.com";
+invoice.FullNotifications = true;
+invoice.NotificationEmail = "satoshi@bitpay.com";
+invoice.PosData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
 invoice = this.bitpay.createInvoice(invoice);
 ```
