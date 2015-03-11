@@ -14,6 +14,8 @@ This SDK provides a convenient abstraction of BitPay's [cryptographically-secure
 
 This SDK implements BitPay's remote client authentication and authorization strategy.  No private or shared-secret information is ever transmitted over the wire.
 
+You can integrate our C# client easily using the NuGet package manager. This package is located at: https://www.nuget.org/packages/BitPay/
+
 ####Handling your client private key
 Each client paired with the BitPay server requires a ECDSA key.  This key provides the security mechanism for all client interaction with the BitPay server. The public key is used to derive the specific client identity that is displayed on your BitPay dashboard.  The public key is also used for securely signing all API requests from the client.  See the [BitPay API](https://bitpay.com/api) for more information.
 
