@@ -118,7 +118,7 @@ rates.update();
 
 # Support
 
-* https://github.com/bitpay/java-bitpay-client/issues
+* https://github.com/bitpay/csharp-bitpay-client/issues
 * https://support.bitpay.com/
 
 # License
