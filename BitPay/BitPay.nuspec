@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>2.0.0</version>
+    <title>BitPay C# Client</title>
+    <authors>Andy Phillipson</authors>
+    <owners>BitPay</owners>
+    <licenseUrl>https://github.com/bitpay/csharp-bitpay-client#license</licenseUrl>
+    <projectUrl>https://github.com/bitpay/csharp-bitpay-client</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This is the C# client library for the BitPay Payment Gateway. This library implements BitPay's Cryptographically Secure RESTful API.</description>
+    <copyright>Copyright 2015 BitPay, Inc.</copyright>
+    <tags>bitcoin bitpay ecdsa cryptography payment gateway</tags>
+  </metadata>
+</package>
