@@ -1,4 +1,4 @@
-﻿using BitCoinSharp;
+using BitCoinSharp;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.Helpers;
 using System.Web.Script.Serialization;
@@ -170,11 +171,18 @@ namespace BitPayAPI
         /// <returns>A new invoice object returned from the server.</returns>
         public Invoice createInvoice(Invoice invoice, String facade = FACADE_POS)
         {
+            Encoding ascii = Encoding.ASCII;
+            Encoding unicode = Encoding.Unicode;
             invoice.Token = this.getAccessToken(facade);
             invoice.Guid = Guid.NewGuid().ToString();
             invoice.Nonce = NextNonce;
             String json = JsonConvert.SerializeObject(invoice);
-            HttpResponseMessage response = this.postWithSignature("invoices", json);
+            byte[] unicodeBytes = unicode.GetBytes(json);
+            byte[] asciiBytes = Encoding.Convert(unicode, ascii, unicodeBytes);
+            char[] asciiChars = new char[ascii.GetCharCount(asciiBytes, 0, asciiBytes.Length)];
+            ascii.GetChars(asciiBytes, 0, asciiBytes.Length, asciiChars, 0);
+            string asciiString = new string(asciiChars);
+            HttpResponseMessage response = this.postWithSignature("invoices", asciiString);
             JsonConvert.PopulateObject(this.responseToJsonString(response), invoice);
             return invoice;
         }
