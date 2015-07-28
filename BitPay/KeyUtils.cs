@@ -129,6 +129,10 @@ namespace BitPayAPI
             int val = (int)hex;
             return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
         }
+        private static bool isValidHexDigit(char chr)
+        {
+            return ('0' <= chr && chr <= '9') || ('a' <= chr && chr <= 'f') || ('A' <= chr && chr <= 'F');
+        }
 
         public static byte[] hexToBytes(string hex)
         {
@@ -137,11 +141,20 @@ namespace BitPayAPI
             if (hex.Length % 2 == 1)
                 throw new FormatException("The binary key cannot have an odd number of digits");
 
+            if (hex == string.Empty)
+                return new byte[0];
+
             byte[] arr = new byte[hex.Length >> 1];
 
             for (int i = 0; i < hex.Length >> 1; ++i)
             {
-                arr[i] = (byte)((getHexVal(hex[i << 1]) << 4) + (getHexVal(hex[(i << 1) + 1])));
+                char highNibble = hex[i << 1];
+                char lowNibble = hex[(i << 1) + 1];
+
+                if (!isValidHexDigit(highNibble) || !isValidHexDigit(lowNibble))
+                    throw new FormatException("The binary key contains invalid chars.");
+
+                arr[i] = (byte)((getHexVal(highNibble) << 4) + (getHexVal(lowNibble)));
             }
             return arr;
         }
