@@ -132,10 +132,11 @@ namespace BitPayAPI
 
         public static byte[] hexToBytes(string hex)
         {
+            if (hex == null)
+                throw new ArgumentNullException("hex");
             if (hex.Length % 2 == 1)
-            {
-                throw new Exception("The binary key cannot have an odd number of digits");
-            }
+                throw new FormatException("The binary key cannot have an odd number of digits");
+
             byte[] arr = new byte[hex.Length >> 1];
 
             for (int i = 0; i < hex.Length >> 1; ++i)
