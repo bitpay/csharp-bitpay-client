@@ -10,7 +10,7 @@ namespace BitPayTest
         private BitPay bitpay;
         private Invoice basicInvoice;
 
-        private static String pairingCode = "p7CQzny";
+        private static String pairingCode = "6UgaJ6W";
         private static String clientName = "BitPay C# Library Tester on " + System.Environment.MachineName;
 
         public BitPayTest()

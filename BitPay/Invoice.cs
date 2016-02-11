@@ -184,6 +184,21 @@ namespace BitPayAPI
         public bool ShouldSerializeExceptionStatus() { return false; }
 
         public InvoicePaymentUrls PaymentUrls { get; set; }
-        public bool ShouldSerializeExceptionInvoicePaymentUrls() { return false; }
+        public bool ShouldSerializePaymentUrls() { return false; }
+
+        public bool Refundable
+        {
+            get { return this.Flags.Refundable; }
+        }
+        public bool ShouldSerializeRefundable() { return false; }
+
+        [Newtonsoft.Json.JsonProperty]
+        private Flags Flags { get; set; }
+        public bool ShouldSerializeFlags() { return false; }
+    }
+
+    class Flags
+    {
+        public bool Refundable { get; set; }
     }
 }

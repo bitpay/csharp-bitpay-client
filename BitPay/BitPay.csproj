@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="BitPay.cs" />
     <Compile Include="BitPayException.cs" />
+    <Compile Include="Buyer.cs" />
     <Compile Include="ECKey.cs" />
     <Compile Include="Invoice.cs" />
     <Compile Include="InvoicePaymentUrls.cs" />
