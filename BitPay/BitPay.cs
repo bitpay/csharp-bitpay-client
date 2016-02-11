@@ -37,8 +37,6 @@ namespace BitPayAPI
         private String _baseUrl = BITPAY_URL;
         private EcKey _ecKey = null;
         private String _identity = "";
-        private long _nonce = DateTime.Now.Ticks / 1000;
-        private bool _disableNonce = false;
         private String _clientName = "";
         private Dictionary<string, string> _tokenCache; // {facade, token}
 
@@ -98,15 +96,6 @@ namespace BitPayAPI
         }
 
         /// <summary>
-        /// Disable use of the nonce for this client.  When disabled, the nonce will not be sent to the server in subsequent requests.
-        /// </summary>
-        public bool DisableNonce
-        {
-            get { return _disableNonce; }
-            set { _disableNonce = DisableNonce; }
-        }
-
-        /// <summary>
         /// Authorize (pair) this client with the server using the specified pairing code.
         /// </summary>
         /// <param name="pairingCode">A code obtained from the server; typically from bitpay.com/api-tokens.</param>
@@ -115,7 +104,6 @@ namespace BitPayAPI
             Token token = new Token();
             token.Id = _identity;
             token.Guid = Guid.NewGuid().ToString();
-            token.Nonce = NextNonce;
             token.PairingCode = pairingCode;
             token.Label = _clientName;
             String json = JsonConvert.SerializeObject(token);
@@ -123,7 +111,7 @@ namespace BitPayAPI
             List<Token> tokens = JsonConvert.DeserializeObject<List<Token>>(this.responseToJsonString(response));
             foreach (Token t in tokens)
             {
-                _tokenCache.Add(t.Facade, t.Value);
+                cacheToken(t.Facade, t.Value);
             }
         }
         
@@ -137,7 +125,6 @@ namespace BitPayAPI
             Token token = new Token();
             token.Id = _identity;
             token.Guid = Guid.NewGuid().ToString();
-            token.Nonce = NextNonce;
             token.Facade = facade;
             token.Count = 1;
             token.Label = _clientName;
@@ -149,7 +136,7 @@ namespace BitPayAPI
             {
                 throw new BitPayException("Error - failed to get token resource; expected 1 token, got " + tokens.Count);
             }
-            _tokenCache.Add(tokens[0].Facade, tokens[0].Value);
+            cacheToken(tokens[0].Facade, tokens[0].Value);
             return tokens[0].PairingCode;
         }
 
@@ -172,21 +159,40 @@ namespace BitPayAPI
         {
             invoice.Token = this.getAccessToken(facade);
             invoice.Guid = Guid.NewGuid().ToString();
-            invoice.Nonce = NextNonce;
             String json = JsonConvert.SerializeObject(invoice);
             HttpResponseMessage response = this.postWithSignature("invoices", json);
             JsonConvert.PopulateObject(this.responseToJsonString(response), invoice);
+
+            // Track the token for this invoice
+            cacheToken(invoice.Id, invoice.Token);
+
             return invoice;
         }
 
         /// <summary>
-        /// Retrieve an invoice by id using the public facade.
+        /// Retrieve an invoice by id and token.
         /// </summary>
         /// <param name="invoiceId">The id of the requested invoice.</param>
         /// <returns>The invoice object retrieved from the server.</returns>
-        public Invoice getInvoice(String invoiceId)
+        public Invoice getInvoice(String invoiceId, String facade = FACADE_POS)
         {
-            HttpResponseMessage response = this.get("invoices/" + invoiceId);
+            // Provide the merchant token whenthe merchant facade is being used.
+            // GET/invoices expects the merchant token and not the merchant/invoice token.
+            Dictionary<string, string> parameters = null;
+            if (facade == FACADE_MERCHANT)
+            {
+                try
+                {
+                    parameters = new Dictionary<string, string>();
+                    parameters.Add("token", getAccessToken(FACADE_MERCHANT));
+                }
+                catch (BitPayException)
+                {
+                    // No token for invoice.
+                    parameters = null;
+                }
+            }
+            HttpResponseMessage response = this.get("invoices/" + invoiceId, parameters);
             return JsonConvert.DeserializeObject<Invoice>(this.responseToJsonString(response));
         }
 
@@ -242,7 +248,7 @@ namespace BitPayAPI
                 _ecKey = KeyUtils.loadEcKey();
 
                 // Alternatively, load your private key from a location you specify.
-                // _ecKey = KeyUtils.createEcKeyFromHexStringFile("C:\\Users\\key.priv");
+                //_ecKey = KeyUtils.createEcKeyFromHexStringFile("C:\\Users\\Andy\\Documents\\private-key.txt");
             }
             else
             {
@@ -255,22 +261,6 @@ namespace BitPayAPI
         {
             // Identity in this implementation is defined to be the SIN.
             _identity = KeyUtils.deriveSIN(_ecKey);
-        }
-
-        private long NextNonce
-        {
-            get
-            {
-                if (!DisableNonce)
-                {
-                    _nonce++;
-                }
-                else
-                {
-                    _nonce = 0;  // Nonce must be 0 when it has been disabled (0 value prevents serialization)
-                }
-                return _nonce;
-            }
         }
 
         private Dictionary<string, string> responseToTokenCache(HttpResponseMessage response)
@@ -293,7 +283,10 @@ namespace BitPayAPI
                     }
                     foreach (string key in kc)
                     {
-                        _tokenCache.Add(key, obj[i][key]);
+                        if (!_tokenCache.ContainsKey(key))
+                        {
+                            cacheToken(key, obj[i][key]);
+                        }
                     }
                 }
             }
@@ -310,6 +303,11 @@ namespace BitPayAPI
 
         private void clearAccessTokenCache() {
             _tokenCache = new Dictionary<string, string>();
+        }
+
+        private void cacheToken(String key, String token)
+        {
+            _tokenCache.Add(key, token);
         }
 
         private bool tryGetAccessTokens()
@@ -346,19 +344,18 @@ namespace BitPayAPI
             return _tokenCache.Count;
         }
 
-        private String getAccessToken(String facade)
+        private String getAccessToken(String key)
         {
-            if (!_tokenCache.ContainsKey(facade))
+            if (!_tokenCache.ContainsKey(key))
             {
-                throw new BitPayException("Error: You do not have access to facade: " + facade);
+                throw new BitPayException("Error: You do not have access to facade: " + key);
             }
-            return _tokenCache[facade];
+            return _tokenCache[key];
         }
 
         private Dictionary<string, string> getParams()
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("nonce", NextNonce + "");
             return parameters;
         }
 

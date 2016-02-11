@@ -13,7 +13,7 @@ namespace BitPayTest
         private static double BTC_EPSILON = .000000001;
         private static double EPSILON = .001;
 
-        private static String pairingCode = "p7CQzny";
+        private static String pairingCode = "6UgaJ6W";
         private static String clientName = "BitPay C# Library Tester on " + System.Environment.MachineName;
 
         public BitPayTest()

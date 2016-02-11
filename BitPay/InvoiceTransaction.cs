@@ -11,13 +11,19 @@ namespace BitPayAPI
     {
         public InvoiceTransaction() { }
 
-        [JsonProperty(PropertyName = "txid")]
-        public string Txid { get; set; }
+        [JsonProperty(PropertyName = "amount")]
+        public double Amount { get; set; }
+
+        [JsonProperty(PropertyName = "confirmations")]
+        public string Confirmations { get; set; }
+
+        [JsonProperty(PropertyName = "receivedTime")]
+        public string ReceivedTime { get; set; }
+
+        [JsonProperty(PropertyName = "time")]
+        public string Time { get; set; }
 
         [JsonProperty(PropertyName = "type")]
         public string Type { get; set; }
-
-        [JsonProperty(PropertyName = "amount")]
-        public double Amount { get; set; }
     }
 }
