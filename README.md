@@ -11,8 +11,7 @@ To get up and running with our C# library quickly, see the GUIDE here: https://g
 ## Support
 
 * https://github.com/bitpay/csharp-bitpay-client/issues
-* https://labs.bitpay.com/c/libraries/csharp
-* https://support.bitpay.com/
+* https://help.bitpay.com/
 
 ## Contribute
 
