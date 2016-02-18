@@ -19,7 +19,7 @@ namespace BitPayTest
 		        // The first time this test runs it will create an identity and emit a client pairing code.
 		        // The pairing code must then be authorized in a BitPay account.  Running the test a second
 		        // time should result in the authorized client (this test) running to completion.
-                bitpay = new BitPay(clientName);        
+                bitpay = new BitPay(clientName);
         
                 if (!bitpay.clientIsAuthorized(BitPay.FACADE_MERCHANT))
                 {
@@ -45,7 +45,8 @@ namespace BitPayTest
         {
             try
             {
-                Invoice invoice = bitpay.createInvoice(new Invoice(50.0m, "USD"));
+                Invoice invoice = bitpay.createInvoice(new Invoice(1.0, "USD"), BitPay.FACADE_MERCHANT);
+                invoice = bitpay.getInvoice(invoice.Id, BitPay.FACADE_MERCHANT);
                 Assert.IsNotNull(invoice.Id, "Invoice created with id=NULL");
             }
             catch (Exception ex)
@@ -71,14 +72,58 @@ namespace BitPayTest
         [TestMethod]
         public void testShouldGetBTCLedger()
         {
+            Ledger ledger = null;
             try
             {
-                Ledger ledger = this.bitpay.getLedger(Ledger.LEDGER_BTC, new DateTime(2014, 8, 1), new DateTime(2014, 8, 31));
+                ledger = this.bitpay.getLedger(Ledger.LEDGER_BTC, new DateTime(2014, 8, 1), new DateTime(2014, 8, 31));
                 Assert.IsTrue(ledger.Entries.Count > 0, "Ledger is empty");
             }
-            catch (Exception ex)
+            catch (Exception ex1)
             {
-                Assert.Fail(ex.Message);
+                if (!ex1.Message.Contains("Ledger is empty"))
+                {
+                    Assert.Fail(ex1.Message);
+                }
+                else
+                {
+                    try
+                    {
+                        Assert.IsTrue(ledger.Entries.Count == 0);
+                    }
+                    catch (Exception ex2)
+                    {
+                        Assert.Fail(ex2.Message);
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        public void testShouldGetUSDLedger()
+        {
+            Ledger ledger = null;
+            try
+            {
+                ledger = this.bitpay.getLedger(Ledger.LEDGER_USD, new DateTime(2014, 1, 1), new DateTime(2014, 1, 31));
+                Assert.IsTrue(ledger.Entries.Count > 0, "Ledger is empty");
+            }
+            catch (Exception ex1)
+            {
+                if (!ex1.Message.Contains("Ledger is empty"))
+                {
+                    Assert.Fail(ex1.Message);
+                }
+                else
+                {
+                    try
+                    {
+                        Assert.IsTrue(ledger.Entries.Count == 0);
+                    }
+                    catch (Exception ex2)
+                    {
+                        Assert.Fail(ex2.Message);
+                    }
+                }
             }
         }
     }

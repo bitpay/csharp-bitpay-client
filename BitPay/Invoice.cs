@@ -22,7 +22,7 @@ namespace BitPayAPI
         public Invoice() {}
 
         // Creates a minimal inovice request object.
-        public Invoice(decimal price, String currency)
+        public Invoice(double price, String currency)
         {
             Price = price;
             Currency = currency;
@@ -45,7 +45,7 @@ namespace BitPayAPI
         //
 
         [JsonProperty(PropertyName = "price")]
-        public decimal Price { get; set; }
+        public double Price { get; set; }
 
         String _currency = "";
         [JsonProperty(PropertyName = "currency")]
@@ -153,7 +153,7 @@ namespace BitPayAPI
         public string Status { get; set; }
         public bool ShouldSerializeStatus() { return false; }
 
-        public decimal BtcPrice { get; set; }
+        public double BtcPrice { get; set; }
         public bool ShouldSerializeBtcPrice() { return false; }
 
         public long InvoiceTime { get; set; }
@@ -165,16 +165,16 @@ namespace BitPayAPI
         public long CurrentTime { get; set; }
         public bool ShouldSerializeCurrentTime() { return false; }
 
-        public decimal BtcPaid { get; set; }
+        public double BtcPaid { get; set; }
         public bool ShouldSerializeBtcPaid() { return false; }
 
-        public decimal BtcDue { get; set; }
+        public double BtcDue { get; set; }
         public bool ShouldSerializeBtcDue() { return false; }
 
         public List<InvoiceTransaction> Transactions { get; set; }
         public bool ShouldSerializeTransactions() { return false; }
 
-        public decimal Rate { get; set; }
+        public double Rate { get; set; }
         public bool ShouldSerializeRate() { return false; }
 
         public Dictionary<string, string> ExRates { get; set; }
@@ -184,6 +184,21 @@ namespace BitPayAPI
         public bool ShouldSerializeExceptionStatus() { return false; }
 
         public InvoicePaymentUrls PaymentUrls { get; set; }
-        public bool ShouldSerializeExceptionInvoicePaymentUrls() { return false; }
+        public bool ShouldSerializePaymentUrls() { return false; }
+
+        public bool Refundable
+        {
+            get { return this.Flags.Refundable; }
+        }
+        public bool ShouldSerializeRefundable() { return false; }
+
+        [Newtonsoft.Json.JsonProperty]
+        private Flags Flags { get; set; }
+        public bool ShouldSerializeFlags() { return false; }
+    }
+
+    class Flags
+    {
+        public bool Refundable { get; set; }
     }
 }
