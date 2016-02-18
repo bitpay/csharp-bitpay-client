@@ -399,7 +399,7 @@ namespace BitPayAPI
         {
             try
             {
-                var bodyContent = new StringContent(json);
+                var bodyContent = new StringContent(this.unicodeToAscii(json));
                 _httpClient.DefaultRequestHeaders.Clear();
                 _httpClient.DefaultRequestHeaders.Add("x-accept-version", BITPAY_API_VERSION);
                 _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", BITPAY_PLUGIN_INFO);
@@ -479,6 +479,15 @@ namespace BitPayAPI
             System.Net.Security.SslPolicyErrors sslPolicyErrors)
         {
             return true;
+        }
+
+        private String unicodeToAscii(String json)
+        {
+            byte[] unicodeBytes = Encoding.Unicode.GetBytes(json);
+            byte[] asciiBytes = Encoding.Convert(Encoding.Unicode, Encoding.ASCII, unicodeBytes);
+            char[] asciiChars = new char[Encoding.ASCII.GetCharCount(asciiBytes, 0, asciiBytes.Length)];
+            Encoding.ASCII.GetChars(asciiBytes, 0, asciiBytes.Length, asciiChars, 0);
+            return new String(asciiChars);
         }
     }
 }
