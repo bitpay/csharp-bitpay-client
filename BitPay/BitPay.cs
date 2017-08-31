@@ -177,7 +177,7 @@ namespace BitPayAPI
         /// <returns>The invoice object retrieved from the server.</returns>
         public Invoice getInvoice(String invoiceId, String facade = FACADE_POS)
         {
-            // Provide the merchant token whenthe merchant facade is being used.
+            // Provide the merchant token when the merchant facade is being used.
             // GET/invoices expects the merchant token and not the merchant/invoice token.
             Dictionary<string, string> parameters = null;
             if (facade == FACADE_MERCHANT)
@@ -241,6 +241,102 @@ namespace BitPayAPI
             List<LedgerEntry> entries = JsonConvert.DeserializeObject<List<LedgerEntry>>(this.responseToJsonString(response));
             return new Ledger(entries);
         }
+
+        /// <summary>
+        /// Submit a BitPay Payout batch.
+        /// </summary>
+        /// <param name="batch">A PayoutBatch object with request parameters defined.</param>
+        /// <returns>A BitPay generated PayoutBatch object.</param>
+        public PayoutBatch submitPayoutBatch(PayoutBatch batch)
+        {
+            batch.Token = this.getAccessToken(FACADE_PAYROLL);
+            batch.Guid = Guid.NewGuid().ToString();
+            String json = JsonConvert.SerializeObject(batch);
+            HttpResponseMessage response = this.postWithSignature("payouts", json);
+
+            // To avoid having to merge instructions in the response with those we sent, we just remove the instructions
+            // we sent and replace with those in the response.
+            batch.Instructions = new List<PayoutInstruction>();
+
+            JsonConvert.PopulateObject(this.responseToJsonString(response), batch, new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                });
+
+            // Track the token for this batch
+            cacheToken(batch.Id, batch.Token);
+
+            return batch;
+        }
+
+        /// <summary>
+        /// Retrieve a collection of BitPay payout batches.
+        /// </summary>
+        /// <returns>A list of BitPay PayoutBatch objects.</param>
+        public List<PayoutBatch> getPayoutBatches()
+        {
+            Dictionary<String, String> parameters = this.getParams();
+            parameters.Add("token", this.getAccessToken(FACADE_PAYROLL));
+            HttpResponseMessage response = this.get("payouts", parameters);
+            return JsonConvert.DeserializeObject<List<PayoutBatch>>(this.responseToJsonString(response), new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                });
+        }
+    
+        /// <summary>
+        /// Retrieve a BitPay payout batch by batch id using.  The client must have been previously authorized for the payroll facade.
+        /// </summary>
+        /// <param name="batchId">The id of the batch to retrieve.</param>
+        /// <returns>A BitPay PayoutBatch object.</param>
+        public PayoutBatch getPayoutBatch(String batchId) {
+            Dictionary<string, string> parameters = null;
+            try
+            {
+                parameters = new Dictionary<string, string>();
+                parameters.Add("token", getAccessToken(FACADE_PAYROLL));
+            }
+            catch (BitPayException)
+            {
+                // No token for batch.
+                parameters = null;
+            }
+            HttpResponseMessage response = this.get("payouts/" + batchId, parameters);
+            return JsonConvert.DeserializeObject<PayoutBatch>(this.responseToJsonString(response), new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                });
+        }
+
+        /// <summary>
+        /// Cancel a BitPay Payout batch.
+        /// </summary>
+        /// <param name="batchId">The id of the batch to cancel.</param>
+        /// <returns> A BitPay generated PayoutBatch object.</param>
+        public PayoutBatch cancelPayoutBatch(String batchId) {
+            PayoutBatch b = getPayoutBatch(batchId);
+            
+            Dictionary<string, string> parameters = null;
+            try
+            {
+                parameters = new Dictionary<string, string>();
+                parameters.Add("token", b.Token);
+            }
+            catch (BitPayException)
+            {
+                // No token for batch.
+                parameters = null;
+            }
+            HttpResponseMessage response = this.delete("payouts/" + batchId, parameters);
+            return JsonConvert.DeserializeObject<PayoutBatch>(this.responseToJsonString(response), new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                });
+        }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private void initKeys()
         {
@@ -382,6 +478,37 @@ namespace BitPayAPI
                 }
 
                 var result = _httpClient.GetAsync(fullURL).Result;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new BitPayException("Error: " + ex.ToString());
+            }
+        }
+
+        private HttpResponseMessage delete(String uri, Dictionary<string, string> parameters = null)
+        {
+            try
+            {
+                String fullURL = _baseUrl + uri;
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Add("x-accept-version", BITPAY_API_VERSION);
+                _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", BITPAY_PLUGIN_INFO);
+
+                if (parameters != null)
+                {
+                    fullURL += "?";
+                    foreach (KeyValuePair<string, string> entry in parameters)
+                    {
+                        fullURL += entry.Key + "=" + entry.Value + "&";
+                    }
+                    fullURL = fullURL.Substring(0, fullURL.Length - 1);
+                    String signature = KeyUtils.sign(_ecKey, fullURL);
+                    _httpClient.DefaultRequestHeaders.Add("x-signature", signature);
+                    _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.bytesToHex(_ecKey.PubKey));
+                }
+
+                var result = _httpClient.DeleteAsync(fullURL).Result;
                 return result;
             }
             catch (Exception ex)
