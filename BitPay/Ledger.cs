@@ -20,7 +20,7 @@ namespace BitPayAPI
         public List<LedgerEntry> Entries = null;
 
         /// <summary>
-        /// Creates an uninitialized invoice request object.
+        /// Creates a Ledger object.
         /// </summary>
         public Ledger(List<LedgerEntry> entries)
         {

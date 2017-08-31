@@ -60,6 +60,11 @@
     <Compile Include="BitPay.cs" />
     <Compile Include="BitPayException.cs" />
     <Compile Include="Buyer.cs" />
+    <Compile Include="Converters.cs" />
+    <Compile Include="PayoutInstructionTransaction.cs" />
+    <Compile Include="PayoutInstructionBtcSummary.cs" />
+    <Compile Include="PayoutInstruction.cs" />
+    <Compile Include="PayoutBatch.cs" />
     <Compile Include="ECKey.cs" />
     <Compile Include="Invoice.cs" />
     <Compile Include="InvoicePaymentUrls.cs" />
