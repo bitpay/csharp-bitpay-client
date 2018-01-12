@@ -334,9 +334,68 @@ namespace BitPayAPI
                 });
         }
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Retrieves settlement reports for the calling merchant filtered by query. The `limit` and `offset` parameters specify pages for large query sets.
+        /// </summary>
+        /// <param name="currency">The three digit currency string for the ledger to retrieve.</param>
+        /// <param name="dateStart">The start date for the query.</param>
+        /// <param name="dateEnd">The end date for the query.</param>
+        /// <param name="status">Can be `processing`, `completed`, or `failed`.</param>
+        /// <param name="limit">Maximum number of settlements to retrieve.</param>
+        /// <param name="offset">Offset for paging</param>
+        /// <returns>A list of BitPay Settlement objects</returns>
+        public List<Settlement> getSettlements(string currency, DateTime dateStart, DateTime dateEnd, string status = "", int limit = 100, int offset = 0)
+        {
+            var parameters = new Dictionary<string, string>
+            {
+                { "token", getAccessToken(FACADE_MERCHANT) },
+                { "startDate", $"{dateStart.ToShortDateString()}" },
+                { "endDate", $"{dateEnd.ToShortDateString()}" },
+                { "currency", currency },
+                { "status", status },
+                { "limit", $"{limit}" },
+                { "offset", $"{offset}" }
+            };
+
+            HttpResponseMessage response = get("settlements", parameters);
+            return JsonConvert.DeserializeObject<List<Settlement>>(responseToJsonString(response));
+        }
+
+        /// <summary>
+        /// Retrieves a summary of the specified settlement.
+        /// </summary>
+        /// <param name="settlementId">Settlement Id</param>
+        /// <returns>A BitPay Settlement object.</returns>
+        public Settlement getSettlement(string settlementId)
+        {
+            var parameters = new Dictionary<string, string>
+            {
+                { "token", getAccessToken(FACADE_MERCHANT) }
+            };
+
+            HttpResponseMessage response = get($"settlements/{settlementId}", parameters);
+            return JsonConvert.DeserializeObject<Settlement>(responseToJsonString(response));
+        }
+
+        /// <summary>
+        /// Gets a detailed reconciliation report of the activity within the settlement period
+        /// </summary>
+        /// <param name="settlement">Settlement to generate report for.</param>
+        /// <returns>A detailed BitPay Settlement object.</returns>
+        public Settlement getSettlementReconciliationReport(Settlement settlement)
+        {
+            var parameters = new Dictionary<string, string>
+            {
+                { "token", settlement.Token }
+            };
+
+            HttpResponseMessage response = get($"settlements/{settlement.Id}/reconciliationReport", parameters);
+            return JsonConvert.DeserializeObject<Settlement>(responseToJsonString(response));
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private void initKeys()
         {
