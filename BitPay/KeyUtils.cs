@@ -28,7 +28,7 @@ namespace BitPayAPI
         public static EcKey createEcKeyFromHexString(String privateKey)
         {
             BigInteger pkey = new BigInteger(privateKey, 16);
-            EcKey key = new EcKey(pkey, true);
+            EcKey key = new EcKey(pkey);
             return key;
         }
 
