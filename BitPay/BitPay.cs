@@ -1,8 +1,5 @@
-using BitCoinSharp;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +8,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.Helpers;
-using System.Web.Script.Serialization;
 
 /**
  * @author Andy Phillipson
@@ -533,7 +529,7 @@ namespace BitPayAPI
                     fullURL = fullURL.Substring(0, fullURL.Length - 1);
                     String signature = KeyUtils.sign(_ecKey, fullURL);
                     _httpClient.DefaultRequestHeaders.Add("x-signature", signature);
-                    _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.bytesToHex(_ecKey.PubKey));
+                    _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.bytesToHex(_ecKey.pubKey));
                 }
 
                 var result = _httpClient.GetAsync(fullURL).Result;
@@ -564,7 +560,7 @@ namespace BitPayAPI
                     fullURL = fullURL.Substring(0, fullURL.Length - 1);
                     String signature = KeyUtils.sign(_ecKey, fullURL);
                     _httpClient.DefaultRequestHeaders.Add("x-signature", signature);
-                    _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.bytesToHex(_ecKey.PubKey));
+                    _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.bytesToHex(_ecKey.pubKey));
                 }
 
                 var result = _httpClient.DeleteAsync(fullURL).Result;
@@ -594,7 +590,7 @@ namespace BitPayAPI
                 {
                     String signature = KeyUtils.sign(_ecKey, _baseUrl + uri + json);
                     _httpClient.DefaultRequestHeaders.Add("x-signature", signature);
-                    _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.bytesToHex(_ecKey.PubKey));
+                    _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.bytesToHex(_ecKey.pubKey));
                 }
                 var result = _httpClient.PostAsync(uri, bodyContent).Result;
                 return result;

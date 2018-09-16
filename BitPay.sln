@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2026
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPay", "BitPay\BitPay.csproj", "{D88A49C3-0280-4320-B120-AE519B2DB219}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPayTest", "BitPayTest\BitPayTest.csproj", "{71166BF5-DA31-4BFD-90E6-16172E894EAA}"
@@ -22,5 +24,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F7298A5F-4956-42F6-B30B-2E3FE3D0B31E}
 	EndGlobalSection
 EndGlobal

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Web.Helpers;
+﻿using System.Collections.Generic;
 
 namespace BitPayAPI
 {
