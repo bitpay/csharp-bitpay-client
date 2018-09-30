@@ -51,7 +51,7 @@ namespace BitPayAPI
                 clientName += " on " + System.Environment.MachineName;
             }
             // Eliminate special characters from the client name (used as a token label).  Trim to 60 chars.
-            string _clientName = new Regex("[^a-zA-Z0-9_ ]").Replace(clientName, "_");
+            _clientName = new Regex("[^a-zA-Z0-9_ ]").Replace(clientName, "_");
             if (_clientName.Length > 60)
             {
                 _clientName = _clientName.Substring(0, 60);
