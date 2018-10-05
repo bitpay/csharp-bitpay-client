@@ -17,7 +17,7 @@ namespace BitPayTest
             {
                 bitpay = new BitPay(clientName);
         
-                if (!bitpay.clientIsAuthorized(BitPay.FACADE_PAYROLL))
+                if (!bitpay.clientIsAuthorized(BitPay.FacadePayroll))
                 {
                     // Get PAYROLL facade authorization.
                     // Obtain a pairingCode from your BitPay account administrator.  When the pairingCode
@@ -31,7 +31,7 @@ namespace BitPayTest
 
                     // bitpay.authorizeClient(pairingCode);
 
-                    String pairingCode = bitpay.requestClientAuthorization(BitPay.FACADE_PAYROLL);
+                    String pairingCode = bitpay.requestClientAuthorization(BitPay.FacadePayroll);
 
                     // Signal the device operator that this client needs to be paired with a merchant account.
                     System.Diagnostics.Debug.WriteLine("Info: Pair this client with your merchant account using the pairing code: " + pairingCode);

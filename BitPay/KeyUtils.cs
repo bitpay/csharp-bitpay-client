@@ -3,6 +3,8 @@ using System;
 using System.Text;
 using System.IO;
 using System.Security.Cryptography;
+using Org.BouncyCastle.Asn1.Sec;
+using Org.BouncyCastle.Crypto.Digests;
 
 namespace BitPayAPI
 {
@@ -27,7 +29,7 @@ namespace BitPayAPI
         public static EcKey createEcKeyFromHexString(String privateKey)
         {
             BigInteger pkey = new BigInteger(privateKey, 16);
-            EcKey key = new EcKey(pkey.ToByteArray());
+            EcKey key = new EcKey(pkey);
             return key;
         }
 
@@ -77,7 +79,14 @@ namespace BitPayAPI
         public static String deriveSIN(EcKey ecKey)
         {
             // Get sha256 hash and then the RIPEMD-160 hash of the public key (this call gets the result in one step).
-            byte[] pubKeyHash = ecKey.pubKey; 
+            byte[] pubKey = ecKey.PubKey;
+            byte[] hash = new SHA256Managed().ComputeHash(pubKey);
+            RipeMD160Digest ripeMd160Digest = new RipeMD160Digest();
+            ripeMd160Digest.BlockUpdate(hash, 0, hash.Length);
+            byte[] output = new byte[20];
+            ripeMd160Digest.DoFinal(output, 0);
+
+            byte[] pubKeyHash = output; 
 
             // Convert binary pubKeyHash, SINtype and version to Hex
             String version = "0F";
@@ -148,13 +157,74 @@ namespace BitPayAPI
             return algorithm.ComputeHash(first);
         }
 
-        public static String sign(EcKey ecKey, String input) 
+        public static byte[] ConvertDerToP1393(byte[] data)
         {
-            String hash = sha256Hash(input);
-            return bytesToHex(ecKey.Sign(hexToBytes(hash)));
-	    }
+            byte[] b = new byte[132];
+            int totalLength = data[1];
+            int n = 0;
+            int offset = 4;
+            int thisLength = data[offset++];
+            if (data[offset] == 0)
+            {
+                // Negative number!
+                ++offset;
+                --thisLength;
+            }
+            for (int i = thisLength; i < 66; ++i)
+            {
+                b[n++] = 0;
+            }
+            if (thisLength > 66)
+            {
+                System.Console.WriteLine("BAD, first number is too big! " + thisLength);
+            }
+            else
+            {
+                for (int i = 0; i < thisLength; ++i)
+                {
+                    b[n++] = data[offset++];
+                }
+            }
+            ++offset;
+            thisLength = data[offset++];
 
-        private static String sha256Hash(String value)
+            for (int i = thisLength; i < 66; ++i)
+            {
+                b[n++] = 0;
+            }
+            if (thisLength > 66)
+            {
+                System.Console.WriteLine("BAD, second number is too big! " + thisLength);
+            }
+            else
+            {
+                for (int i = 0; i < thisLength; ++i)
+                {
+                    b[n++] = data[offset++];
+                }
+            }
+            return b;
+        }
+
+        public static string sign(EcKey ecKey, string input) {
+            // return ecKey.Sign(input);
+            String hash = Sha256Hash(input);
+            var hashBytes = hexToBytes(hash);
+            var signature = ecKey.Sign(hashBytes);
+            var bytesHex = bytesToHex(signature);
+            return bytesHex;
+            return bytesToHex(ecKey.Sign(hexToBytes(hash)));
+        }
+
+        private static byte[] Sha256HashBytes(string value) {
+            using (var hash = SHA256.Create()) {
+                var bytes = Encoding.UTF8.GetBytes(value);
+                var result = hash.ComputeHash(bytes);
+                return result;
+            }
+        }
+
+        private static String Sha256Hash(String value)
         {
             StringBuilder Sb = new StringBuilder();
             using (SHA256 hash = SHA256Managed.Create())

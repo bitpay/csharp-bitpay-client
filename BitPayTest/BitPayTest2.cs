@@ -21,13 +21,13 @@ namespace BitPayTest
 		        // time should result in the authorized client (this test) running to completion.
                 bitpay = new BitPay(clientName);
         
-                if (!bitpay.clientIsAuthorized(BitPay.FACADE_MERCHANT))
+                if (!bitpay.clientIsAuthorized(BitPay.FacadeMerchant))
                 {
                     // Get POS facade authorization code.
                     // Obtain a pairingCode from the BitPay server.  The pairingCode must be emitted from
         	        // this device and input into and approved by the desired merchant account.  To
         	        // generate invoices a POS facade is required.
-                    String pairingCode = bitpay.requestClientAuthorization(BitPay.FACADE_MERCHANT);
+                    String pairingCode = bitpay.requestClientAuthorization(BitPay.FacadeMerchant);
 
                     // Signal the device operator that this client needs to be paired with a merchant account.
                     System.Diagnostics.Debug.WriteLine("Info: Pair this client with your merchant account using the pairing code: " + pairingCode);
@@ -45,8 +45,8 @@ namespace BitPayTest
         {
             try
             {
-                Invoice invoice = bitpay.createInvoice(new Invoice(1.0, "USD"), BitPay.FACADE_MERCHANT);
-                invoice = bitpay.getInvoice(invoice.Id, BitPay.FACADE_MERCHANT);
+                Invoice invoice = bitpay.createInvoice(new Invoice(1.0, "USD"), BitPay.FacadeMerchant);
+                invoice = bitpay.getInvoice(invoice.Id, BitPay.FacadeMerchant);
                 Assert.IsNotNull(invoice.Id, "Invoice created with id=NULL");
             }
             catch (Exception ex)
