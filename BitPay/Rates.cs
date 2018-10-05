@@ -7,7 +7,7 @@ namespace BitPayAPI
     /// </summary>
     public class Rates
     {
-        private BitPay _bp;
+        private readonly BitPay _bp;
         private List<Rate> _rates;
 
         public Rates(List<Rate> rates, BitPay bp)
@@ -16,17 +16,17 @@ namespace BitPayAPI
             _rates = rates;
         }
 
-	    public List<Rate> getRates()
+	    public List<Rate> GetRates()
         {
 		    return _rates;
 	    }
 
-	    public void update()
+	    public void Update()
         {
-		    _rates = _bp.getRates().getRates();
+		    _rates = _bp.GetRates().GetRates();
 	    }
 
-        public decimal getRate(string currencyCode)
+        public decimal GetRate(string currencyCode)
         {
 		    decimal val = 0;
 		    foreach (Rate rateObj in _rates)

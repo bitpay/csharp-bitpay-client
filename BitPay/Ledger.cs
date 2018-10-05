@@ -5,17 +5,17 @@ namespace BitPayAPI
 {
     public class Ledger
     {
-        public const String LEDGER_AUD = "AUD";
-        public const String LEDGER_BTC = "BTC";
-        public const String LEDGER_CAD = "CAD";
-        public const String LEDGER_EUR = "EUR";
-        public const String LEDGER_GBP = "GBP";
-        public const String LEDGER_MXN = "MXN";
-        public const String LEDGER_NDZ = "NDZ";
-        public const String LEDGER_USD = "USD";
-        public const String LEDGER_ZAR = "ZAR";
+        public const String LedgerAud = "AUD";
+        public const String LedgerBtc = "BTC";
+        public const String LedgerCad = "CAD";
+        public const String LedgerEur = "EUR";
+        public const String LedgerGbp = "GBP";
+        public const String LedgerMxn = "MXN";
+        public const String LedgerNdz = "NDZ";
+        public const String LedgerUsd = "USD";
+        public const String LedgerZar = "ZAR";
 
-        public List<LedgerEntry> Entries = null;
+        public List<LedgerEntry> Entries;
 
         /// <summary>
         /// Creates a Ledger object.

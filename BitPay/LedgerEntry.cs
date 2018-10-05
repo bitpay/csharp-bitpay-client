@@ -44,6 +44,6 @@ namespace BitPayAPI
         public double InvoiceAmount { get; set; }
 
         [JsonProperty(PropertyName = "invoiceCurrency")]
-        public string invoiceCurrency { get; set; }
+        public string InvoiceCurrency { get; set; }
     }
 }

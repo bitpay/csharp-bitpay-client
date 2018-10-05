@@ -6,15 +6,15 @@ namespace BitPayAPI
 {
     public class PayoutBatch
     {
-        public const String STATUS_NEW = "new";
-	    public const String STATUS_FUNDED = "funded";
-	    public const String STATUS_PROCESSING = "processing";
-	    public const String STATUS_COMPLETE = "complete";
-	    public const String STATUS_FAILED = "failed";
-	    public const String STATUS_CANCELLED = "cancelled";
+        public const string StatusNew = "new";
+	    public const string StatusFunded = "funded";
+	    public const string StatusProcessing = "processing";
+	    public const string StatusComplete = "complete";
+	    public const string StatusFailed = "failed";
+	    public const string StatusCancelled = "cancelled";
 
-	    public const String METHOD_MANUAL2 = "manual_2";
-	    public const String METHOD_VWAP24 = "vwap_24hr";    
+	    public const string MethodManual2 = "manual_2";
+	    public const string MethodVwap24 = "vwap_24hr";    
 
         /// <summary>
         /// Constructor, create an empty PayoutBatch object.
@@ -25,8 +25,8 @@ namespace BitPayAPI
             Reference = "";
             BankTransferId = "";
             NotificationEmail = "";
-            NotificationURL = "";
-            PricingMethod = METHOD_VWAP24;
+            NotificationUrl = "";
+            PricingMethod = MethodVwap24;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace BitPayAPI
         /// <param name="reference">Merchant-provided data.</param>
         /// <param name="bankTransferId">Merchant-provided data, to help match funding payments to payout batches.</param>
         /// <param name="instructions">Payout instructions.</param>
-        public PayoutBatch(String currency, DateTime effectiveDate, String bankTransferId, String reference, List<PayoutInstruction> instructions) : this() {
+        public PayoutBatch(string currency, DateTime effectiveDate, string bankTransferId, string reference, List<PayoutInstruction> instructions) : this() {
             Currency = currency;
             EffectiveDate = effectiveDate;
             BankTransferId = bankTransferId;
@@ -74,10 +74,10 @@ namespace BitPayAPI
         public DateTime EffectiveDate { get; set; }
 
         [JsonProperty(PropertyName = "reference")]
-        public String Reference { get; set; }
+        public string Reference { get; set; }
 
         [JsonProperty(PropertyName = "bankTransferId")]
-        public String BankTransferId { get; set; }
+        public string BankTransferId { get; set; }
 
         // Optional fields
         //
@@ -90,7 +90,7 @@ namespace BitPayAPI
         public double Amount { get; set; }
         public bool ShouldSerializeAmount() { return true; }
 
-        String _currency = "";
+        string _currency = "";
         [JsonProperty(PropertyName = "currency")]
         public string Currency
         {
@@ -107,15 +107,15 @@ namespace BitPayAPI
 
         [JsonProperty(PropertyName = "pricingMethod")]
         public string PricingMethod { get; set; }
-        public bool ShouldSerializePricingMethod() { return !String.IsNullOrEmpty(PricingMethod); }
+        public bool ShouldSerializePricingMethod() { return !string.IsNullOrEmpty(PricingMethod); }
 
         [JsonProperty(PropertyName = "notificationEmail")]
         public string NotificationEmail { get; set; }
-        public bool ShouldSerializeNotificationEmail() { return !String.IsNullOrEmpty(NotificationEmail); }
+        public bool ShouldSerializeNotificationEmail() { return !string.IsNullOrEmpty(NotificationEmail); }
 
         [JsonProperty(PropertyName = "notificationURL")]
-        public string NotificationURL { get; set; }
-        public bool ShouldSerializeNotificationURL() { return !String.IsNullOrEmpty(NotificationURL); }
+        public string NotificationUrl { get; set; }
+        public bool ShouldSerializeNotificationUrl() { return !string.IsNullOrEmpty(NotificationUrl); }
 
         // Response fields
         //

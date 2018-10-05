@@ -6,8 +6,8 @@ namespace BitPayAPI
 {
     public class PayoutInstruction
     {
-        public const String STATUS_PAID = "paid";
-	    public const String STATUS_UNPAID = "unpaid";
+        public const String StatusPaid = "paid";
+	    public const String StatusUnpaid = "unpaid";
 	
         /// <summary>
         /// Constructor, create an empty PayoutInstruction object.
