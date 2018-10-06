@@ -3,6 +3,7 @@ using System;
 using System.Text;
 using System.IO;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using Org.BouncyCastle.Crypto.Digests;
 
 namespace BitPayAPI {
@@ -31,10 +32,10 @@ namespace BitPayAPI {
             return CreateEcKeyFromHexString(privateKey);
         }
 
-        public static EcKey LoadEcKey() {
+        public static async Task<EcKey> LoadEcKey() {
             using (var fs = File.OpenRead(PrivateKeyFilename)) {
                 var b = new byte[1024];
-                fs.Read(b, 0, b.Length);
+                await fs.ReadAsync(b, 0, b.Length);
                 var key = EcKey.FromAsn1(b);
                 return key;
             }
@@ -48,10 +49,10 @@ namespace BitPayAPI {
             }
         }
 
-        public static void SaveEcKey(EcKey ecKey) {
+        public static async Task SaveEcKey(EcKey ecKey) {
             var bytes = ecKey.ToAsn1();
             using (var fs = new FileStream(PrivateKeyFilename, FileMode.Create, FileAccess.Write)) {
-                fs.Write(bytes, 0, bytes.Length);
+                await fs.WriteAsync(bytes, 0, bytes.Length);
             }
         }
 

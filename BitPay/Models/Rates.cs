@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BitPayAPI.Models
 {
@@ -21,9 +22,9 @@ namespace BitPayAPI.Models
 		    return _rates;
 	    }
 
-	    public void Update()
+	    public async Task Update()
         {
-		    _rates = _bp.GetRates().GetRates();
+		    _rates = (await _bp.GetRates()).GetRates();
 	    }
 
         public decimal GetRate(string currencyCode)

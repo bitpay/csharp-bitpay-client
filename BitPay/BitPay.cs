@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web.Helpers;
 using BitPayAPI.Exceptions;
 using BitPayAPI.Models;
@@ -44,8 +45,8 @@ namespace BitPayAPI {
         /// <param name="clientName">The label for this client.</param>
         /// <param name="envUrl">The target server URL.</param>
         public BitPay(string clientName = BitpayPluginInfo, string envUrl = BitpayUrl) {
-            InitKeys();
-            Init(clientName, envUrl);
+            InitKeys().Wait();
+            Init(clientName, envUrl).Wait();
         }
 
         /// <summary>
@@ -56,7 +57,18 @@ namespace BitPayAPI {
         /// <param name="envUrl">The target server URL.</param>
         public BitPay(EcKey ecKey, string clientName = BitpayPluginInfo, string envUrl = BitpayUrl) {
             _ecKey = ecKey;
-            Init(clientName, envUrl);
+            Init(clientName, envUrl).Wait();
+        }
+
+
+        public async Task Initialize(string clientName = BitpayPluginInfo, string envUrl = BitpayUrl) {
+            await InitKeys();
+            await Init(clientName, envUrl);
+        }
+
+        public async Task Initlialize(EcKey ecKey, string clientName = BitpayPluginInfo, string envUrl = BitpayUrl) {
+            _ecKey = ecKey;
+            await Init(clientName, envUrl);
         }
 
         /// <summary>
@@ -68,16 +80,17 @@ namespace BitPayAPI {
         /// Authorize (pair) this client with the server using the specified pairing code.
         /// </summary>
         /// <param name="pairingCode">A code obtained from the server; typically from bitpay.com/api-tokens.</param>
-        public void AuthorizeClient(string pairingCode) {
+        public async Task AuthorizeClient(string pairingCode) {
             try {
                 var token = new Token {
                     Id = Identity, Guid = Guid.NewGuid().ToString(), PairingCode = pairingCode, Label = _clientName
                 };
                 var json = JsonConvert.SerializeObject(token);
-                var response = Post("tokens", json);
-                var tokens = JsonConvert.DeserializeObject<List<Token>>(ResponseToJsonString(response));
+                var response = await Post("tokens", json);
+                var responseString = await ResponseToJsonString(response);
+                var tokens = JsonConvert.DeserializeObject<List<Token>>(responseString);
                 foreach (var t in tokens) {
-                    CacheToken(t.Facade, t.Value);
+                    await CacheToken(t.Facade, t.Value);
                 }
             } catch (Exception ex) {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException))) {
@@ -93,7 +106,7 @@ namespace BitPayAPI {
         /// </summary>
         /// <param name="facade">The facade for which authorization is requested.</param>
         /// <returns>A pairing code for this client.  This code must be used to authorize this client at BitPay.com/api-tokens.</returns>
-        public string RequestClientAuthorization(string facade) {
+        public async Task<string> RequestClientAuthorization(string facade) {
             try {
                 var token = new Token {
                     Id = Identity,
@@ -103,8 +116,9 @@ namespace BitPayAPI {
                     Label = _clientName
                 };
                 var json = JsonConvert.SerializeObject(token);
-                var response = Post("tokens", json);
-                var tokens = JsonConvert.DeserializeObject<List<Token>>(ResponseToJsonString(response));
+                var response = await Post("tokens", json);
+                var responseString = await ResponseToJsonString(response);
+                var tokens = JsonConvert.DeserializeObject<List<Token>>(responseString);
                 if(!tokens.Any())
                     throw new TokenRegistrationException();
 
@@ -113,7 +127,7 @@ namespace BitPayAPI {
                 //    throw new BitPayException("Error - failed to get token resource; expected 1 token, got " +
                 //                              tokens.Count);
 
-                CacheToken(tokens[0].Facade, tokens[0].Value);
+                await CacheToken(tokens[0].Facade, tokens[0].Value);
                 return tokens[0].PairingCode;
             } catch (Exception ex) {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException))) {
@@ -139,13 +153,14 @@ namespace BitPayAPI {
         /// <param name="invoice">An invoice request object.</param>
         /// <param name="facade">The facade to create the invoice against</param>
         /// <returns>A new invoice object returned from the server.</returns>
-        public Invoice CreateInvoice(Invoice invoice, string facade = FacadePos) {
+        public async Task<Invoice> CreateInvoice(Invoice invoice, string facade = FacadePos) {
             try {
                 invoice.Token = GetAccessToken(facade);
                 invoice.Guid = Guid.NewGuid().ToString();
                 var json = JsonConvert.SerializeObject(invoice);
-                var response = PostWithSignature("invoices", json);
-                JsonConvert.PopulateObject(ResponseToJsonString(response), invoice);
+                var response = await PostWithSignature("invoices", json);
+                var responseString = await ResponseToJsonString(response);
+                JsonConvert.PopulateObject(responseString, invoice);
             } catch (Exception ex) {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException))) {
                     throw new InvoiceCreationException(ex);
@@ -155,7 +170,7 @@ namespace BitPayAPI {
             }
 
             // Track the token for this invoice
-            CacheToken(invoice.Id, invoice.Token);
+            await CacheToken(invoice.Id, invoice.Token);
 
             return invoice;
         }
@@ -166,7 +181,7 @@ namespace BitPayAPI {
         /// <param name="invoiceId">The id of the requested invoice.</param>
         /// <param name="facade">The facade to get the invoice from</param>
         /// <returns>The invoice object retrieved from the server.</returns>
-        public Invoice GetInvoice(string invoiceId, string facade = FacadeMerchant) {
+        public async Task<Invoice> GetInvoice(string invoiceId, string facade = FacadeMerchant) {
             try {
                 // Provide the merchant token when the merchant facade is being used.
                 // GET/invoices expects the merchant token and not the merchant/invoice token.
@@ -180,8 +195,9 @@ namespace BitPayAPI {
                     parameters = null;
                 }
 
-                var response = Get("invoices/" + invoiceId, parameters);
-                return JsonConvert.DeserializeObject<Invoice>(ResponseToJsonString(response));
+                var response = await Get("invoices/" + invoiceId, parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<Invoice>(responseString);
             } catch (Exception ex) {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException))) {
                     throw new InvoiceQueryException(ex);
@@ -197,14 +213,15 @@ namespace BitPayAPI {
         /// <param name="dateStart">The start date for the query.</param>
         /// <param name="dateEnd">The end date for the query.</param>
         /// <returns>A list of invoice objects retrieved from the server.</returns>
-        public List<Invoice> GetInvoices(DateTime dateStart, DateTime dateEnd) {
+        public async Task<List<Invoice>> GetInvoices(DateTime dateStart, DateTime dateEnd) {
             try {
-                var parameters = GetParams();
+                var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(FacadeMerchant));
                 parameters.Add("dateStart", dateStart.ToShortDateString());
                 parameters.Add("dateEnd", dateEnd.ToShortDateString());
-                var response = Get("invoices", parameters);
-                return JsonConvert.DeserializeObject<List<Invoice>>(ResponseToJsonString(response));
+                var response = await Get("invoices", parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<List<Invoice>>(responseString);
             } catch (Exception ex) {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException))) {
                     throw new InvoiceQueryException(ex);
@@ -218,10 +235,11 @@ namespace BitPayAPI {
         /// Retrieve the exchange rate table using the public facade.
         /// </summary>
         /// <returns>The rate table as an object retrieved from the server.</returns>
-        public Rates GetRates() {
+        public async Task<Rates> GetRates() {
             try {
-                var response = Get("rates");
-                var rates = JsonConvert.DeserializeObject<List<Rate>>(ResponseToJsonString(response));
+                var response = await Get("rates");
+                var responseString = await ResponseToJsonString(response);
+                var rates = JsonConvert.DeserializeObject<List<Rate>>(responseString);
                 return new Rates(rates, this);
             } catch (Exception ex) {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException))) {
@@ -239,15 +257,15 @@ namespace BitPayAPI {
         /// <param name="dateStart">The start date for the query.</param>
         /// <param name="dateEnd">The end date for the query.</param>
         /// <returns>A list of invoice objects retrieved from the server.</returns>
-        public Ledger GetLedger(string currency, DateTime dateStart, DateTime dateEnd) {
+        public async Task<Ledger> GetLedger(string currency, DateTime dateStart, DateTime dateEnd) {
             try {
-                var parameters = GetParams();
+                var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(FacadeMerchant));
                 parameters.Add("startDate", "" + dateStart.ToShortDateString());
                 parameters.Add("endDate", "" + dateEnd.ToShortDateString());
-                var response = Get("ledgers/" + currency, parameters);
-                var entries =
-                    JsonConvert.DeserializeObject<List<LedgerEntry>>(ResponseToJsonString(response));
+                var response = await Get("ledgers/" + currency, parameters);
+                var responseString = await ResponseToJsonString(response);
+                var entries = JsonConvert.DeserializeObject<List<LedgerEntry>>(responseString);
                 return new Ledger(entries);
             } catch (Exception ex) {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException))) {
@@ -263,23 +281,23 @@ namespace BitPayAPI {
         /// </summary>
         /// <param name="batch">A PayoutBatch object with request parameters defined.</param>
         /// <returns>A BitPay generated PayoutBatch object.</returns>
-        public PayoutBatch SubmitPayoutBatch(PayoutBatch batch) {
+        public async Task<PayoutBatch> SubmitPayoutBatch(PayoutBatch batch) {
             try {
                 batch.Token = GetAccessToken(FacadePayroll);
                 batch.Guid = Guid.NewGuid().ToString();
                 var json = JsonConvert.SerializeObject(batch);
-                var response = PostWithSignature("payouts", json);
+                var response = await PostWithSignature("payouts", json);
 
                 // To avoid having to merge instructions in the response with those we sent, we just remove the instructions
                 // we sent and replace with those in the response.
                 batch.Instructions = new List<PayoutInstruction>();
-
-                JsonConvert.PopulateObject(ResponseToJsonString(response), batch, new JsonSerializerSettings {
+                var responseString = await ResponseToJsonString(response);
+                JsonConvert.PopulateObject(responseString, batch, new JsonSerializerSettings {
                     NullValueHandling = NullValueHandling.Ignore
                 });
 
                 // Track the token for this batch
-                CacheToken(batch.Id, batch.Token);
+                await CacheToken(batch.Id, batch.Token);
 
                 return batch;
             } catch (Exception ex) {
@@ -295,12 +313,13 @@ namespace BitPayAPI {
         /// Retrieve a collection of BitPay payout batches.
         /// </summary>
         /// <returns>A list of BitPay PayoutBatch objects.</returns>
-        public List<PayoutBatch> GetPayoutBatches() {
+        public async Task<List<PayoutBatch>> GetPayoutBatches() {
             try {
-                var parameters = GetParams();
+                var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(FacadePayroll));
-                var response = Get("payouts", parameters);
-                return JsonConvert.DeserializeObject<List<PayoutBatch>>(ResponseToJsonString(response),
+                var response = await Get("payouts", parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<List<PayoutBatch>>(responseString,
                     new JsonSerializerSettings {
                         NullValueHandling = NullValueHandling.Ignore
                     });
@@ -318,7 +337,7 @@ namespace BitPayAPI {
         /// </summary>
         /// <param name="batchId">The id of the batch to retrieve.</param>
         /// <returns>A BitPay PayoutBatch object.</returns>
-        public PayoutBatch GetPayoutBatch(string batchId) {
+        public async Task<PayoutBatch> GetPayoutBatch(string batchId) {
             try {
                 Dictionary<string, string> parameters;
                 try {
@@ -328,8 +347,9 @@ namespace BitPayAPI {
                     parameters = null;
                 }
 
-                var response = Get("payouts/" + batchId, parameters);
-                return JsonConvert.DeserializeObject<PayoutBatch>(ResponseToJsonString(response),
+                var response = await Get("payouts/" + batchId, parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<PayoutBatch>(responseString,
                     new JsonSerializerSettings {
                         NullValueHandling = NullValueHandling.Ignore
                     });
@@ -347,9 +367,9 @@ namespace BitPayAPI {
         /// </summary>
         /// <param name="batchId">The id of the batch to cancel.</param>
         /// <returns> A BitPay generated PayoutBatch object.</returns>
-        public PayoutBatch CancelPayoutBatch(string batchId) {
+        public async Task<PayoutBatch> CancelPayoutBatch(string batchId) {
             try {
-                var b = GetPayoutBatch(batchId);
+                var b = await GetPayoutBatch(batchId);
 
                 Dictionary<string, string> parameters;
                 try {
@@ -359,8 +379,9 @@ namespace BitPayAPI {
                     parameters = null;
                 }
 
-                var response = Delete("payouts/" + batchId, parameters);
-                return JsonConvert.DeserializeObject<PayoutBatch>(ResponseToJsonString(response),
+                var response = await Delete("payouts/" + batchId, parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<PayoutBatch>(responseString,
                     new JsonSerializerSettings {
                         NullValueHandling = NullValueHandling.Ignore
                     });
@@ -383,7 +404,7 @@ namespace BitPayAPI {
         /// <param name="limit">Maximum number of settlements to retrieve.</param>
         /// <param name="offset">Offset for paging</param>
         /// <returns>A list of BitPay Settlement objects</returns>
-        public List<Settlement> GetSettlements(string currency, DateTime dateStart, DateTime dateEnd,
+        public async Task<List<Settlement>> GetSettlements(string currency, DateTime dateStart, DateTime dateEnd,
             string status = "", int limit = 100, int offset = 0) {
             try {
                 var parameters = new Dictionary<string, string> {
@@ -396,8 +417,9 @@ namespace BitPayAPI {
                     {"offset", $"{offset}"}
                 };
 
-                var response = Get("settlements", parameters);
-                return JsonConvert.DeserializeObject<List<Settlement>>(ResponseToJsonString(response));
+                var response = await Get("settlements", parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<List<Settlement>>(responseString);
             } catch (Exception ex) {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException))) {
                     throw new SettlementException(ex);
@@ -412,14 +434,15 @@ namespace BitPayAPI {
         /// </summary>
         /// <param name="settlementId">Settlement Id</param>
         /// <returns>A BitPay Settlement object.</returns>
-        public Settlement GetSettlement(string settlementId) {
+        public async Task<Settlement> GetSettlement(string settlementId) {
             try {
                 var parameters = new Dictionary<string, string> {
                     {"token", GetAccessToken(FacadeMerchant)}
                 };
 
-                var response = Get($"settlements/{settlementId}", parameters);
-                return JsonConvert.DeserializeObject<Settlement>(ResponseToJsonString(response));
+                var response = await Get($"settlements/{settlementId}", parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<Settlement>(responseString);
             } catch (Exception ex) {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException))) {
                     throw new SettlementException(ex);
@@ -434,14 +457,15 @@ namespace BitPayAPI {
         /// </summary>
         /// <param name="settlement">Settlement to generate report for.</param>
         /// <returns>A detailed BitPay Settlement object.</returns>
-        public Settlement GetSettlementReconciliationReport(Settlement settlement) {
+        public async Task<Settlement> GetSettlementReconciliationReport(Settlement settlement) {
             try {
                 var parameters = new Dictionary<string, string> {
                     {"token", settlement.Token}
                 };
 
-                var response = Get($"settlements/{settlement.Id}/reconciliationReport", parameters);
-                return JsonConvert.DeserializeObject<Settlement>(ResponseToJsonString(response));
+                var response = await Get($"settlements/{settlement.Id}/reconciliationReport", parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<Settlement>(responseString);
             } catch (Exception ex) {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException))) {
                     throw new SettlementException(ex);
@@ -455,14 +479,14 @@ namespace BitPayAPI {
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        private void Init(string clientName, string envUrl) {
+        private async Task Init(string clientName, string envUrl) {
             try {
                 // IgnoreBadCertificates();
                 _baseUrl = envUrl;
                 _httpClient = new HttpClient {BaseAddress = new Uri(_baseUrl)};
                 NormalizeClientName(clientName);
                 DeriveIdentity();
-                LoadAccessTokens();
+                await LoadAccessTokens();
             } catch (Exception ex) {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException))) {
                     throw new BitPayException(ex);
@@ -472,15 +496,15 @@ namespace BitPayAPI {
             }
         }
 
-        private void InitKeys() {
+        private async Task InitKeys() {
             if (KeyUtils.PrivateKeyExists()) {
-                _ecKey = KeyUtils.LoadEcKey();
+                _ecKey = await KeyUtils.LoadEcKey();
 
                 // TODO: Alternatively, load your private key from a location you specify.
                 //_ecKey = KeyUtils.createEcKeyFromHexStringFile("C:\\Users\\Andy\\Documents\\private-key.txt");
             } else {
                 _ecKey = KeyUtils.CreateEcKey();
-                KeyUtils.SaveEcKey(_ecKey);
+                await KeyUtils.SaveEcKey(_ecKey);
             }
         }
 
@@ -493,12 +517,12 @@ namespace BitPayAPI {
             _tokenCache = new Dictionary<string, string>();
         }
 
-        private void CacheToken(string key, string token) {
+        private async Task CacheToken(string key, string token) {
             _tokenCache.Add(key, token);
-            WriteTokenCache();
+            await WriteTokenCache();
         }
 
-        private void WriteTokenCache() {
+        private async Task WriteTokenCache() {
             try {
                 using (var fs = File.OpenWrite(TokensFile)) {
                     using (var writer = new StreamWriter(fs)) {
@@ -511,7 +535,7 @@ namespace BitPayAPI {
                             toWrite = toWrite.Substring(1);
                         }
 
-                        writer.Write(toWrite);
+                        await writer.WriteAsync(toWrite);
                     }
                 }
             } catch (Exception ex) {
@@ -519,13 +543,13 @@ namespace BitPayAPI {
             }
         }
 
-        private void LoadAccessTokens() {
+        private async Task LoadAccessTokens() {
             try {
                 ClearAccessTokenCache();
                 if (File.Exists(TokensFile)) {
                     using (var fs = File.OpenRead(TokensFile)) {
                         using (var reader = new StreamReader(fs)) {
-                            var tokens = reader.ReadToEnd().Split(char.Parse(";"));
+                            var tokens = (await reader.ReadToEndAsync()).Split(char.Parse(";"));
                             foreach (var tokenPair in tokens) {
                                 var items = tokenPair.Split(char.Parse("="));
                                 if (items.Length == 2 && !"".EndsWith(items[1].Trim())) {
@@ -547,12 +571,12 @@ namespace BitPayAPI {
             return _tokenCache[key];
         }
 
-        private Dictionary<string, string> GetParams() {
+        private Dictionary<string, string> InitParams() {
             var parameters = new Dictionary<string, string>();
             return parameters;
         }
 
-        private HttpResponseMessage Get(string uri, Dictionary<string, string> parameters = null) {
+        private async Task<HttpResponseMessage> Get(string uri, Dictionary<string, string> parameters = null) {
             try {
                 var fullUrl = _baseUrl + uri;
                 _httpClient.DefaultRequestHeaders.Clear();
@@ -570,14 +594,14 @@ namespace BitPayAPI {
                     _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.BytesToHex(_ecKey.PublicKey));
                 }
 
-                var result = _httpClient.GetAsync(fullUrl).Result;
+                var result = await _httpClient.GetAsync(fullUrl);
                 return result;
             } catch (Exception ex) {
                 throw new BitPayApiCommunicationException(ex);
             }
         }
 
-        private HttpResponseMessage Delete(string uri, Dictionary<string, string> parameters = null) {
+        private async Task<HttpResponseMessage> Delete(string uri, Dictionary<string, string> parameters = null) {
             try {
                 var fullUrl = _baseUrl + uri;
                 _httpClient.DefaultRequestHeaders.Clear();
@@ -596,18 +620,18 @@ namespace BitPayAPI {
                     _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.BytesToHex(_ecKey.PublicKey));
                 }
 
-                var result = _httpClient.DeleteAsync(fullUrl).Result;
+                var result = await _httpClient.DeleteAsync(fullUrl);
                 return result;
             } catch (Exception ex) {
                 throw new BitPayApiCommunicationException(ex);
             }
         }
 
-        private HttpResponseMessage PostWithSignature(string uri, string json) {
-            return Post(uri, json, true);
+        private async Task<HttpResponseMessage> PostWithSignature(string uri, string json) {
+            return await Post(uri, json, true);
         }
 
-        private HttpResponseMessage Post(string uri, string json, bool signatureRequired = false) {
+        private async Task<HttpResponseMessage> Post(string uri, string json, bool signatureRequired = false) {
             try {
                 var bodyContent = new StringContent(UnicodeToAscii(json));
                 _httpClient.DefaultRequestHeaders.Clear();
@@ -620,14 +644,14 @@ namespace BitPayAPI {
                     _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.BytesToHex(_ecKey.PublicKey));
                 }
 
-                var result = _httpClient.PostAsync(uri, bodyContent).Result;
+                var result = await _httpClient.PostAsync(uri, bodyContent);
                 return result;
             } catch (Exception ex) {
                 throw new BitPayApiCommunicationException(ex);
             }
         }
 
-        private string ResponseToJsonString(HttpResponseMessage response) {
+        private async Task<string> ResponseToJsonString(HttpResponseMessage response) {
             if (response == null)
                 throw new BitPayApiCommunicationException(new NullReferenceException("Response is null"));
 
@@ -635,7 +659,7 @@ namespace BitPayAPI {
                 // Get the response as a dynamic object for detecting possible error(s) or data object.
                 // An error(s) object raises an exception.
                 // A data object has its content extracted (throw away the data wrapper object).
-                var responseString = response.Content.ReadAsStringAsync().Result;
+                var responseString = await response.Content.ReadAsStringAsync();
                 var obj = Json.Decode(responseString);
 
                 // Check for error response.

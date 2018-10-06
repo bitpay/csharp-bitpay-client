@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using BitPayAPI.Exceptions;
 using Newtonsoft.Json;
 
@@ -201,112 +202,87 @@ namespace BitPayAPI.Models {
         // Response fields
         //
 
+        [JsonIgnore]
         public string Id { get; set; }
 
-        public bool ShouldSerializeId() {
-            return false;
-        }
-
+        [JsonIgnore]
         public string Url { get; set; }
 
-        public bool ShouldSerializeUrl() {
-            return false;
-        }
-
+        [JsonIgnore]
         public string Status { get; set; }
 
-        public bool ShouldSerializeStatus() {
-            return false;
-        }
-
+        [JsonIgnore]
         [Obsolete("To be removed, use PaymentSubtotals")]
         public double BtcPrice { get; set; }
 
-        public bool ShouldSerializeBtcPrice() {
-            return false;
-        }
-
+        [JsonIgnore]
         public long InvoiceTime { get; set; }
 
-        public bool ShouldSerializeInvoiceTime() {
-            return false;
-        }
-
+        [JsonIgnore]
         public long ExpirationTime { get; set; }
 
-        public bool ShouldSerializeExpirationTime() {
-            return false;
-        }
-
+        [JsonIgnore]
         public long CurrentTime { get; set; }
 
-        public bool ShouldSerializeCurrentTime() {
-            return false;
-        }
-
+        [JsonIgnore]
         [Obsolete("To be removed, use AmountPaid")]
         public double BtcPaid { get; set; }
 
-        public bool ShouldSerializeBtcPaid() {
-            return false;
-        }
-
+        [JsonIgnore]
         [Obsolete("To be removed, use PaymentTotals")]
         public double BtcDue { get; set; }
 
-        public bool ShouldSerializeBtcDue() {
-            return false;
-        }
-
+        [JsonIgnore]
         public List<InvoiceTransaction> Transactions { get; set; }
 
-        public bool ShouldSerializeTransactions() {
-            return false;
-        }
-
+        [JsonIgnore]
         [Obsolete("To be removed, use ExchangeRates")]
         public double Rate { get; set; }
 
-        public bool ShouldSerializeRate() {
-            return false;
-        }
-
+        [JsonIgnore]
         [Obsolete("To be removed, use ExchangeRates")]
         public Dictionary<string, string> ExRates { get; set; }
 
-        public bool ShouldSerializeExRates() {
-            return false;
-        }
-
+        [JsonIgnore]
         public string ExceptionStatus { get; set; }
 
-        public bool ShouldSerializeExceptionStatus() {
-            return false;
-        }
-
+        [JsonIgnore]
         [Obsolete("To be removed, use PaymentCodes")]
         public InvoicePaymentUrls PaymentUrls { get; set; }
 
-        public bool ShouldSerializePaymentUrls() {
-            return false;
-        }
-
+        [JsonIgnore]
         [Obsolete("To be removed")]
         public bool Refundable => Flags.Refundable;
 
-        public bool ShouldSerializeRefundable() {
-            return false;
-        }
-
+        [JsonIgnore]
         [JsonProperty]
-        private Flags Flags { get; set; }
+        private InvoiceFlags Flags { get; set; }
 
-        public bool ShouldSerializeFlags() {
-            return false;
-        }
+        [JsonIgnore]
+        public string TransactionCurrency { get; set; }
+
+        [JsonIgnore]
+        public SupportedTransactionsCurrencies SupportedTransactionsCurrencies { get; set; }
+
+        [JsonIgnore]
+        public MinerFees MinerFees { get; set; }
+
+        [JsonIgnore]
+        public PaymentCodes PaymentCodes { get; set; }
+
+        [JsonIgnore]
+        public PaymentTotal PaymentSubtotals { get; set; }
+
+        [JsonIgnore]
+        public PaymentTotal PaymentTotals { get; set; }
+
+        [JsonIgnore]
+        public double AmountPaid { get; set; }
+
+        [JsonIgnore]
+        public ExchangeRates ExchangeRates { get; set; }
+
+
     }
 
-    internal class Flags {
-        public bool Refundable { get; set; }
-    }
 }

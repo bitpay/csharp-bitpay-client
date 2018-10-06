@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using BitPayAPI.Models;
 
 namespace BitPayTest {
@@ -17,7 +18,7 @@ namespace BitPayTest {
         private static readonly string BitpayTestUrl = "https://test.bitpay.com/";
 
         [TestInitialize]
-        public void Init() {
+        public async Task Init() {
             // This scenario qualifies that this (test) client does not have merchant facade access.
             _bitpay = new BitPay(ClientName, BitpayTestUrl);
 
@@ -26,62 +27,63 @@ namespace BitPayTest {
                 // Obtain a pairingCode from your BitPay account administrator.  When the pairingCode
                 // is created by your administrator it is assigned a facade.  To generate invoices a
                 // POS facade is required.
-                _bitpay.AuthorizeClient(PairingCode);
+                await _bitpay.AuthorizeClient(PairingCode);
             }
         }
 
         [TestMethod]
-        public void TestShouldGetInvoiceId() {
+        public async Task TestShouldGetInvoiceId() {
             var invoice = new Invoice(50.0, "USD");
-            _basicInvoice = _bitpay.CreateInvoice(invoice);
+            _basicInvoice = await _bitpay.CreateInvoice(invoice);
             Assert.IsNotNull(_basicInvoice.Id, "Invoice created with id=NULL");
         }
 
         [TestMethod]
-        public void TestShouldGetInvoiceUrl() {
-            _basicInvoice = _bitpay.CreateInvoice(new Invoice(10.0, "USD"));
+        public async Task TestShouldGetInvoiceUrl() {
+            _basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, "USD"));
             Assert.IsNotNull(_basicInvoice.Url, "Invoice created with url=NULL");
         }
 
         [TestMethod]
-        public void TestShouldGetInvoiceStatus() {
-            _basicInvoice = _bitpay.CreateInvoice(new Invoice(10.0, "USD"));
+        public async Task TestShouldGetInvoiceStatus() {
+            _basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, "USD"));
             Assert.AreEqual(Invoice.StatusNew, _basicInvoice.Status, "Status is incorrect");
         }
 
         [TestMethod]
-        public void TestShouldGetInvoiceBtcPrice() {
-            _basicInvoice = _bitpay.CreateInvoice(new Invoice(10.0, "USD"));
-            Assert.IsNotNull(_basicInvoice.BtcPrice, "Invoice created with btcPrice=NULL");
+        public async Task TestShouldGetInvoiceBtcPrice() {
+            _basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, "USD"));
+            Assert.IsNotNull(_basicInvoice.PaymentSubtotals.Btc, "Invoice created with PaymentSubtotals.Btc=NULL");
+            Assert.IsNotNull(_basicInvoice.PaymentSubtotals.Bch, "Invoice created with PaymentSubtotals.Bch=NULL");
         }
 
         [TestMethod]
-        public void TestShouldCreateInvoiceOneTenthBtc() {
-            var invoice = _bitpay.CreateInvoice(new Invoice(0.1, "BTC"));
+        public async Task TestShouldCreateInvoiceOneTenthBtc() {
+            var invoice = await _bitpay.CreateInvoice(new Invoice(0.1, "BTC"));
             Assert.AreEqual(0.1, invoice.Price, 0.0000001, "Invoice not created correctly: 0.1BTC");
         }
 
         [TestMethod]
-        public void TestShouldCreateInvoice100Usd() {
-            var invoice = _bitpay.CreateInvoice(new Invoice(100.0, "USD"));
+        public async Task TestShouldCreateInvoice100Usd() {
+            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, "USD"));
             Assert.AreEqual(100.0, invoice.Price, "Invoice not created correctly: 100USD");
         }
 
         [TestMethod]
-        public void TestShouldCreateInvoice100Eur() {
-            var invoice = _bitpay.CreateInvoice(new Invoice(100.0, "EUR"));
+        public async Task TestShouldCreateInvoice100Eur() {
+            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, "EUR"));
             Assert.AreEqual(100.0, invoice.Price, "Invoice not created correctly: 100EUR");
         }
 
         [TestMethod]
-        public void TestShouldGetInvoice() {
-            var invoice = _bitpay.CreateInvoice(new Invoice(100.0, "EUR"));
+        public async Task TestShouldGetInvoice() {
+            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, "EUR"));
             var retrievedInvoice = _bitpay.GetInvoice(invoice.Id);
             Assert.AreEqual(invoice.Id, retrievedInvoice.Id, "Expected invoice not retrieved");
         }
 
         [TestMethod]
-        public void TestShouldCreateInvoiceWithAdditionalParams() {
+        public async Task TestShouldCreateInvoiceWithAdditionalParams() {
             var invoice = new Invoice(100.0, "USD")
             {
                 BuyerName = "Satoshi",
@@ -90,7 +92,7 @@ namespace BitPayTest {
                 NotificationEmail = "satoshi@bitpay.com",
                 PosData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
             };
-            invoice = _bitpay.CreateInvoice(invoice);
+            invoice = await _bitpay.CreateInvoice(invoice);
             Assert.AreEqual(Invoice.StatusNew, invoice.Status, "Status is incorrect");
             Assert.AreEqual("Satoshi", invoice.BuyerName, "BuyerName is incorrect");
             Assert.AreEqual("satoshi@bitpay.com", invoice.BuyerEmail, "BuyerEmail is incorrect");
@@ -100,64 +102,64 @@ namespace BitPayTest {
         }
 
         [TestMethod]
-        public void TestShouldGetExchangeRates() {
-            var rates = _bitpay.GetRates();
+        public async Task TestShouldGetExchangeRates() {
+            var rates = await _bitpay.GetRates();
             Assert.IsNotNull(rates.GetRates(), "Exchange rates not retrieved");
         }
 
         [TestMethod]
-        public void TestShouldGetUsdExchangeRate() {
-            var rates = _bitpay.GetRates();
+        public async Task TestShouldGetUsdExchangeRate() {
+            var rates = await _bitpay.GetRates();
             Assert.IsTrue(rates.GetRate("USD") != 0, "Exchange rate not retrieved: USD");
         }
 
         [TestMethod]
-        public void TestShouldGetEurExchangeRate() {
-            var rates = _bitpay.GetRates();
+        public async Task TestShouldGetEurExchangeRate() {
+            var rates = await _bitpay.GetRates();
             Assert.IsTrue(rates.GetRate("EUR") != 0, "Exchange rate not retrieved: EUR");
         }
 
         [TestMethod]
-        public void TestShouldGetCnyExchangeRate() {
-            var rates = _bitpay.GetRates();
+        public async Task TestShouldGetCnyExchangeRate() {
+            var rates = await _bitpay.GetRates();
             Assert.IsTrue(rates.GetRate("CNY") != 0, "Exchange rate not retrieved: CNY");
         }
 
         [TestMethod]
-        public void TestShouldUpdateExchangeRates() {
-            var rates = _bitpay.GetRates();
-            rates.Update();
+        public async Task TestShouldUpdateExchangeRates() {
+            var rates = await _bitpay.GetRates();
+            await rates.Update();
             Assert.IsNotNull(rates.GetRates(), "Exchange rates not retrieved after update");
         }
 
         [TestMethod]
-        public void TestShouldGetInvoiceIdOne() {
+        public async Task TestShouldGetInvoiceIdOne() {
 
-            var invoice = _bitpay.CreateInvoice(new Invoice(1.0, "USD"), BitPay.FacadeMerchant);
-            invoice = _bitpay.GetInvoice(invoice.Id, BitPay.FacadeMerchant);
+            var invoice = await _bitpay.CreateInvoice(new Invoice(1.0, "USD"), BitPay.FacadeMerchant);
+            invoice = await _bitpay.GetInvoice(invoice.Id);
             Assert.IsNotNull(invoice.Id, "Invoice created with id=NULL");
         }
 
         [TestMethod]
-        public void TestShouldGetInvoices() {
-            var invoices = _bitpay.GetInvoices(new DateTime(2014, 8, 1), new DateTime(2014, 8, 31));
+        public async Task TestShouldGetInvoices() {
+            var invoices = await _bitpay.GetInvoices(new DateTime(2014, 8, 1), new DateTime(2014, 8, 31));
             Assert.IsTrue(invoices.Count > 0, "No invoices retrieved");
         }
 
         [TestMethod]
-        public void TestShouldGetBtcLedger() {
-            var ledger = _bitpay.GetLedger(Ledger.LedgerBtc, new DateTime(2014, 8, 1), new DateTime(2014, 8, 31));
+        public async Task TestShouldGetBtcLedger() {
+            var ledger = await _bitpay.GetLedger(Ledger.LedgerBtc, new DateTime(2014, 8, 1), new DateTime(2014, 8, 31));
             Assert.IsTrue(ledger.Entries.Count > 0, "Ledger is empty");
         }
 
         [TestMethod]
-        public void TestShouldGetUsdLedger() {
-            var ledger = _bitpay.GetLedger(Ledger.LedgerUsd, new DateTime(2014, 1, 1), new DateTime(2014, 1, 31));
+        public async Task TestShouldGetUsdLedger() {
+            var ledger = await _bitpay.GetLedger(Ledger.LedgerUsd, new DateTime(2014, 1, 1), new DateTime(2014, 1, 31));
             Assert.IsTrue(ledger.Entries.Count > 0, "Ledger is empty");
         }
 
         [TestMethod]
-        public void TestShouldSubmitPayoutBatch() {
+        public async Task TestShouldSubmitPayoutBatch() {
             var date = DateTime.Now;
             var threeDaysFromNow = date.AddDays(3);
 
@@ -171,14 +173,14 @@ namespace BitPayTest {
             };
 
             var batch = new PayoutBatch(currency, effectiveDate, bankTransferId, reference, instructions);
-            batch = _bitpay.SubmitPayoutBatch(batch);
+            batch = await _bitpay.SubmitPayoutBatch(batch);
 
             Assert.IsNotNull(batch.Id, "Batch created with id=NULL");
             Assert.IsTrue(batch.Instructions.Count == 2);
         }
 
         [TestMethod]
-        public void TestShouldSubmitGetAndDeletePayoutBatch() {
+        public async Task TestShouldSubmitGetAndDeletePayoutBatch() {
             var date = DateTime.Now;
             var threeDaysFromNow = date.AddDays(3);
 
@@ -192,18 +194,19 @@ namespace BitPayTest {
             };
 
             var batch0 = new PayoutBatch(currency, effectiveDate, bankTransferId, reference, instructions);
-            batch0 = _bitpay.SubmitPayoutBatch(batch0);
+            batch0 = await _bitpay.SubmitPayoutBatch(batch0);
 
             Assert.IsNotNull(batch0.Id, "Batch (0) created with id=NULL");
             Assert.IsTrue(batch0.Instructions.Count == 2);
 
-            var batch1 = _bitpay.GetPayoutBatch(batch0.Id);
+            var batch1 = await _bitpay.GetPayoutBatch(batch0.Id);
 
             Assert.IsNotNull(batch1.Id, "Batch (1) created with id=NULL");
             Assert.IsTrue(batch1.Instructions.Count == 2);
 
-            _bitpay.CancelPayoutBatch(batch0.Id);
+            await _bitpay.CancelPayoutBatch(batch0.Id);
 
         }
+
     }
 }

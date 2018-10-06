@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace BitPayAPI.Models
@@ -25,9 +26,6 @@ namespace BitPayAPI.Models
         [JsonProperty(PropertyName = "sale")]
         public string Sale { get; set; }
 
-        [JsonProperty(PropertyName = "exRates")]
-        public Dictionary<string, string> ExRates { get; set; }
-
         [JsonProperty(PropertyName = "buyer")]
         public Buyer Buyer { get; set; }
 
@@ -45,5 +43,8 @@ namespace BitPayAPI.Models
 
         [JsonProperty(PropertyName = "invoiceCurrency")]
         public string InvoiceCurrency { get; set; }
+
+        [JsonProperty(PropertyName = "transactionCurrency")]
+        public string TransactionCurrency { get; set; }
     }
 }
