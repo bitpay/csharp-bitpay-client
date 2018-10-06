@@ -18,7 +18,7 @@ namespace BitPayTest {
         private static readonly string BitpayTestUrl = "https://test.bitpay.com/";
 
         [TestInitialize]
-        public async Task Init() {
+        public async void Init() {
             // This scenario qualifies that this (test) client does not have merchant facade access.
             _bitpay = new BitPay(ClientName, BitpayTestUrl);
 
@@ -78,7 +78,7 @@ namespace BitPayTest {
         [TestMethod]
         public async Task TestShouldGetInvoice() {
             var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, "EUR"));
-            var retrievedInvoice = _bitpay.GetInvoice(invoice.Id);
+            var retrievedInvoice = await _bitpay.GetInvoice(invoice.Id);
             Assert.AreEqual(invoice.Id, retrievedInvoice.Id, "Expected invoice not retrieved");
         }
 

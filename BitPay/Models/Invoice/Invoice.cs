@@ -202,87 +202,125 @@ namespace BitPayAPI.Models {
         // Response fields
         //
 
-        [JsonIgnore]
         public string Id { get; set; }
 
-        [JsonIgnore]
         public string Url { get; set; }
 
-        [JsonIgnore]
         public string Status { get; set; }
 
-        [JsonIgnore]
         [Obsolete("To be removed, use PaymentSubtotals")]
         public double BtcPrice { get; set; }
 
-        [JsonIgnore]
         public long InvoiceTime { get; set; }
 
-        [JsonIgnore]
         public long ExpirationTime { get; set; }
 
-        [JsonIgnore]
         public long CurrentTime { get; set; }
 
-        [JsonIgnore]
         [Obsolete("To be removed, use AmountPaid")]
         public double BtcPaid { get; set; }
 
-        [JsonIgnore]
         [Obsolete("To be removed, use PaymentTotals")]
         public double BtcDue { get; set; }
 
-        [JsonIgnore]
         public List<InvoiceTransaction> Transactions { get; set; }
 
-        [JsonIgnore]
         [Obsolete("To be removed, use ExchangeRates")]
         public double Rate { get; set; }
 
-        [JsonIgnore]
         [Obsolete("To be removed, use ExchangeRates")]
         public Dictionary<string, string> ExRates { get; set; }
 
-        [JsonIgnore]
         public string ExceptionStatus { get; set; }
 
-        [JsonIgnore]
         [Obsolete("To be removed, use PaymentCodes")]
         public InvoicePaymentUrls PaymentUrls { get; set; }
 
-        [JsonIgnore]
         [Obsolete("To be removed")]
         public bool Refundable => Flags.Refundable;
 
-        [JsonIgnore]
         [JsonProperty]
-        private InvoiceFlags Flags { get; set; }
+        private InvoiceFlags Flags { get; set; } = new InvoiceFlags();
 
-        [JsonIgnore]
         public string TransactionCurrency { get; set; }
 
-        [JsonIgnore]
         public SupportedTransactionsCurrencies SupportedTransactionsCurrencies { get; set; }
 
-        [JsonIgnore]
         public MinerFees MinerFees { get; set; }
 
-        [JsonIgnore]
         public PaymentCodes PaymentCodes { get; set; }
 
-        [JsonIgnore]
         public PaymentTotal PaymentSubtotals { get; set; }
 
-        [JsonIgnore]
         public PaymentTotal PaymentTotals { get; set; }
 
-        [JsonIgnore]
         public double AmountPaid { get; set; }
 
-        [JsonIgnore]
         public ExchangeRates ExchangeRates { get; set; }
 
+        public bool ShouldSerializeId() {
+            return false;
+        }
 
+        public bool ShouldSerializeUrl() {
+            return false;
+        }
+
+        public bool ShouldSerializeStatus() {
+            return false;
+        }
+
+        public bool ShouldSerializeBtcPrice() {
+            return false;
+        }
+
+        public bool ShouldSerializeInvoiceTime() {
+            return false;
+        }
+
+        public bool ShouldSerializeExpirationTime() {
+            return false;
+        }
+
+        public bool ShouldSerializeCurrentTime() {
+            return false;
+        }
+
+        public bool ShouldSerializeBtcPaid() {
+            return false;
+        }
+
+        public bool ShouldSerializeBtcDue() {
+            return false;
+        }
+
+        public bool ShouldSerializeTransactions() {
+            return false;
+        }
+
+        public bool ShouldSerializeRate() {
+            return false;
+        }
+
+        public bool ShouldSerializeExRates() {
+            return false;
+        }
+
+        public bool ShouldSerializeExceptionStatus() {
+            return false;
+        }
+
+        public bool ShouldSerializePaymentUrls() {
+            return false;
+        }
+
+        public bool ShouldSerializeRefundable() {
+            return false;
+        }
+
+        public bool ShouldSerializeFlags() {
+            return false;
+        }
     }
 
 }
