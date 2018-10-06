@@ -1,4 +1,4 @@
-﻿namespace BitPayAPI.Models
+﻿namespace BitPayAPI.Models.Invoice
 {
     /// <summary>
     /// Invoice payment URLs identified by BIP format.

@@ -235,10 +235,10 @@
     <Compile Include="Exceptions\TokenRegistrationException.cs" />
     <Compile Include="Exceptions\TokensCacheLoadException.cs" />
     <Compile Include="Exceptions\TokensCacheWriteException.cs" />
-    <Compile Include="Models\ExchangeRate.cs" />
-    <Compile Include="Models\ExchangeRateBch.cs" />
-    <Compile Include="Models\ExchangeRateBtc.cs" />
-    <Compile Include="Models\ExchangeRates.cs" />
+    <Compile Include="Models\Invoice\ExchangeRate.cs" />
+    <Compile Include="Models\Invoice\ExchangeRateBch.cs" />
+    <Compile Include="Models\Invoice\ExchangeRateBtc.cs" />
+    <Compile Include="Models\Invoice\ExchangeRates.cs" />
     <Compile Include="Models\InvoiceData.cs" />
     <Compile Include="Models\Invoice\InvoiceFlags.cs" />
     <Compile Include="Models\Invoice\MinerFees.cs" />

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Web.Helpers;
 using BitPayAPI.Exceptions;
 using BitPayAPI.Models;
+using BitPayAPI.Models.Invoice;
 
 /**
  * @author Andy Phillipson

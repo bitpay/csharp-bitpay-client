@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BitPayAPI.Models;
+using BitPayAPI.Models.Invoice;
 
 namespace BitPayTest {
 

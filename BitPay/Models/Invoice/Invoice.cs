@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using BitPayAPI.Exceptions;
 using Newtonsoft.Json;
 
-namespace BitPayAPI.Models {
+namespace BitPayAPI.Models.Invoice {
     public class Invoice {
         public const string StatusNew = "new";
         public const string StatusPaid = "paid";
