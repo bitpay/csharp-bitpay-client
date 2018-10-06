@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BitPayAPI
+namespace BitPayAPI.Models
 {
     /// <summary>
     /// Provides an interface to the BitPay server to obtain exchange rate information.

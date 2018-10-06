@@ -216,33 +216,47 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions\BatchException.cs" />
     <Compile Include="BitPay.cs" />
-    <Compile Include="BitPayException.cs" />
-    <Compile Include="Buyer.cs" />
+    <Compile Include="Exceptions\BitPayApiCommunicationException.cs" />
+    <Compile Include="Exceptions\BitPayException.cs" />
+    <Compile Include="Models\Buyer.cs" />
     <Compile Include="Converters.cs" />
     <Compile Include="EcKey.cs" />
-    <Compile Include="InvoiceData.cs" />
-    <Compile Include="PayoutInfo.cs" />
-    <Compile Include="PayoutInstructionTransaction.cs" />
-    <Compile Include="PayoutInstructionBtcSummary.cs" />
-    <Compile Include="PayoutInstruction.cs" />
-    <Compile Include="PayoutBatch.cs" />
-    <Compile Include="Invoice.cs" />
-    <Compile Include="InvoicePaymentUrls.cs" />
-    <Compile Include="InvoiceTransaction.cs" />
-    <Compile Include="Ledger.cs" />
-    <Compile Include="LedgerEntry.cs" />
-    <Compile Include="Policy.cs" />
+    <Compile Include="Exceptions\ClientAuthorizationException.cs" />
+    <Compile Include="Exceptions\InvoiceCreationException.cs" />
+    <Compile Include="Exceptions\InvoiceException.cs" />
+    <Compile Include="Exceptions\InvoiceQueryException.cs" />
+    <Compile Include="Exceptions\LedgerQueryException.cs" />
+    <Compile Include="Exceptions\RatesQueryException.cs" />
+    <Compile Include="Exceptions\SettlementException.cs" />
+    <Compile Include="Exceptions\TokenNotFoundException.cs" />
+    <Compile Include="Exceptions\TokensCacheException.cs" />
+    <Compile Include="Exceptions\TokenRegistrationException.cs" />
+    <Compile Include="Exceptions\TokensCacheLoadException.cs" />
+    <Compile Include="Exceptions\TokensCacheWriteException.cs" />
+    <Compile Include="Models\InvoiceData.cs" />
+    <Compile Include="Models\PayoutInfo.cs" />
+    <Compile Include="Models\PayoutInstructionTransaction.cs" />
+    <Compile Include="Models\PayoutInstructionBtcSummary.cs" />
+    <Compile Include="Models\PayoutInstruction.cs" />
+    <Compile Include="Models\PayoutBatch.cs" />
+    <Compile Include="Models\Invoice.cs" />
+    <Compile Include="Models\InvoicePaymentUrls.cs" />
+    <Compile Include="Models\InvoiceTransaction.cs" />
+    <Compile Include="Models\Ledger.cs" />
+    <Compile Include="Models\LedgerEntry.cs" />
+    <Compile Include="Models\Policy.cs" />
     <Compile Include="KeyUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Rate.cs" />
-    <Compile Include="Rates.cs" />
-    <Compile Include="RefundAmount.cs" />
-    <Compile Include="RefundInfo.cs" />
-    <Compile Include="Settlement.cs" />
-    <Compile Include="SettlementLedgerEntry.cs" />
-    <Compile Include="Token.cs" />
-    <Compile Include="WithHoldings.cs" />
+    <Compile Include="Models\Rate.cs" />
+    <Compile Include="Models\Rates.cs" />
+    <Compile Include="Models\RefundAmount.cs" />
+    <Compile Include="Models\RefundInfo.cs" />
+    <Compile Include="Models\Settlement.cs" />
+    <Compile Include="Models\SettlementLedgerEntry.cs" />
+    <Compile Include="Models\Token.cs" />
+    <Compile Include="Models\WithHoldings.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
@@ -253,6 +267,7 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

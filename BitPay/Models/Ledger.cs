@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BitPayAPI
+namespace BitPayAPI.Models
 {
     public class Ledger
     {

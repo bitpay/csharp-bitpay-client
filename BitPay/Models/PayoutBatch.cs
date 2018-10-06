@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using BitPayAPI.Exceptions;
+using Newtonsoft.Json;
 
-namespace BitPayAPI
+namespace BitPayAPI.Models
 {
     public class PayoutBatch
     {

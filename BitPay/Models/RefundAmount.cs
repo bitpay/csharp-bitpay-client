@@ -1,4 +1,4 @@
-﻿namespace BitPayAPI
+﻿namespace BitPayAPI.Models
 {
     public class RefundAmount
     {

@@ -41,24 +41,18 @@ namespace BitPayAPI {
         }
 
         public static string GetKeyStringFromFile(string filename) {
-            StreamReader sr;
-            try {
-                sr = new StreamReader(filename);
+            using (var sr = new StreamReader(filename)) {
                 var line = sr.ReadToEnd();
                 sr.Close();
                 return line;
-            } catch (IOException e) {
-                Console.Write(e.Message);
             }
-
-            return "";
         }
 
         public static void SaveEcKey(EcKey ecKey) {
             var bytes = ecKey.ToAsn1();
-            var fs = new FileStream(PrivateKeyFilename, FileMode.Create, FileAccess.Write);
-            fs.Write(bytes, 0, bytes.Length);
-            fs.Close();
+            using (var fs = new FileStream(PrivateKeyFilename, FileMode.Create, FileAccess.Write)) {
+                fs.Write(bytes, 0, bytes.Length);
+            }
         }
 
         public static string DeriveSin(EcKey ecKey) {

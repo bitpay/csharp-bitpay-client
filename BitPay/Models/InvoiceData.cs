@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BitPayAPI
+namespace BitPayAPI.Models
 {
     public class InvoiceData
     {

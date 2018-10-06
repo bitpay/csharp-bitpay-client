@@ -1,7 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using System;
 using System.Collections.Generic;
+using BitPayAPI.Exceptions;
+using Newtonsoft.Json;
 
-namespace BitPayAPI {
+namespace BitPayAPI.Models {
     public class Invoice {
         public const string StatusNew = "new";
         public const string StatusPaid = "paid";
@@ -217,6 +219,7 @@ namespace BitPayAPI {
             return false;
         }
 
+        [Obsolete("To be removed, use PaymentSubtotals")]
         public double BtcPrice { get; set; }
 
         public bool ShouldSerializeBtcPrice() {
@@ -241,12 +244,14 @@ namespace BitPayAPI {
             return false;
         }
 
+        [Obsolete("To be removed, use AmountPaid")]
         public double BtcPaid { get; set; }
 
         public bool ShouldSerializeBtcPaid() {
             return false;
         }
 
+        [Obsolete("To be removed, use PaymentTotals")]
         public double BtcDue { get; set; }
 
         public bool ShouldSerializeBtcDue() {
@@ -259,12 +264,14 @@ namespace BitPayAPI {
             return false;
         }
 
+        [Obsolete("To be removed, use ExchangeRates")]
         public double Rate { get; set; }
 
         public bool ShouldSerializeRate() {
             return false;
         }
 
+        [Obsolete("To be removed, use ExchangeRates")]
         public Dictionary<string, string> ExRates { get; set; }
 
         public bool ShouldSerializeExRates() {
@@ -277,12 +284,14 @@ namespace BitPayAPI {
             return false;
         }
 
+        [Obsolete("To be removed, use PaymentCodes")]
         public InvoicePaymentUrls PaymentUrls { get; set; }
 
         public bool ShouldSerializePaymentUrls() {
             return false;
         }
 
+        [Obsolete("To be removed")]
         public bool Refundable => Flags.Refundable;
 
         public bool ShouldSerializeRefundable() {
