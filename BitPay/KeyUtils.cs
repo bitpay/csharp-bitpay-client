@@ -133,6 +133,12 @@ namespace BitPayAPI {
             return algorithm.ComputeHash(first);
         }
 
+        /// <summary>
+        /// Signs the input string with the provided key
+        /// </summary>
+        /// <param name="ecKey">The key object to sign with</param>
+        /// <param name="input">The string to be signed</param>
+        /// <returns>The signature</returns>
         public static string Sign(EcKey ecKey, string input) {
             // return ecKey.Sign(input);
             var hash = Sha256Hash(input);

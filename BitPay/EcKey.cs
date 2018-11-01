@@ -121,6 +121,11 @@ namespace BitPayAPI {
         /// </summary>
         public byte[] PubKeyHash => _pubKeyHash ?? (_pubKeyHash = Sha256Hash160(_publicKey));
 
+        /// <summary>
+        /// Gets the hash160 form of the input array
+        /// </summary>
+        /// <param name="input">The array to hash</param>
+        /// <returns>The hash160 hash</returns>
         public static byte[] Sha256Hash160(byte[] input) {
             var sha256 = new SHA256Managed().ComputeHash(input);
             var digest = new RipeMD160Digest();
@@ -151,7 +156,8 @@ namespace BitPayAPI {
         public override string ToString() {
             var b = new StringBuilder();
             b.Append("pub:").Append(BytesToHexString(_publicKey));
-            b.Append(" priv:").Append(BytesToHexString(_privateKey.ToByteArray()));
+            // maybe we don't want to show the private key wherever we call this method from...
+            //b.Append(" priv:").Append(BytesToHexString(_privateKey.ToByteArray()));
             return b.ToString();
         }
 

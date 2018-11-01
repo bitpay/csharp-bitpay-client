@@ -17,13 +17,14 @@ using BitPayAPI.Models.Invoice;
 /**
  * @author Andy Phillipson
  * @date 9.3.2014
- * 
+ *
  * See bitpay.com/api for more information.
  */
 
 namespace BitPayAPI {
 
     public class BitPay {
+
         private const string BitpayApiVersion = "2.0.0";
         private const string BitpayPluginInfo = "BitPay CSharp Client " + BitpayApiVersion;
         private const string BitpayUrl = "https://bitpay.com/";
@@ -61,19 +62,18 @@ namespace BitPayAPI {
             Init(clientName, envUrl).Wait();
         }
 
+        //public async Task Initialize(string clientName = BitpayPluginInfo, string envUrl = BitpayUrl) {
+        //    await InitKeys();
+        //    await Init(clientName, envUrl);
+        //}
 
-        public async Task Initialize(string clientName = BitpayPluginInfo, string envUrl = BitpayUrl) {
-            await InitKeys();
-            await Init(clientName, envUrl);
-        }
-
-        public async Task Initlialize(EcKey ecKey, string clientName = BitpayPluginInfo, string envUrl = BitpayUrl) {
-            _ecKey = ecKey;
-            await Init(clientName, envUrl);
-        }
+        //public async Task Initlialize(EcKey ecKey, string clientName = BitpayPluginInfo, string envUrl = BitpayUrl) {
+        //    _ecKey = ecKey;
+        //    await Init(clientName, envUrl);
+        //}
 
         /// <summary>
-        /// Return the identity of this client.
+        /// Return the identity of this client (i.e. the public key).
         /// </summary>
         public string Identity { get; private set; }
 
@@ -106,14 +106,13 @@ namespace BitPayAPI {
         /// Request authorization (a token) for this client in the specified facade.
         /// </summary>
         /// <param name="facade">The facade for which authorization is requested.</param>
-        /// <returns>A pairing code for this client.  This code must be used to authorize this client at BitPay.com/api-tokens.</returns>
+        /// <returns>A pairing code for this client. This code must be used to authorize this client at BitPay.com/api-tokens.</returns>
         public async Task<string> RequestClientAuthorization(string facade) {
             try {
                 var token = new Token {
                     Id = Identity,
                     Guid = Guid.NewGuid().ToString(),
                     Facade = facade,
-                    Count = 1,
                     Label = _clientName
                 };
                 var json = JsonConvert.SerializeObject(token);
@@ -216,10 +215,11 @@ namespace BitPayAPI {
         /// <returns>A list of invoice objects retrieved from the server.</returns>
         public async Task<List<Invoice>> GetInvoices(DateTime dateStart, DateTime dateEnd) {
             try {
+                // UTC date, ISO-8601 format yyyy-mm-dd or yyyy-mm-ddThh:mm:ssZ. Default is current time.
                 var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(FacadeMerchant));
-                parameters.Add("dateStart", dateStart.ToShortDateString());
-                parameters.Add("dateEnd", dateEnd.ToShortDateString());
+                parameters.Add("dateStart", dateStart.ToString("yyyy-MM-dd"));
+                parameters.Add("dateEnd", dateEnd.ToString("yyyy-MM-dd"));
                 var response = await Get("invoices", parameters);
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<List<Invoice>>(responseString);
@@ -262,8 +262,8 @@ namespace BitPayAPI {
             try {
                 var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(FacadeMerchant));
-                parameters.Add("startDate", "" + dateStart.ToShortDateString());
-                parameters.Add("endDate", "" + dateEnd.ToShortDateString());
+                parameters.Add("startDate", "" + dateStart.ToString("yyyy-MM-dd"));
+                parameters.Add("endDate", "" + dateEnd.ToString("yyyy-MM-dd"));
                 var response = await Get("ledgers/" + currency, parameters);
                 var responseString = await ResponseToJsonString(response);
                 var entries = JsonConvert.DeserializeObject<List<LedgerEntry>>(responseString);
@@ -410,8 +410,8 @@ namespace BitPayAPI {
             try {
                 var parameters = new Dictionary<string, string> {
                     {"token", GetAccessToken(FacadeMerchant)},
-                    {"startDate", $"{dateStart.ToShortDateString()}"},
-                    {"endDate", $"{dateEnd.ToShortDateString()}"},
+                    {"startDate", $"{dateStart.ToString("yyyy-MM-dd")}"},
+                    {"endDate", $"{dateEnd.ToString("yyyy-MM-dd")}"},
                     {"currency", currency},
                     {"status", status},
                     {"limit", $"{limit}"},
@@ -480,6 +480,12 @@ namespace BitPayAPI {
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// Initialize this object with the client name and the environment Url
+        /// </summary>
+        /// <param name="clientName">The client name</param>
+        /// <param name="envUrl">THe environment Url</param>
+        /// <returns></returns>
         private async Task Init(string clientName, string envUrl) {
             try {
                 // IgnoreBadCertificates();
@@ -497,6 +503,10 @@ namespace BitPayAPI {
             }
         }
 
+        /// <summary>
+        /// Initialize the public/private key pair by either loading the existing one or by creating a new one
+        /// </summary>
+        /// <returns></returns>
         private async Task InitKeys() {
             if (KeyUtils.PrivateKeyExists()) {
                 _ecKey = await KeyUtils.LoadEcKey();
@@ -509,6 +519,9 @@ namespace BitPayAPI {
             }
         }
 
+        /// <summary>
+        /// Set the public key as the Identity of this object
+        /// </summary>
         private void DeriveIdentity() {
             // Identity in this implementation is defined to be the SIN.
             Identity = KeyUtils.DeriveSin(_ecKey);
@@ -518,11 +531,23 @@ namespace BitPayAPI {
             _tokenCache = new Dictionary<string, string>();
         }
 
+        /// <summary>
+        /// Add this token to the token cache
+        /// </summary>
+        /// <param name="key">The token type</param>
+        /// <param name="token">The token value</param>
+        /// <returns></returns>
         private async Task CacheToken(string key, string token) {
+            // we add the token to the runtime dictionary
             _tokenCache.Add(key, token);
+            // we also persist the token
             await WriteTokenCache();
         }
 
+        /// <summary>
+        /// Persist the token cache to disk 
+        /// </summary>
+        /// <returns></returns>
         private async Task WriteTokenCache() {
             try {
                 using (var fs = File.OpenWrite(TokensFile)) {
@@ -536,6 +561,9 @@ namespace BitPayAPI {
                             toWrite = toWrite.Substring(1);
                         }
 
+                        /* the file structure is
+                         key=value;key=value
+                         */
                         await writer.WriteAsync(toWrite);
                     }
                 }
@@ -544,6 +572,10 @@ namespace BitPayAPI {
             }
         }
 
+        /// <summary>
+        /// Load the access tokens from persistent storage
+        /// </summary>
+        /// <returns></returns>
         private async Task LoadAccessTokens() {
             try {
                 ClearAccessTokenCache();
@@ -572,11 +604,21 @@ namespace BitPayAPI {
             return _tokenCache[key];
         }
 
+        /// <summary>
+        /// Just empty and parameters dictionary
+        /// </summary>
+        /// <returns></returns>
         private Dictionary<string, string> InitParams() {
             var parameters = new Dictionary<string, string>();
             return parameters;
         }
 
+        /// <summary>
+        /// Make a GET request
+        /// </summary>
+        /// <param name="uri">The URI to query</param>
+        /// <param name="parameters">The request parameters</param>
+        /// <returns>The HttpResponseMessage of the request</returns>
         private async Task<HttpResponseMessage> Get(string uri, Dictionary<string, string> parameters = null) {
             try {
                 var fullUrl = _baseUrl + uri;
@@ -602,6 +644,12 @@ namespace BitPayAPI {
             }
         }
 
+        /// <summary>
+        /// Make a DELETE request
+        /// </summary>
+        /// <param name="uri">The URI to request</param>
+        /// <param name="parameters">The parameters of the request</param>
+        /// <returns>The HttpResponseMessage of the request</returns>
         private async Task<HttpResponseMessage> Delete(string uri, Dictionary<string, string> parameters = null) {
             try {
                 var fullUrl = _baseUrl + uri;
@@ -628,6 +676,7 @@ namespace BitPayAPI {
             }
         }
 
+
         private async Task<HttpResponseMessage> PostWithSignature(string uri, string json) {
             return await Post(uri, json, true);
         }
@@ -642,8 +691,8 @@ namespace BitPayAPI {
                 if (signatureRequired) {
                     var signature = KeyUtils.Sign(_ecKey, _baseUrl + uri + json);
                     _httpClient.DefaultRequestHeaders.Add("x-signature", signature);
+                    _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.BytesToHex(_ecKey?.PublicKey));
                 }
-                _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.BytesToHex(_ecKey.PublicKey));
                 var result = await _httpClient.PostAsync(uri, bodyContent);
                 return result;
             } catch (Exception ex) {
@@ -734,82 +783,6 @@ namespace BitPayAPI {
             }
         }
 
-        //// Deprecate non standard naming
-        //[Obsolete("Use AuthorizeClient instead")]
-        //public void authorizeClient(string pairingCode) {
-        //    AuthorizeClient(pairingCode);
-        //}
-
-        //[Obsolete("Use RequestClientAuthorization instead")]
-        //public string requestClientAuthorization(string facade) {
-        //    return RequestClientAuthorization(facade);
-        //}
-
-        //[Obsolete("Use ClientIsAuthorized instead")]
-        //public bool clientIsAuthorized(string facade) {
-        //    return ClientIsAuthorized(facade);
-        //}
-
-        //[Obsolete("Use CreateInvoice instead")]
-        //public Invoice createInvoice(Invoice invoice, string facade = FacadePos) {
-        //    return CreateInvoice(invoice, facade);
-        //}
-
-        //[Obsolete("Use GetInvoice instead")]
-        //public Invoice getInvoice(string invoiceId, string facade = FacadePos) {
-        //    return GetInvoice(invoiceId, facade);
-        //}
-
-        //[Obsolete("Use GetInvoices instead")]
-        //public List<Invoice> getInvoices(DateTime dateStart, DateTime dateEnd) {
-        //    return GetInvoices(dateStart, dateEnd);
-        //}
-
-        //[Obsolete("Use GetRates instead")]
-        //public Rates getRates() {
-        //    return GetRates();
-        //}
-
-        //[Obsolete("Use GetLedger instead")]
-        //public Ledger getLedger(string currency, DateTime dateStart, DateTime dateEnd) {
-        //    return GetLedger(currency, dateStart, dateEnd);
-        //}
-
-        //[Obsolete("Use SubmitPayoutBatchInstead")]
-        //public PayoutBatch submitPayoutBatch(PayoutBatch batch) {
-        //    return SubmitPayoutBatch(batch);
-        //}
-
-        //[Obsolete("USe GetPayoutBatches")]
-        //public List<PayoutBatch> getPayoutBatches() {
-        //    return GetPayoutBatches();
-        //}
-
-        //[Obsolete("Use GetPayoutBatch")]
-        //public PayoutBatch getPayoutBatch(string batchId) {
-        //    return GetPayoutBatch(batchId);
-        //}
-
-        //[Obsolete("Use CancelPayoutBatch")]
-        //public PayoutBatch cancelPayoutBatch(string batchId) {
-        //    return CancelPayoutBatch(batchId);
-        //}
-
-        //[Obsolete("Use GetSettlements")]
-        //public List<Settlement> getSettlements(string currency, DateTime dateStart, DateTime dateEnd,
-        //    string status = "", int limit = 100, int offset = 0) {
-        //    return GetSettlements(currency, dateStart, dateEnd, status, limit, offset);
-        //}
-
-        //[Obsolete("USe GetSettlement")]
-        //public Settlement getSettlement(string settlementId) {
-        //    return GetSettlement(settlementId);
-        //}
-
-        //[Obsolete("Use GetSettlementReconciliationReport")]
-        //public Settlement getSettlementReconciliationReport(Settlement settlement) {
-        //    return GetSettlementReconciliationReport(settlement);
-        //}
     }
 
 }

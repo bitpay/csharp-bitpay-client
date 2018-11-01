@@ -9,8 +9,7 @@ namespace BitPayAPI.Models
     /// </summary>
     public class Token
     {
-        public Token() {}
-
+     
         // API fields
         //
 
