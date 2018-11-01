@@ -642,9 +642,8 @@ namespace BitPayAPI {
                 if (signatureRequired) {
                     var signature = KeyUtils.Sign(_ecKey, _baseUrl + uri + json);
                     _httpClient.DefaultRequestHeaders.Add("x-signature", signature);
-                    _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.BytesToHex(_ecKey.PublicKey));
                 }
-
+                _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.BytesToHex(_ecKey.PublicKey));
                 var result = await _httpClient.PostAsync(uri, bodyContent);
                 return result;
             } catch (Exception ex) {

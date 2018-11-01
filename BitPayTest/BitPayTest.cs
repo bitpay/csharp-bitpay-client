@@ -149,7 +149,9 @@ namespace BitPayTest {
 
         [TestMethod]
         public async Task TestShouldGetBtcLedger() {
-            var ledger = await _bitpay.GetLedger(Ledger.LedgerBtc, new DateTime(2014, 8, 1), new DateTime(2014, 8, 31));
+            var pairingCode = await _bitpay.RequestClientAuthorization("merchant");
+            await _bitpay.AuthorizeClient(pairingCode);
+            var ledger = await _bitpay.GetLedger(Ledger.LedgerUsd, new DateTime(2014, 8, 1), new DateTime(2014, 8, 31));
             Assert.IsTrue(ledger.Entries.Count > 0, "Ledger is empty");
         }
 
