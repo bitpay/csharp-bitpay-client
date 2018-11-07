@@ -16,8 +16,10 @@ namespace BitPayTest {
         // This is the BitPay object we're going to use through all the tests
         private BitPay _bitpay;
 
-        // The pairing code generated in your BitPay account - the POS Paring Code
-        private static readonly string PairingCode = "hdQMXJM"; // "n9GCnT9";
+        // The pairing code generated in your BitPay account -
+        // https://test.bitpay.com/dashboard/merchant/api-tokens
+        // This is the POS Pairing Code
+        private static readonly string PairingCode = "hW0ZGpU"; 
 
         // Your favourite client name
         private static readonly string ClientName = "BitPay C# Library Tester on " + Environment.MachineName;
@@ -27,7 +29,7 @@ namespace BitPayTest {
 
 
         [TestInitialize]
-        public async void Init() {
+        public void Init() {
             
             // Initialize the BitPay object to be used in the following tests
             _bitpay = new BitPay(ClientName, BitpayTestUrl);
@@ -35,7 +37,7 @@ namespace BitPayTest {
             // If the client doesn't have a POS token yet, fetch one.
             // For the Merchant and Payroll Facades, see below, in their corresponding tests
             if (!_bitpay.ClientIsAuthorized(BitPay.FacadePos)) {
-                await _bitpay.AuthorizeClient(PairingCode);
+                _bitpay.AuthorizeClient(PairingCode).Wait();
             }
 
         }
@@ -177,7 +179,9 @@ namespace BitPayTest {
                 // get a pairing code for the merchant facade for this client
                 var pcode = await _bitpay.RequestClientAuthorization(BitPay.FacadeMerchant);
                 /* We can't continue. Please make sure you write down this pairing code, then goto
-                    your BitPay account in the API Tokens section and paste it into the search field.
+                    your BitPay account in the API Tokens section 
+                    https://test.bitpay.com/dashboard/merchant/api-tokens    
+                    and paste it into the search field.
                     It should get you to a page to approve it. After you approve it, run the tests
                     again and they should pass.
                  */

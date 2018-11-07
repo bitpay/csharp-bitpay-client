@@ -136,6 +136,7 @@ namespace BitPayAPI {
         }
 
         public static string BytesToHexString(byte[] bytes) {
+
             var buf = new StringBuilder(bytes.Length * 2);
             foreach (var b in bytes) {
                 var s = b.ToString("x");
@@ -152,6 +153,17 @@ namespace BitPayAPI {
         /// as the pubKeyHash/address.
         /// </summary>
         public byte[] PublicKey => _publicKey;
+
+        private string _publicKeyHexBytes;
+        public string PublicKeyHexBytes {
+            get {
+                if (_publicKeyHexBytes == null) {
+                    _publicKeyHexBytes = KeyUtils.BytesToHex(_publicKey);
+                }
+
+                return _publicKeyHexBytes;
+            }
+        }
 
         public override string ToString() {
             var b = new StringBuilder();

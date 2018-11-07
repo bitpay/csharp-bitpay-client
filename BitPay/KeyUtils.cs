@@ -9,7 +9,7 @@ using Org.BouncyCastle.Crypto.Digests;
 namespace BitPayAPI {
     public class KeyUtils {
         private static readonly char[] HexArray = "0123456789abcdef".ToCharArray();
-        private const string PrivateKeyFilename = "bitpay_private.key";
+        private const string PrivateKeyFilename = BitPay.TokensFolder + "\\bitpay_private.key";
 
         public static bool PrivateKeyExists() {
             return File.Exists(PrivateKeyFilename);
@@ -51,12 +51,19 @@ namespace BitPayAPI {
 
         public static async Task SaveEcKey(EcKey ecKey) {
             var bytes = ecKey.ToAsn1();
+            if (!Directory.Exists(BitPay.TokensFolder)) {
+                Directory.CreateDirectory(BitPay.TokensFolder);
+            }
             using (var fs = new FileStream(PrivateKeyFilename, FileMode.Create, FileAccess.Write)) {
                 await fs.WriteAsync(bytes, 0, bytes.Length);
             }
         }
 
+        private static string _derivedSin;
         public static string DeriveSin(EcKey ecKey) {
+            if (_derivedSin != null) {
+                return _derivedSin;
+            }
             // Get sha256 hash and then the RIPEMD-160 hash of the public key (this call gets the result in one step).
             var pubKey = ecKey.PublicKey;
             var hash = new SHA256Managed().ComputeHash(pubKey);
@@ -87,6 +94,8 @@ namespace BitPayAPI {
             var unencoded = preSin + first4Bytes;
             var unencodedBytes = new BigInteger(unencoded, 16).ToByteArray();
             var encoded = Encode(unencodedBytes);
+
+            _derivedSin = encoded;
 
             return encoded;
         }

@@ -28,7 +28,8 @@ namespace BitPayAPI {
         private const string BitpayApiVersion = "2.0.0";
         private const string BitpayPluginInfo = "BitPay CSharp Client " + BitpayApiVersion;
         private const string BitpayUrl = "https://bitpay.com/";
-        private const string TokensFile = "bitpay_tokens";
+        public const string TokensFolder = "tokens";
+        private const string TokensFile = TokensFolder + "\\bitpay_tokens";
 
         public const string FacadePayroll = "payroll";
         public const string FacadePos = "pos";
@@ -550,6 +551,9 @@ namespace BitPayAPI {
         /// <returns></returns>
         private async Task WriteTokenCache() {
             try {
+                if (!File.Exists(TokensFile)) {
+                    File.Create(TokensFile);
+                }
                 using (var fs = File.OpenWrite(TokensFile)) {
                     using (var writer = new StreamWriter(fs)) {
                         var toWrite = "";
@@ -580,6 +584,7 @@ namespace BitPayAPI {
             try {
                 ClearAccessTokenCache();
                 if (File.Exists(TokensFile)) {
+                    File.Delete(TokensFile);
                     using (var fs = File.OpenRead(TokensFile)) {
                         using (var reader = new StreamReader(fs)) {
                             var tokens = (await reader.ReadToEndAsync()).Split(char.Parse(";"));
@@ -591,6 +596,8 @@ namespace BitPayAPI {
                             }
                         }
                     }
+                } else if(!Directory.Exists(TokensFolder)) {
+                    Directory.CreateDirectory(TokensFolder);
                 }
             } catch (Exception ex) {
                 throw new TokensCacheLoadException(ex);
@@ -691,7 +698,7 @@ namespace BitPayAPI {
                 if (signatureRequired) {
                     var signature = KeyUtils.Sign(_ecKey, _baseUrl + uri + json);
                     _httpClient.DefaultRequestHeaders.Add("x-signature", signature);
-                    _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.BytesToHex(_ecKey?.PublicKey));
+                    _httpClient.DefaultRequestHeaders.Add("x-identity", _ecKey?.PublicKeyHexBytes);
                 }
                 var result = await _httpClient.PostAsync(uri, bodyContent);
                 return result;
