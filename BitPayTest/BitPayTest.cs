@@ -19,7 +19,7 @@ namespace BitPayTest {
         // The pairing code generated in your BitPay account -
         // https://test.bitpay.com/dashboard/merchant/api-tokens
         // This is the POS Pairing Code
-        private static readonly string PairingCode = "FmSJugn"; 
+        private static readonly string PairingCode = "GiAXLaT"; 
 
         // Your favourite client name
         private static readonly string ClientName = "BitPay C# Library Tester on " + Environment.MachineName;

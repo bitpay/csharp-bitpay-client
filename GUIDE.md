@@ -57,6 +57,8 @@ if (!bitpay.clientIsAuthorized(BitPay.FACADE_POS))
   // Signal the device operator that this client needs to be paired with a merchant account.
   System.Diagnostics.Debug.WriteLine("Info: Pair this client with your merchant account using the pairing code: " + pairingCode);
   throw new BitPayException("Error: client is not authorized for POS facade.");
+  
+  // At this point you need to go to your account in the [api-tokens section](https://bitpay.com/dashboard/merchant/api-tokens) , search for the resulted pairing code and approve it. After this step, you can safely start making requests for this facade.
 }
 ```
 
@@ -119,3 +121,5 @@ double rate = rates.getRate("USD");
 
 rates.update();
 ```
+
+See also the tests project for more examples of API calls.
