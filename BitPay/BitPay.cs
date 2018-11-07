@@ -63,16 +63,6 @@ namespace BitPayAPI {
             Init(clientName, envUrl).Wait();
         }
 
-        //public async Task Initialize(string clientName = BitpayPluginInfo, string envUrl = BitpayUrl) {
-        //    await InitKeys();
-        //    await Init(clientName, envUrl);
-        //}
-
-        //public async Task Initlialize(EcKey ecKey, string clientName = BitpayPluginInfo, string envUrl = BitpayUrl) {
-        //    _ecKey = ecKey;
-        //    await Init(clientName, envUrl);
-        //}
-
         /// <summary>
         /// Return the identity of this client (i.e. the public key).
         /// </summary>
@@ -92,7 +82,7 @@ namespace BitPayAPI {
                 var responseString = await ResponseToJsonString(response);
                 var tokens = JsonConvert.DeserializeObject<List<Token>>(responseString);
                 foreach (var t in tokens) {
-                    await CacheToken(t.Facade, t.Value);
+                    CacheToken(t.Facade, t.Value);
                 }
             } catch (Exception ex) {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException))) {
@@ -128,7 +118,7 @@ namespace BitPayAPI {
                 //    throw new BitPayException("Error - failed to get token resource; expected 1 token, got " +
                 //                              tokens.Count);
 
-                await CacheToken(tokens[0].Facade, tokens[0].Value);
+                CacheToken(tokens[0].Facade, tokens[0].Value);
                 return tokens[0].PairingCode;
             } catch (Exception ex) {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException))) {
@@ -171,7 +161,7 @@ namespace BitPayAPI {
             }
 
             // Track the token for this invoice
-            await CacheToken(invoice.Id, invoice.Token);
+            CacheToken(invoice.Id, invoice.Token);
 
             return invoice;
         }
@@ -299,7 +289,7 @@ namespace BitPayAPI {
                 });
 
                 // Track the token for this batch
-                await CacheToken(batch.Id, batch.Token);
+                CacheToken(batch.Id, batch.Token);
 
                 return batch;
             } catch (Exception ex) {
@@ -538,39 +528,35 @@ namespace BitPayAPI {
         /// <param name="key">The token type</param>
         /// <param name="token">The token value</param>
         /// <returns></returns>
-        private async Task CacheToken(string key, string token) {
+        private void CacheToken(string key, string token) {
             // we add the token to the runtime dictionary
             _tokenCache.Add(key, token);
             // we also persist the token
-            await WriteTokenCache();
+            WriteTokenCache();
         }
 
         /// <summary>
         /// Persist the token cache to disk 
         /// </summary>
         /// <returns></returns>
-        private async Task WriteTokenCache() {
+        private void WriteTokenCache() {
             try {
-                if (!File.Exists(TokensFile)) {
-                    File.Create(TokensFile);
+                var toWrite = "";
+                foreach (var key in _tokenCache.Keys) {
+                    toWrite += ";" + key + "=" + _tokenCache[key];
                 }
-                using (var fs = File.OpenWrite(TokensFile)) {
-                    using (var writer = new StreamWriter(fs)) {
-                        var toWrite = "";
-                        foreach (var key in _tokenCache.Keys) {
-                            toWrite += ";" + key + "=" + _tokenCache[key];
-                        }
 
-                        if (!"".Equals(toWrite)) {
-                            toWrite = toWrite.Substring(1);
-                        }
-
-                        /* the file structure is
-                         key=value;key=value
-                         */
-                        await writer.WriteAsync(toWrite);
-                    }
+                if (!"".Equals(toWrite)) {
+                    toWrite = toWrite.Substring(1);
                 }
+
+                /* the file structure is
+                 key=value;key=value
+                 */
+                lock (this) {
+                    File.WriteAllText(TokensFile, toWrite);
+                }
+
             } catch (Exception ex) {
                 throw new TokensCacheWriteException(ex);
             }
@@ -584,7 +570,6 @@ namespace BitPayAPI {
             try {
                 ClearAccessTokenCache();
                 if (File.Exists(TokensFile)) {
-                    File.Delete(TokensFile);
                     using (var fs = File.OpenRead(TokensFile)) {
                         using (var reader = new StreamReader(fs)) {
                             var tokens = (await reader.ReadToEndAsync()).Split(char.Parse(";"));
@@ -596,7 +581,7 @@ namespace BitPayAPI {
                             }
                         }
                     }
-                } else if(!Directory.Exists(TokensFolder)) {
+                } else if (!Directory.Exists(TokensFolder)) {
                     Directory.CreateDirectory(TokensFolder);
                 }
             } catch (Exception ex) {

@@ -19,7 +19,7 @@ namespace BitPayTest {
         // The pairing code generated in your BitPay account -
         // https://test.bitpay.com/dashboard/merchant/api-tokens
         // This is the POS Pairing Code
-        private static readonly string PairingCode = "hW0ZGpU"; 
+        private static readonly string PairingCode = "FmSJugn"; 
 
         // Your favourite client name
         private static readonly string ClientName = "BitPay C# Library Tester on " + Environment.MachineName;
@@ -30,7 +30,7 @@ namespace BitPayTest {
 
         [TestInitialize]
         public void Init() {
-            
+
             // Initialize the BitPay object to be used in the following tests
             _bitpay = new BitPay(ClientName, BitpayTestUrl);
 
@@ -38,6 +38,20 @@ namespace BitPayTest {
             // For the Merchant and Payroll Facades, see below, in their corresponding tests
             if (!_bitpay.ClientIsAuthorized(BitPay.FacadePos)) {
                 _bitpay.AuthorizeClient(PairingCode).Wait();
+            }
+
+            // ledgers require the Merchant Facade
+            if (!_bitpay.ClientIsAuthorized(BitPay.FacadeMerchant)) {
+                // get a pairing code for the merchant facade for this client
+                var pcode = _bitpay.RequestClientAuthorization(BitPay.FacadeMerchant).Result;
+                /* We can't continue. Please make sure you write down this pairing code, then goto
+                    your BitPay account in the API Tokens section 
+                    https://test.bitpay.com/dashboard/merchant/api-tokens    
+                    and paste it into the search field.
+                    It should get you to a page to approve it. After you approve it, run the tests
+                    again and they should pass.
+                 */
+                throw new BitPayException("Please approve the pairing code " + pcode + " in your account.");
             }
 
         }
@@ -174,20 +188,6 @@ namespace BitPayTest {
         [TestMethod]
         public async Task TestShouldGetBtcLedger() {
             
-            // ledgers require the Merchant Facade
-            if (!_bitpay.ClientIsAuthorized(BitPay.FacadeMerchant)) {
-                // get a pairing code for the merchant facade for this client
-                var pcode = await _bitpay.RequestClientAuthorization(BitPay.FacadeMerchant);
-                /* We can't continue. Please make sure you write down this pairing code, then goto
-                    your BitPay account in the API Tokens section 
-                    https://test.bitpay.com/dashboard/merchant/api-tokens    
-                    and paste it into the search field.
-                    It should get you to a page to approve it. After you approve it, run the tests
-                    again and they should pass.
-                 */
-                throw new BitPayException("Please approve the pairing code " + pcode + " in your account.");
-            }
-
             // make sure we get a ledger with a not null Entries property
             var ledger = await _bitpay.GetLedger(Ledger.LedgerBtc, new DateTime(2014, 8, 1), new DateTime(2014, 8, 31));
             Assert.IsNotNull(ledger);
@@ -213,73 +213,73 @@ namespace BitPayTest {
 
         }
 
-        [TestMethod]
-        public async Task TestShouldSubmitPayoutBatch() {
+        //[TestMethod]
+        //public async Task TestShouldSubmitPayoutBatch() {
 
-            // The payout batches is for the Payroll facade
-            if (!_bitpay.ClientIsAuthorized(BitPay.FacadePayroll)) {
-                // get the pairing code for the payout facade
-                var pcode = await _bitpay.RequestClientAuthorization(BitPay.FacadePayroll);
-                /*
-                 Unfortunately at the time of this writing the Payroll facade is not available through the API
-                 so this test will always fail - since you can't approve the Payroll pairing code
-                 */
-                throw new BitPayException("Please approve the pairing code " + pcode + " in your account.");
-            }
+        //    // The payout batches is for the Payroll facade
+        //    if (!_bitpay.ClientIsAuthorized(BitPay.FacadePayroll)) {
+        //        // get the pairing code for the payout facade
+        //        var pcode = await _bitpay.RequestClientAuthorization(BitPay.FacadePayroll);
+        //        /*
+        //         Unfortunately at the time of this writing the Payroll facade is not available through the API
+        //         so this test will always fail - since you can't approve the Payroll pairing code
+        //         */
+        //        throw new BitPayException("Please approve the pairing code " + pcode + " in your account.");
+        //    }
 
-            var date = DateTime.Now;
-            var threeDaysFromNow = date.AddDays(3);
+        //    var date = DateTime.Now;
+        //    var threeDaysFromNow = date.AddDays(3);
 
-            var effectiveDate = threeDaysFromNow;
-            var reference = "My test batch";
-            var bankTransferId = "My bank transfer id";
-            var currency = "USD";
-            var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u", "Alice"),
-                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A", "Bob")
-            };
+        //    var effectiveDate = threeDaysFromNow;
+        //    var reference = "My test batch";
+        //    var bankTransferId = "My bank transfer id";
+        //    var currency = "USD";
+        //    var instructions = new List<PayoutInstruction>() {
+        //        new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u", "Alice"),
+        //        new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A", "Bob")
+        //    };
 
-            var batch = new PayoutBatch(currency, effectiveDate, bankTransferId, reference, instructions);
-            batch = await _bitpay.SubmitPayoutBatch(batch);
+        //    var batch = new PayoutBatch(currency, effectiveDate, bankTransferId, reference, instructions);
+        //    batch = await _bitpay.SubmitPayoutBatch(batch);
 
-            Assert.IsNotNull(batch.Id, "Batch created with id=NULL");
-            Assert.IsTrue(batch.Instructions.Count == 2);
-        }
+        //    Assert.IsNotNull(batch.Id, "Batch created with id=NULL");
+        //    Assert.IsTrue(batch.Instructions.Count == 2);
+        //}
 
-        [TestMethod]
-        public async Task TestShouldSubmitGetAndDeletePayoutBatch() {
+        //[TestMethod]
+        //public async Task TestShouldSubmitGetAndDeletePayoutBatch() {
 
-            /*
-               Unfortunately at the time of this writing the Payroll facade is not available through the API
-               so this test will always fail - since you can't approve the Payroll pairing code
-             */
+        //    /*
+        //       Unfortunately at the time of this writing the Payroll facade is not available through the API
+        //       so this test will always fail - since you can't approve the Payroll pairing code
+        //     */
 
-            var date = DateTime.Now;
-            var threeDaysFromNow = date.AddDays(3);
+        //    var date = DateTime.Now;
+        //    var threeDaysFromNow = date.AddDays(3);
 
-            var effectiveDate = threeDaysFromNow;
-            var reference = "My test batch";
-            var bankTransferId = "My bank transfer id";
-            var currency = "USD";
-            var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u", "Alice"),
-                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A", "Bob")
-            };
+        //    var effectiveDate = threeDaysFromNow;
+        //    var reference = "My test batch";
+        //    var bankTransferId = "My bank transfer id";
+        //    var currency = "USD";
+        //    var instructions = new List<PayoutInstruction>() {
+        //        new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u", "Alice"),
+        //        new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A", "Bob")
+        //    };
 
-            var batch0 = new PayoutBatch(currency, effectiveDate, bankTransferId, reference, instructions);
-            batch0 = await _bitpay.SubmitPayoutBatch(batch0);
+        //    var batch0 = new PayoutBatch(currency, effectiveDate, bankTransferId, reference, instructions);
+        //    batch0 = await _bitpay.SubmitPayoutBatch(batch0);
 
-            Assert.IsNotNull(batch0.Id, "Batch (0) created with id=NULL");
-            Assert.IsTrue(batch0.Instructions.Count == 2);
+        //    Assert.IsNotNull(batch0.Id, "Batch (0) created with id=NULL");
+        //    Assert.IsTrue(batch0.Instructions.Count == 2);
 
-            var batch1 = await _bitpay.GetPayoutBatch(batch0.Id);
+        //    var batch1 = await _bitpay.GetPayoutBatch(batch0.Id);
 
-            Assert.IsNotNull(batch1.Id, "Batch (1) created with id=NULL");
-            Assert.IsTrue(batch1.Instructions.Count == 2);
+        //    Assert.IsNotNull(batch1.Id, "Batch (1) created with id=NULL");
+        //    Assert.IsTrue(batch1.Instructions.Count == 2);
 
-            await _bitpay.CancelPayoutBatch(batch0.Id);
+        //    await _bitpay.CancelPayoutBatch(batch0.Id);
 
-        }
+        //}
 
     }
 }
