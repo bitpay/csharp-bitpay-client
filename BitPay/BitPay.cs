@@ -28,8 +28,8 @@ namespace BitPayAPI {
         private const string BitpayApiVersion = "2.0.0";
         private const string BitpayPluginInfo = "BitPay CSharp Client " + BitpayApiVersion;
         private const string BitpayUrl = "https://bitpay.com/";
-        public const string TokensFolder = "tokens";
-        private const string TokensFile = TokensFolder + "\\bitpay_tokens";
+        public static string TokensFolder = "tokens";
+        private static string TokensFile => TokensFolder + "\\bitpay_tokens";
 
         public const string FacadePayroll = "payroll";
         public const string FacadePos = "pos";
@@ -484,7 +484,7 @@ namespace BitPayAPI {
                 _httpClient = new HttpClient {BaseAddress = new Uri(_baseUrl)};
                 NormalizeClientName(clientName);
                 DeriveIdentity();
-                await LoadAccessTokens();
+                await LoadAccessTokens().ConfigureAwait(false);
             } catch (Exception ex) {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException))) {
                     throw new BitPayException(ex);
@@ -500,13 +500,12 @@ namespace BitPayAPI {
         /// <returns></returns>
         private async Task InitKeys() {
             if (KeyUtils.PrivateKeyExists()) {
-                _ecKey = await KeyUtils.LoadEcKey();
-
-                // TODO: Alternatively, load your private key from a location you specify.
-                //_ecKey = KeyUtils.createEcKeyFromHexStringFile("C:\\Users\\Andy\\Documents\\private-key.txt");
-            } else {
+				_ecKey = await KeyUtils.LoadEcKey().ConfigureAwait(false);
+				// TODO: Alternatively, load your private key from a location you specify.
+				//_ecKey = KeyUtils.createEcKeyFromHexStringFile("C:\\Users\\Andy\\Documents\\private-key.txt");
+			} else {
                 _ecKey = KeyUtils.CreateEcKey();
-                await KeyUtils.SaveEcKey(_ecKey);
+                await KeyUtils.SaveEcKey(_ecKey).ConfigureAwait(false);
             }
         }
 
@@ -569,25 +568,25 @@ namespace BitPayAPI {
         private async Task LoadAccessTokens() {
             try {
                 ClearAccessTokenCache();
-                if (File.Exists(TokensFile)) {
+				if (File.Exists(TokensFile)) {
                     using (var fs = File.OpenRead(TokensFile)) {
-                        using (var reader = new StreamReader(fs)) {
-                            var tokens = (await reader.ReadToEndAsync()).Split(char.Parse(";"));
-                            foreach (var tokenPair in tokens) {
+						using (var reader = new StreamReader(fs)) {
+							var tokens = (await reader.ReadToEndAsync().ConfigureAwait(false)).Split(char.Parse(";"));
+							foreach (var tokenPair in tokens) {
                                 var items = tokenPair.Split(char.Parse("="));
-                                if (items.Length == 2 && !"".EndsWith(items[1].Trim())) {
-                                    _tokenCache.Add(items[0], items[1]);
+								if (items.Length == 2 && !"".EndsWith(items[1].Trim())) {
+									_tokenCache.Add(items[0], items[1]);
                                 }
                             }
-                        }
+						}
                     }
-                } else if (!Directory.Exists(TokensFolder)) {
+				} else if (!Directory.Exists(TokensFolder)) {
                     Directory.CreateDirectory(TokensFolder);
                 }
             } catch (Exception ex) {
                 throw new TokensCacheLoadException(ex);
             }
-        }
+		}
 
         private string GetAccessToken(string key) {
             if (!_tokenCache.ContainsKey(key))
