@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPay", "BitPay\BitPay.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPayTest", "BitPayTest\BitPayTest.csproj", "{71166BF5-DA31-4BFD-90E6-16172E894EAA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPayUnitTest", "BitPayUnitTest\BitPayUnitTest.csproj", "{2FCA393C-BD09-4740-ADB5-C4293C9F823D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPaySetup", "BitPaySetup\BitPaySetup.csproj", "{596685AF-1AFD-4137-B3EB-F849351298DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{71166BF5-DA31-4BFD-90E6-16172E894EAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71166BF5-DA31-4BFD-90E6-16172E894EAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71166BF5-DA31-4BFD-90E6-16172E894EAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FCA393C-BD09-4740-ADB5-C4293C9F823D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FCA393C-BD09-4740-ADB5-C4293C9F823D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FCA393C-BD09-4740-ADB5-C4293C9F823D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FCA393C-BD09-4740-ADB5-C4293C9F823D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{596685AF-1AFD-4137-B3EB-F849351298DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{596685AF-1AFD-4137-B3EB-F849351298DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{596685AF-1AFD-4137-B3EB-F849351298DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{596685AF-1AFD-4137-B3EB-F849351298DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

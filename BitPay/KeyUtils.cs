@@ -9,7 +9,7 @@ using Org.BouncyCastle.Crypto.Digests;
 namespace BitPayAPI {
     public class KeyUtils {
         private static readonly char[] HexArray = "0123456789abcdef".ToCharArray();
-        private const string PrivateKeyFilename = BitPay.TokensFolder + "\\bitpay_private.key";
+        private const string PrivateKeyFilename = Env.TokensFolderPath + "\\bitpay_private.key";
 
         public static bool PrivateKeyExists() {
             return File.Exists(PrivateKeyFilename);
@@ -51,8 +51,8 @@ namespace BitPayAPI {
 
         public static async Task SaveEcKey(EcKey ecKey) {
             var bytes = ecKey.ToAsn1();
-            if (!Directory.Exists(BitPay.TokensFolder)) {
-                Directory.CreateDirectory(BitPay.TokensFolder);
+            if (!Directory.Exists(Env.TokensFolderPath)) {
+                Directory.CreateDirectory(Env.TokensFolderPath);
             }
             using (var fs = new FileStream(PrivateKeyFilename, FileMode.Create, FileAccess.Write)) {
                 await fs.WriteAsync(bytes, 0, bytes.Length);
