@@ -4,7 +4,6 @@ namespace BitPayAPI.Models
 {
     public class PayoutInstructionBtcSummary
     {
-
         public PayoutInstructionBtcSummary(double paid, double unpaid)
         {
             Paid = paid;
@@ -18,6 +17,5 @@ namespace BitPayAPI.Models
         [JsonProperty(PropertyName = "unpaid")]
         [JsonConverter(typeof(Converters.BtcValueConverter))]
         public double Unpaid { get; set; }
-
     }
 }

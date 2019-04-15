@@ -1,26 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace BitPayAPI.Models
 {
     public class PayoutInstruction
     {
-        public const String StatusPaid = "paid";
-	    public const String StatusUnpaid = "unpaid";
-	
-        /// <summary>
-        /// Constructor, create an empty PayoutInstruction object.
-        /// </summary>
-        public PayoutInstruction() {}
+        public const string StatusPaid = "paid";
+        public const string StatusUnpaid = "unpaid";
 
         /// <summary>
-        /// Constructor, create a PayoutInstruction object.
+        ///     Constructor, create an empty PayoutInstruction object.
+        /// </summary>
+        public PayoutInstruction()
+        {
+        }
+
+        /// <summary>
+        ///     Constructor, create a PayoutInstruction object.
         /// </summary>
         /// <param name="amount">BTC amount.</param>
         /// <param name="address">Bitcoin address.</param>
         /// <param name="label">Label.</param>
-        public PayoutInstruction(double amount, String address, String label)
+        public PayoutInstruction(double amount, string address, string label)
         {
             Amount = amount;
             Address = address;
@@ -29,30 +30,56 @@ namespace BitPayAPI.Models
 
         [JsonProperty(PropertyName = "amount")]
         public double Amount { get; set; }
-        public bool ShouldSerializeAmount() { return true; }
 
         [JsonProperty(PropertyName = "address")]
-        public String Address { get; set; }
-        public bool ShouldSerializeAddress() { return !String.IsNullOrEmpty(Address); }
+        public string Address { get; set; }
 
-        [JsonProperty(PropertyName = "label")]
-        public String Label { get; set; }
-        public bool ShouldSerializeLabel() { return !String.IsNullOrEmpty(Label); }
+        [JsonProperty(PropertyName = "label")] public string Label { get; set; }
 
         // Response fields
         //
 
         public string Id { get; set; }
-        public bool ShouldSerializeId() { return false; }
 
         public string Status { get; set; }
-        public bool ShouldSerializeStatus() { return false; }
 
         public PayoutInstructionBtcSummary Btc { get; set; }
-        public bool ShouldSerializeBtc() { return false; }
 
-        public List <PayoutInstructionTransaction> Transactions { get; set; }
-        public bool ShouldSerializeTransactions() { return false; }
+        public List<PayoutInstructionTransaction> Transactions { get; set; }
 
+        public bool ShouldSerializeAmount()
+        {
+            return true;
+        }
+
+        public bool ShouldSerializeAddress()
+        {
+            return !string.IsNullOrEmpty(Address);
+        }
+
+        public bool ShouldSerializeLabel()
+        {
+            return !string.IsNullOrEmpty(Label);
+        }
+
+        public bool ShouldSerializeId()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeStatus()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeBtc()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeTransactions()
+        {
+            return false;
+        }
     }
 }

@@ -2,14 +2,12 @@
 using Xunit;
 using BitPayAPI;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using BitPayAPI.Exceptions;
 using BitPayAPI.Models;
 using BitPayAPI.Models.Invoice;
-using Xunit.Abstractions;
 
-namespace BitPayUnitTest
+namespace BitPayXUnitTest
 {
     public class Tests
     {
@@ -149,7 +147,7 @@ namespace BitPayUnitTest
             Assert.Equal(Invoice.StatusNew, invoice.Status);
             Assert.Equal("Satoshi", invoice.BuyerName);
             Assert.Equal("satoshi@bitpay.com", invoice.BuyerEmail);
-            Assert.Equal(true, invoice.FullNotifications);
+            Assert.True(invoice.FullNotifications, "FullNotifications is incorrect");
             Assert.Equal("satoshi@bitpay.com", invoice.NotificationEmail);
             Assert.Equal("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", invoice.PosData);
         }

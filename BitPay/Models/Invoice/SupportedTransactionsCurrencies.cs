@@ -1,5 +1,7 @@
-﻿namespace BitPayAPI.Models.Invoice {
-    public class SupportedTransactionsCurrencies {
+﻿namespace BitPayAPI.Models.Invoice
+{
+    public class SupportedTransactionsCurrencies
+    {
         public SupportedTransactionsCurrency Btc { get; set; }
         public SupportedTransactionsCurrency Bch { get; set; }
     }

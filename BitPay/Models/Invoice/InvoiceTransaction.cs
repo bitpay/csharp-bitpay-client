@@ -3,12 +3,10 @@
 namespace BitPayAPI.Models.Invoice
 {
     /// <summary>
-    /// Provides information about a single invoice transaction.
+    ///     Provides information about a single invoice transaction.
     /// </summary>
     public class InvoiceTransaction
     {
-        public InvoiceTransaction() { }
-
         [JsonProperty(PropertyName = "amount")]
         public double Amount { get; set; }
 
@@ -18,10 +16,8 @@ namespace BitPayAPI.Models.Invoice
         [JsonProperty(PropertyName = "receivedTime")]
         public string ReceivedTime { get; set; }
 
-        [JsonProperty(PropertyName = "time")]
-        public string Time { get; set; }
+        [JsonProperty(PropertyName = "time")] public string Time { get; set; }
 
-        [JsonProperty(PropertyName = "type")]
-        public string Type { get; set; }
+        [JsonProperty(PropertyName = "type")] public string Type { get; set; }
     }
 }

@@ -2,30 +2,35 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using BitPayAPI.Exceptions;
 using BitPayAPI.Models;
 using BitPayAPI.Models.Invoice;
 
-namespace BitPayTest {
+namespace BitPayUnitTest {
 
     [TestClass]
     public class BitPayTest {
-
         // This is the BitPay object we're going to use through all the tests
         private BitPay _bitpay;
-
         // The pairing code generated in your BitPay account -
         // https://test.bitpay.com/dashboard/merchant/api-tokens
         // This is the POS Pairing Code
-        private static readonly string PairingCode = "jYw3Pco";
+        private static readonly string PairingCode = "GHXnenG";
 
         // Your favourite client name
         private static readonly string ClientName = "BitPay C# Library Tester on " + Environment.MachineName;
 
         // The URL to test against
         private static readonly string BitpayTestUrl = "https://test.bitpay.com/";
+        
+        // Define the date range for fetching results during the test
+        private static DateTime today = DateTime.Now;
+        private static DateTime tomorrow = today.AddDays(1);
+        private static DateTime yesterday = today.AddDays(-1);
+
+        // Will store one of the generated invoices during the test
+        // so it can be paid manually in order to pass the ledger tests
 
 
         [TestInitialize]
@@ -36,14 +41,14 @@ namespace BitPayTest {
 
             // If the client doesn't have a POS token yet, fetch one.
             // For the Merchant and Payroll Facades, see below, in their corresponding tests
-            if (!_bitpay.ClientIsAuthorized(BitPay.FacadePos)) {
-                _bitpay.AuthorizeClient(PairingCode).Wait();
+            if (!_bitpay.ClientIsAuthorized(Facade.PointOfSale)) {
+                _bitpay.AuthorizeClient(PairingCode);
             }
 
             // ledgers require the Merchant Facade
-            if (!_bitpay.ClientIsAuthorized(BitPay.FacadeMerchant)) {
+            if (!_bitpay.ClientIsAuthorized(Facade.Merchant)) {
                 // get a pairing code for the merchant facade for this client
-                var pcode = _bitpay.RequestClientAuthorization(BitPay.FacadeMerchant).Result;
+                var pcode = _bitpay.RequestClientAuthorization(Facade.Merchant).Result;
                 /* We can't continue. Please make sure you write down this pairing code, then goto
                     your BitPay account in the API Tokens section 
                     https://test.bitpay.com/dashboard/merchant/api-tokens    
@@ -55,9 +60,9 @@ namespace BitPayTest {
             }
 
             // ledgers require the Payroll Facade
-            if (!_bitpay.ClientIsAuthorized(BitPay.FacadePayroll)) {
+            if (!_bitpay.ClientIsAuthorized(Facade.Payroll)) {
                 // get a pairing code for the merchant facade for this client
-                var pcode = _bitpay.RequestClientAuthorization(BitPay.FacadePayroll).Result;
+                var pcode = _bitpay.RequestClientAuthorization(Facade.Payroll).Result;
                 /* We can't continue. Please make sure you write down this pairing code, then goto
                     your BitPay account in the API Tokens section 
                     https://test.bitpay.com/dashboard/merchant/api-tokens    
@@ -67,7 +72,6 @@ namespace BitPayTest {
                  */
                 throw new BitPayException("Please approve the pairing code " + pcode + " in your account.");
             }
-
         }
 
         [TestMethod]
@@ -104,7 +108,7 @@ namespace BitPayTest {
         public async Task TestShouldCreateInvoiceOneTenthBtc() {
             // create an invoice and make sure we receive the correct price value back (under 1 BTC)
             var invoice = await _bitpay.CreateInvoice(new Invoice(0.1, "BTC"));
-            Assert.AreEqual(0.1, invoice.Price, 0.0000001, "Invoice not created correctly: 0.1BTC");
+            Assert.AreEqual(0.1, invoice.Price, "Invoice not created correctly: 0.1BTC");
         }
 
         [TestMethod]
@@ -187,7 +191,7 @@ namespace BitPayTest {
         [TestMethod]
         public async Task TestShouldGetInvoiceIdOne() {
             // create an invoice and get it by its id
-            var invoice = await _bitpay.CreateInvoice(new Invoice(1.0, "USD"), BitPay.FacadeMerchant);
+            var invoice = await _bitpay.CreateInvoice(new Invoice(1.0, "USD"), Facade.Merchant);
             invoice = await _bitpay.GetInvoice(invoice.Id);
             Assert.IsNotNull(invoice.Id, "Invoice created with id=NULL");
         }
@@ -195,7 +199,7 @@ namespace BitPayTest {
         [TestMethod]
         public async Task TestShouldGetInvoices() {
             // get invoices between two dates
-            var invoices = await _bitpay.GetInvoices(new DateTime(2018, 8, 1), new DateTime(2018, 11, 30));
+            var invoices = await _bitpay.GetInvoices(yesterday, tomorrow);
             Assert.IsTrue(invoices.Count > 0, "No invoices retrieved");
         }
 
@@ -203,7 +207,7 @@ namespace BitPayTest {
         public async Task TestShouldGetBtcLedger() {
 
             // make sure we get a ledger with a not null Entries property
-            var ledger = await _bitpay.GetLedger(Ledger.LedgerBtc, new DateTime(2014, 8, 1), new DateTime(2014, 8, 31));
+            var ledger = await _bitpay.GetLedger(Ledger.LedgerBtc, yesterday, tomorrow);
             Assert.IsNotNull(ledger);
             Assert.IsNotNull(ledger.Entries);
 
@@ -218,7 +222,7 @@ namespace BitPayTest {
             // Please see the comments from the GetBtcLedger concerning the Merchant facade
 
             // make sure we get a ledger with a not null Entries property
-            var ledger = await _bitpay.GetLedger(Ledger.LedgerUsd, new DateTime(2014, 1, 1), new DateTime(2014, 1, 31));
+            var ledger = await _bitpay.GetLedger(Ledger.LedgerUsd, yesterday, tomorrow);
             Assert.IsNotNull(ledger);
             Assert.IsNotNull(ledger.Entries);
 

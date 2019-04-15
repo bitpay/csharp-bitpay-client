@@ -1,24 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace BitPayAPI.Models
 {
     public class Ledger
     {
-        public const String LedgerAud = "AUD";
-        public const String LedgerBtc = "BTC";
-        public const String LedgerCad = "CAD";
-        public const String LedgerEur = "EUR";
-        public const String LedgerGbp = "GBP";
-        public const String LedgerMxn = "MXN";
-        public const String LedgerNdz = "NDZ";
-        public const String LedgerUsd = "USD";
-        public const String LedgerZar = "ZAR";
+        public const string LedgerAud = "AUD";
+        public const string LedgerBtc = "BTC";
+        public const string LedgerCad = "CAD";
+        public const string LedgerEur = "EUR";
+        public const string LedgerGbp = "GBP";
+        public const string LedgerMxn = "MXN";
+        public const string LedgerNdz = "NDZ";
+        public const string LedgerUsd = "USD";
+        public const string LedgerZar = "ZAR";
 
         public List<LedgerEntry> Entries;
 
         /// <summary>
-        /// Creates a Ledger object.
+        ///     Creates a Ledger object.
         /// </summary>
         public Ledger(List<LedgerEntry> entries)
         {
