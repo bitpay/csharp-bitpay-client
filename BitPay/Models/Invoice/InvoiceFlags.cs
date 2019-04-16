@@ -1,5 +1,7 @@
-﻿namespace BitPayAPI.Models.Invoice {
-    public class InvoiceFlags {
+﻿namespace BitPayAPI.Models.Invoice
+{
+    public class InvoiceFlags
+    {
         public bool Refundable { get; set; }
     }
 }
