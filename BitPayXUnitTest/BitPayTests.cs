@@ -2,10 +2,12 @@
 using Xunit;
 using BitPayAPI;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using BitPayAPI.Exceptions;
 using BitPayAPI.Models;
 using BitPayAPI.Models.Invoice;
+using Microsoft.Extensions.Configuration;
 
 namespace BitPayXUnitTest
 {
@@ -19,10 +21,7 @@ namespace BitPayXUnitTest
         private static readonly string PairingCode = "fWASBGz";
 
         // Your favourite client name
-        private static readonly string ClientName = "BitPay C# Library Tester on " + Environment.MachineName;
-
-        // The URL to test against
-        private static readonly string BitpayTestUrl = "https://test.bitpay.com/";
+        private static readonly string ClientName = "BitPay .Net Client Tester on " + Environment.MachineName;
         
         // Define the date range for fetching results during the test
         private static DateTime today = DateTime.Now;
@@ -34,18 +33,27 @@ namespace BitPayXUnitTest
         
         public Tests()
         {
+            // JSON minified with the BitPay configuration as in the required configuration file
+            // and parsed into a IConfiguration object
+            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"ClientDescription\":\"BitPay .Net Test Client\",\"ApiUrl\":\"https://test.bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"sec/bitpay_test_private.key\",\"ApiTokens\":{\"pos\":\"FrbBsxHFkoTbzJPDe6vzBghJzMvDe1nbGUJ3M6n5MHQd\",\"merchant\":\"EZYmyjSaUXh6NcF7Ej9g7dizhhsW2eRvWT29W6CG1omT\",\"payroll\":\"DjyLfN2JDeFoHgUV9Xpx3kvLpA5G2emiyFxUv1q9CREt\"}},\"Prod\":{\"ClientDescription\":\"\",\"ApiUrl\":\"https://bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"pos\":\"\",\"merchant\":\"\",\"payroll\":\"\"}}}}}";
+            var memoryJsonFile = new MemoryFileInfo("config.json", Encoding.UTF8.GetBytes(json), DateTimeOffset.Now);
+            var memoryFileProvider = new MockFileProvider(memoryJsonFile);
 
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile(memoryFileProvider, "config.json", false, false)
+                .Build();
+            
             // Initialize the BitPay object to be used in the following tests
-            _bitpay = new BitPay(ClientName, BitpayTestUrl);
+            _bitpay = new BitPay(configuration);
 
             // If the client doesn't have a POS token yet, fetch one.
             // For the Merchant and Payroll Facades, see below, in their corresponding tests
-            if (!_bitpay.ClientIsAuthorized(Facade.PointOfSale)) {
+            if (!_bitpay.tokenExist(Facade.PointOfSale)) {
                 _bitpay.AuthorizeClient(PairingCode);
             }
 
             // ledgers require the Merchant Facade
-            if (!_bitpay.ClientIsAuthorized(Facade.Merchant)) {
+            if (!_bitpay.tokenExist(Facade.Merchant)) {
                 // get a pairing code for the merchant facade for this client
                 var pcode = _bitpay.RequestClientAuthorization(Facade.Merchant).Result;
                 /* We can't continue. Please make sure you write down this pairing code, then goto
@@ -59,7 +67,7 @@ namespace BitPayXUnitTest
             }
 
             // ledgers require the Payroll Facade
-            if (!_bitpay.ClientIsAuthorized(Facade.Payroll)) {
+            if (!_bitpay.tokenExist(Facade.Payroll)) {
                 // get a pairing code for the merchant facade for this client
                 var pcode = _bitpay.RequestClientAuthorization(Facade.Payroll).Result;
                 /* We can't continue. Please make sure you write down this pairing code, then goto
@@ -138,17 +146,11 @@ namespace BitPayXUnitTest
             // create an invoice and make sure we receive the correct fields values back
             var invoice = new Invoice(100.0, "USD") {
                 BuyerName = "Satoshi",
-                BuyerEmail = "satoshi@bitpay.com",
-                FullNotifications = true,
-                NotificationEmail = "satoshi@bitpay.com",
                 PosData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
             };
             invoice = await _bitpay.CreateInvoice(invoice);
             Assert.Equal(Invoice.StatusNew, invoice.Status);
             Assert.Equal("Satoshi", invoice.BuyerName);
-            Assert.Equal("satoshi@bitpay.com", invoice.BuyerEmail);
-            Assert.True(invoice.FullNotifications, "FullNotifications is incorrect");
-            Assert.Equal("satoshi@bitpay.com", invoice.NotificationEmail);
             Assert.Equal("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", invoice.PosData);
         }
 
