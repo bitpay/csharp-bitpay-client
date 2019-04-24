@@ -12,6 +12,7 @@ using BitPayAPI.Models;
 using BitPayAPI.Models.Invoice;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Configuration;
 
 /**
  * @author Antonio Buedo
@@ -25,38 +26,42 @@ namespace BitPayAPI
 {
     public class BitPay
     {
+        private static IConfiguration _configuration { get; set; }
+        private static string _env;
+        private Dictionary<string, string> _tokenCache; // {facade, token}
+        private static string _configFilePath;
+        
         private const string BitpayApiVersion = "2.0.0";
-        private const string BitpayPluginInfo = "BitPay CSharp Client " + Env.BitpayApiVersion;
+        private const string BitpayPluginInfo = "BitPay .Net Client v2.0.1904";
 
-        private const string TokensFile = Env.TokensFolderPath + "\\bitpay_tokens";
         private string _baseUrl;
-        private string _clientName = "";
+        private string _clientName;
         private EcKey _ecKey;
 
         private HttpClient _httpClient;
-        private Dictionary<string, string> _tokenCache; // {facade, token}
-
+        
         /// <summary>
         ///     Constructor for use if the keys and SIN are managed by this library.
         /// </summary>
-        /// <param name="clientName">The label for this client.</param>
-        /// <param name="envUrl">The target server URL.</param>
-        public BitPay(string clientName = BitpayPluginInfo, string envUrl = Env.ProdUrl)
+        /// <param name="ConfigFilePath">The path to the configuration file.</param>
+        public BitPay(string ConfigFilePath)
         {
+            _configFilePath = ConfigFilePath;
+            GetConfig();
             InitKeys().Wait();
-            Init(clientName, envUrl).Wait();
+            Init().Wait();
         }
-
+        
         /// <summary>
-        ///     Constructor for use if the keys and SIN were derived external to this library.
+        ///     Constructor for use if the keys and SIN are managed by this library.
         /// </summary>
-        /// <param name="ecKey">An elliptical curve key.</param>
-        /// <param name="clientName">The label for this client.</param>
-        /// <param name="envUrl">The target server URL.</param>
-        public BitPay(EcKey ecKey, string clientName = BitpayPluginInfo, string envUrl = Env.ProdUrl)
+        /// <param name="config">IConfiguration with loaded configuration.</param>
+        public BitPay(IConfiguration config)
         {
-            _ecKey = ecKey;
-            Init(clientName, envUrl).Wait();
+            _configuration = config;
+            _env = _configuration.GetSection("BitPayConfiguration:Environment").Value;
+            InitKeys().Wait();
+            Init().Wait();
         }
 
         /// <summary>
@@ -129,9 +134,23 @@ namespace BitPayAPI
         /// </summary>
         /// <param name="facade">The facade name for which authorization is tested.</param>
         /// <returns></returns>
-        public bool ClientIsAuthorized(string facade)
+        public bool tokenExist(string facade)
         {
             return _tokenCache.ContainsKey(facade);
+        }
+
+
+        /// <summary>
+        ///     Returns the token for the specified facade.
+        /// </summary>
+        /// <param name="facade">The facade name for which the token is requested.</param>
+        /// <returns></returns>
+        public string GetTokenByFacade(string facade)
+        {
+            if (!_tokenCache.ContainsKey(facade))
+                return "";
+
+            return _tokenCache[facade];
         }
 
         /// <summary>
@@ -525,17 +544,14 @@ namespace BitPayAPI
         /// <summary>
         ///     Initialize this object with the client name and the environment Url
         /// </summary>
-        /// <param name="clientName">The client name</param>
-        /// <param name="envUrl">THe environment Url</param>
         /// <returns></returns>
-        private async Task Init(string clientName, string envUrl)
+        private async Task Init()
         {
             try
             {
-                // IgnoreBadCertificates();
-                _baseUrl = envUrl;
+                _baseUrl = _configuration.GetSection("BitPayConfiguration:EnvConfig:"+ _env +":ApiUrl").Value;
                 _httpClient = new HttpClient {BaseAddress = new Uri(_baseUrl)};
-                NormalizeClientName(clientName);
+                NormalizeClientName(_configuration.GetSection("BitPayConfiguration:EnvConfig:"+ _env +":ClientDescription").Value);
                 DeriveIdentity();
                 await LoadAccessTokens();
             }
@@ -554,12 +570,9 @@ namespace BitPayAPI
         /// <returns></returns>
         private async Task InitKeys()
         {
-            if (KeyUtils.PrivateKeyExists())
+            if (KeyUtils.PrivateKeyExists(_configuration.GetSection("BitPayConfiguration:EnvConfig:"+ _env +":PrivateKeyPath").Value))
             {
                 _ecKey = await KeyUtils.LoadEcKey();
-
-                // TODO: Alternatively, load your private key from a location you specify.
-                //_ecKey = KeyUtils.createEcKeyFromHexStringFile("C:\\Users\\Andy\\Documents\\private-key.txt");
             }
             else
             {
@@ -591,7 +604,15 @@ namespace BitPayAPI
         private void CacheToken(string key, string token)
         {
             // we add the token to the runtime dictionary
-            _tokenCache.Add(key, token);
+            if (tokenExist(key))
+            {
+                _tokenCache[key] = token;
+            }
+            else
+            {
+                _tokenCache.Add(key, token);
+            }
+
             // we also persist the token
             WriteTokenCache();
         }
@@ -604,17 +625,10 @@ namespace BitPayAPI
         {
             try
             {
-                var toWrite = "";
-                foreach (var key in _tokenCache.Keys) toWrite += ";" + key + "=" + _tokenCache[key];
-
-                if (!"".Equals(toWrite)) toWrite = toWrite.Substring(1);
-
-                /* the file structure is
-                 key=value;key=value
-                 */
-                lock (this)
+                foreach (var key in _tokenCache.Keys)
                 {
-                    File.WriteAllText(TokensFile, toWrite);
+                    _configuration["BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:" + key] =
+                        key + ":" + _tokenCache[key];
                 }
             }
             catch (Exception ex)
@@ -632,21 +646,14 @@ namespace BitPayAPI
             try
             {
                 ClearAccessTokenCache();
-                if (File.Exists(TokensFile))
-                    using (var fs = File.OpenRead(TokensFile))
-                    {
-                        using (var reader = new StreamReader(fs))
-                        {
-                            var tokens = (await reader.ReadToEndAsync()).Split(char.Parse(";"));
-                            foreach (var tokenPair in tokens)
-                            {
-                                var items = tokenPair.Split(char.Parse("="));
-                                if (items.Length == 2 && !"".EndsWith(items[1].Trim()))
-                                    _tokenCache.Add(items[0], items[1]);
-                            }
-                        }
+                
+                IConfigurationSection tokenList = _configuration.GetSection("BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens");
+                foreach (IConfigurationSection token in tokenList.GetChildren().ToArray())
+                {
+                    if (_configuration["BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:" + token.Key] != null && !string.IsNullOrEmpty(token.Value)) {
+                        _tokenCache.Add(token.Key, token.Value);
                     }
-                else if (!Directory.Exists(Env.TokensFolderPath)) Directory.CreateDirectory(Env.TokensFolderPath);
+                }
             }
             catch (Exception ex)
             {
@@ -830,19 +837,6 @@ namespace BitPayAPI
             }
         }
 
-        //private void IgnoreBadCertificates() {
-        //    System.Net.ServicePointManager.ServerCertificateValidationCallback =
-        //        new System.Net.Security.RemoteCertificateValidationCallback(AcceptAllCertifications);
-        //}
-
-        //private bool AcceptAllCertifications(
-        //    object sender,
-        //    System.Security.Cryptography.X509Certificates.X509Certificate certification,
-        //    System.Security.Cryptography.X509Certificates.X509Chain chain,
-        //    System.Net.Security.SslPolicyErrors sslPolicyErrors) {
-        //    return true;
-        //}
-
         private string UnicodeToAscii(string json)
         {
             var unicodeBytes = Encoding.Unicode.GetBytes(json);
@@ -859,6 +853,28 @@ namespace BitPayAPI
             // Eliminate special characters from the client name (used as a token label).  Trim to 60 chars.
             _clientName = new Regex("[^a-zA-Z0-9_ ]").Replace(clientName, "_");
             if (_clientName.Length > 60) _clientName = _clientName.Substring(0, 60);
+        }
+
+        /// <summary>
+        ///     Loads the configuration file (JSON)
+        /// </summary>
+        /// <returns></returns>
+        private void GetConfig()
+        {
+            try
+            {
+                if (!File.Exists(_configFilePath))
+                {
+                    throw new Exception("Configuration file not found");
+                }
+                var builder = new ConfigurationBuilder().AddJsonFile(_configFilePath, false, true);
+                _configuration = builder.Build();
+                _env = _configuration.GetSection("BitPayConfiguration:Environment").Value;
+            }
+            catch (Exception ex)
+            {
+                throw new ConfigNotFoundException(ex);
+            }
         }
     }
 }

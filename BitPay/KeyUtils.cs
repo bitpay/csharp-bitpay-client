@@ -10,7 +10,7 @@ namespace BitPayAPI
 {
     public class KeyUtils
     {
-        private const string PrivateKeyFilename = Env.TokensFolderPath + "\\bitpay_private.key";
+        private static string PrivateKeyFile;
 
         private const string Alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
         private static readonly char[] HexArray = "0123456789abcdef".ToCharArray();
@@ -18,9 +18,11 @@ namespace BitPayAPI
         private static string _derivedSin;
         private static readonly BigInteger Base = BigInteger.ValueOf(58);
 
-        public static bool PrivateKeyExists()
+        public static bool PrivateKeyExists(string privateKeyFile)
         {
-            return File.Exists(PrivateKeyFilename);
+            PrivateKeyFile = privateKeyFile;
+            
+            return File.Exists(privateKeyFile);
         }
 
         public static EcKey CreateEcKey()
@@ -45,7 +47,7 @@ namespace BitPayAPI
 
         public static async Task<EcKey> LoadEcKey()
         {
-            using (var fs = File.OpenRead(PrivateKeyFilename))
+            using (var fs = File.OpenRead(PrivateKeyFile))
             {
                 var b = new byte[1024];
                 await fs.ReadAsync(b, 0, b.Length);
@@ -67,8 +69,11 @@ namespace BitPayAPI
         public static async Task SaveEcKey(EcKey ecKey)
         {
             var bytes = ecKey.ToAsn1();
-            if (!Directory.Exists(Env.TokensFolderPath)) Directory.CreateDirectory(Env.TokensFolderPath);
-            using (var fs = new FileStream(PrivateKeyFilename, FileMode.Create, FileAccess.Write))
+            if (!string.IsNullOrEmpty(Path.GetDirectoryName(PrivateKeyFile)) && !Directory.Exists(Path.GetDirectoryName(PrivateKeyFile)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(PrivateKeyFile));
+            }
+            using (var fs = new FileStream(PrivateKeyFile, FileMode.Create, FileAccess.Write))
             {
                 await fs.WriteAsync(bytes, 0, bytes.Length);
             }
