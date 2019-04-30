@@ -32,7 +32,7 @@ namespace BitPayAPI
         private static string _configFilePath;
         
         private const string BitpayApiVersion = "2.0.0";
-        private const string BitpayPluginInfo = "BitPay .Net Client v2.0.1904";
+        private const string BitpayPluginInfo = "BitPay_dotNet_Client_v2.0.1904";
 
         private string _baseUrl;
         private string _clientName;
