@@ -21,66 +21,33 @@ Follow the guide [BitPay.Net Setup utility guide](https://github.com/bitpay/csha
 
 ### Initializing your BitPay client
 
+Once you have the environment file (JSON previously generated) you can initialize the client on two different ways:
+
 ```c#
-// Let the SDK store the private key on the clients local file system.
-BitPay bitpay = new BitPay();
+// Provide the full path to the env file which you have previously stored securely.
+
+BitPay bitpay = new BitPay("BitPay.config.json");
 ```
 
 ```c#
-// Create the private key using the SDK, store it as required, and inject the private key into the SDK.
-ECKey key = KeyUtils.createEcKey();
-this.bitpay = new BitPay(key);
-```
+// Provide a IConfiguration Interface containing the same structure as in the json file.
 
-```c#
-// Create the private key external to the SDK, store it in a file, and inject the private key into the SDK.
-String privateKey = KeyUtils.getKeyStringFromFile(privateKeyFile);
-ECKey key = KeyUtils.createEcKeyFromHexString(privateKey);
-this.bitpay = new BitPay(key);
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("BitPay.config.json", false, false)
+    .Build();
+    
+BitPay bitpay = new BitPay(configuration);
 ```
 
 ### Pair your client with BitPay
 
-Your client must be paired with the BitPay server.  The pairing initializes authentication and authorization for your client to communicate with BitPay for your specific merchant account.  There are two pairing modes available; client initiated and server initiated.
+Your client must be paired with the BitPay server.  The pairing initializes authentication and authorization for your client to communicate with BitPay for your specific merchant account.
 
-### Client initiated pairing
 
-Pairing is accomplished by having your client request a pairing code from the BitPay server.  The pairing code is then entered into the BitPay merchant dashboard for the desired merchant.  Your interactive authentication at https://bitpay.com/login provides the authentication needed to create finalize the client-server pairing request.
+Pairing is accomplished by having the BitPay.Net Setup utility request a pairing code from the BitPay server.
+Meanwhile a new pairing code is generated, the BitPay.Net Setup utility will ask you to activate it in your BitPay account. It will also store the paired token in the environment file.
 
-```c#
-String clientName = "server 1";
-BitPay bitpay = new BitPay(clientName);        
-        
-if (!bitpay.clientIsAuthorized(BitPay.FACADE_POS))
-{
-  // Get POS facade authorization code.
-  String pairingCode = bitpay.requestClientAuthorization(BitPay.FACADE_POS);
-  
-  // Signal the device operator that this client needs to be paired with a merchant account.
-  System.Diagnostics.Debug.WriteLine("Info: Pair this client with your merchant account using the pairing code: " + pairingCode);
-  throw new BitPayException("Error: client is not authorized for POS facade.");
-  
-  // At this point you need to go to your account in the [api-tokens section](https://bitpay.com/dashboard/merchant/api-tokens) , search for the resulted pairing code and approve it. After this step, you can safely start making requests for this facade.
-}
-```
-
-### Server initiated pairing
-
-Pairing is accomplished by obtaining a pairing code from the BitPay server.  The pairing code is then injected into your client (typically during client initialization/configuration).  Your interactive authentication at https://bitpay.com/login provides the authentication needed to create finalize the client-server pairing request.
-
-```c#
-// Obtain a pairingCode from your BitPay account administrator. 
-String pairingCode = "xxxxxxx";
-String clientName = "server 1";
-BitPay bitpay = new BitPay(clientName);
-
-// Is this client already authorized to use the POS facade?
-if (!bitpay.clientIsAuthorized(BitPay.FACADE_POS))
-{
-  // Get POS facade authorization.
-  bitpay.authorizeClient(pairingCode);
-}	
-```
+The pairing code is then entered into the BitPay merchant dashboard for the desired merchant.  Your interactive authentication at https://bitpay.com/login provides the authentication needed to create finalize the client-server pairing request.
 
 ### Create an invoice
 
@@ -98,9 +65,9 @@ You can add optional attributes to the invoice.  Atributes that are not set are 
 ```c#
 Invoice invoice = new Invoice(100.0m, "USD");
 invoice.BuyerName = "Satoshi";
-invoice.BuyerEmail = "satoshi@bitpay.com";
+invoice.BuyerEmail = "satoshi@example.com";
 invoice.FullNotifications = true;
-invoice.NotificationEmail = "satoshi@bitpay.com";
+invoice.NotificationEmail = "satoshi@example.com";
 invoice.PosData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
 invoice = this.bitpay.createInvoice(invoice);
@@ -114,7 +81,7 @@ Invoice invoice = bitpay.getInvoice(invoice.getId());
 
 ### Get exchange rates
 
-You can retrieve BitPay's [BBB exchange rates](https://bitpay.com/bitcoin-exchange-rates).
+You can retrieve BitPay's [BBB exchange rates](https://bitpay.com/exchange-rates).
 
 ```c#
 Rates rates = this.bitpay.getRates();
