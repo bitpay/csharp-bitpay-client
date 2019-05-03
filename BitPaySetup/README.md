@@ -1,17 +1,17 @@
-csharp-bitpay-client
+BitPay.Net Setup utility
 ==================
 
-This is the C# client library for the BitPay Payment Gateway.  This library implements BitPay's [Cryptographically Secure RESTful API](https://bitpay.com/api).
+This is the BitPay.Net Setup utility for the BitPay client setup.  This generates all configuration required for your environment file.
 
 
 ## Getting Started
 
-To get up and running with our C# library quickly, see the GUIDE here: https://github.com/bitpay/csharp-bitpay-client/blob/master/GUIDE.md
+To get up and running with our BitPay.Net Setup utility quickly, follow the GUIDE [Here](https://github.com/bitpay/csharp-bitpay-client/blob/master/BitPaySetup/GUIDE.md).
 
 ## Support
 
 * https://github.com/bitpay/csharp-bitpay-client/issues
-* https://support.bitpay.com
+* https://support.bitpay.com/
 
 ## Contribute
 
