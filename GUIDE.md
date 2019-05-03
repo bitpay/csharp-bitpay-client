@@ -43,7 +43,6 @@ BitPay bitpay = new BitPay(configuration);
 
 Your client must be paired with the BitPay server.  The pairing initializes authentication and authorization for your client to communicate with BitPay for your specific merchant account.
 
-
 Pairing is accomplished by having the BitPay.Net Setup utility request a pairing code from the BitPay server.
 Meanwhile a new pairing code is generated, the BitPay.Net Setup utility will ask you to activate it in your BitPay account. It will also store the paired token in the environment file.
 
@@ -52,7 +51,7 @@ The pairing code is then entered into the BitPay merchant dashboard for the desi
 ### Create an invoice
 
 ```c#
-Invoice invoice = bitpay.createInvoice(100.0m, "USD");
+Invoice invoice = bitpay.createInvoice(100.0, "USD");
 
 String invoiceUrl = invoice.getURL();
 
@@ -63,7 +62,7 @@ String status = invoice.getStatus();
 
 You can add optional attributes to the invoice.  Atributes that are not set are ignored or given default values.
 ```c#
-Invoice invoice = new Invoice(100.0m, "USD");
+Invoice invoice = new Invoice(100.0, "USD");
 invoice.BuyerName = "Satoshi";
 invoice.BuyerEmail = "satoshi@example.com";
 invoice.FullNotifications = true;
