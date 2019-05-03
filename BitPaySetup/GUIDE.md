@@ -11,8 +11,8 @@ For Testing purposes you can create a testing merchant account [Here](https://te
 
 ### First things first
 
-IMPORTANT: If this is the first time you set up your client, follow the below steps in order.
-``
+**IMPORTANT:** If this is the first time you set up your client, follow the below steps in order.
+
 ### Selecting the environment file name and target
 
 Once you open the utility you will be asked to provide the path and filename of the new (or existing) environment file.
@@ -34,6 +34,8 @@ After selecting the environment, the following message will show up. All notific
 ### Select/Create a private key
 
 **Generate Private Key** option in the main menu
+
+**IMPORTANT:** This Private Key is used to sign every request to the BitPay API and it can not be shared or exposed under any circumstances.
 
 The first option in the menu will ask you to provide the path and filename to a existing private key file, if you did not create a private key yet, the new key will be stored in the given path with the given name.
 
@@ -113,4 +115,4 @@ Once you have gone through all steps, the environment file is ready to be used w
 - **PrivateKeyPath:** Points to the path where the private key file is located.**
 - **ApiTokens:** Holds the token for each one of the facades that you are allowed to use.
 <br/><sub><sub>* Do not change unless BitPay asks you to </sub></sub>
-<br/><sub><sub>** Do not change unless BitPay asks you to </sub></sub>
+<br/><sub><sub>** Private Key should be securely stored </sub></sub>
