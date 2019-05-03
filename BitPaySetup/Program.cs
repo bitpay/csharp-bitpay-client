@@ -154,6 +154,7 @@ namespace BitPaySetup
                             Main();
                             return;
                     }
+                    SetNotification(notification + "\n IMPORTANT: If this is the first time you set up your client, follow the below steps in order.");
 
                     appConfig.BitPayConfiguration.Environment = env;
                     GenerateConfFile(confFilePath);
@@ -199,7 +200,7 @@ namespace BitPaySetup
                 }
             }
 
-            Console.WriteLine(" Enter the full path for the key pair files where this will loaded from or generated:");
+            Console.WriteLine(" Enter the full path for the private key files where this will loaded from or generated:");
             Console.WriteLine(" If click Enter, a file named \"bitpay_private_" + env.ToLower() +
                               " will be generated in the root of this application and");
             Console.WriteLine(" any file with the same name in this directory will be overwritten.");
@@ -220,7 +221,7 @@ namespace BitPaySetup
 
                 ecKey = KeyUtils.CreateEcKey();
                 KeyUtils.SaveEcKey(ecKey);
-                SetNotification(" New key pair generated successfully with public key:\n " + ecKey.PublicKeyHexBytes +
+                SetNotification(" New private key generated successfully with public key:\n " + ecKey.PublicKeyHexBytes +
                                 "\n in: \"" + ecKeyFilePath + "\"");
             }
             else
@@ -313,7 +314,7 @@ namespace BitPaySetup
             catch (Exception e)
             {
                 SetNotification(
-                    " An error occurred while generating a new token pair.\n Error Details: " +
+                    " An error occurred while generating a new token pair.\n Make sure you have created a/o selected a private key.\n Error Details: " +
                     e.Message);
 
                 return;
@@ -429,7 +430,7 @@ namespace BitPaySetup
         private static void DrawMenu(int maxitems)
         {
             Console.WriteLine(" Select one of the following options:");
-            Console.WriteLine(" 1. Generate Key pair");
+            Console.WriteLine(" 1. Generate Private Key");
             Console.WriteLine(" 2. Set client description for environment");
             Console.WriteLine(" 3. Get pairing code and token");
             Console.WriteLine(" 4. Select a different environment");
