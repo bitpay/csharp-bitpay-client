@@ -17,11 +17,11 @@ IMPORTANT: If this is the first time you set up your client, follow the below st
 
 Once you open the utility you will be asked to provide the path and filename of the new (or existing) environment file.
 
-![alt Select/create env file](https://raw.githubusercontent.com/anbugal/csharp-bitpay-client/master/screenshots/utility-setup-init.png)
+![alt Select/create env file](https://raw.githubusercontent.com/bitpay/csharp-bitpay-client/master/screenshots/utility-setup-init.png)
 
 Then the environment that you are configuring for.
 
-![alt Select environment](https://raw.githubusercontent.com/anbugal/csharp-bitpay-client/master/screenshots/utility-setup-env.png)
+![alt Select environment](https://raw.githubusercontent.com/bitpay/csharp-bitpay-client/master/screenshots/utility-setup-env.png)
 
 After selecting the environment, the following message will show up. All notifications will show on top of the menu so, please, read carefully.
 
@@ -29,7 +29,7 @@ After selecting the environment, the following message will show up. All notific
 
 ### BitPay.Net Setup utility main menu
 
-![alt Main menu](https://raw.githubusercontent.com/anbugal/csharp-bitpay-client/master/screenshots/utility-setup-menu.png)
+![alt Main menu](https://raw.githubusercontent.com/bitpay/csharp-bitpay-client/master/screenshots/utility-setup-menu.png)
 
 ### Select/Create a private key
 
@@ -57,11 +57,11 @@ This name will help you to identify your client in the API tokens overview in yo
 
 Here you can request a pairing code for each facade your account is configured for.
 
-![alt Select facade](https://raw.githubusercontent.com/anbugal/csharp-bitpay-client/master/screenshots/utility-setup-facade.png)
+![alt Select facade](https://raw.githubusercontent.com/bitpay/csharp-bitpay-client/master/screenshots/utility-setup-facade.png)
 
 Meanwhile a new pairing code is generated, the BitPay.Net Setup utility will ask you to approve it in your BitPay account. It will also store the paired token in the environment file.
 
-![alt Approve pairing code](https://raw.githubusercontent.com/anbugal/csharp-bitpay-client/master/screenshots/utility-setup-pair.png)
+![alt Approve pairing code](https://raw.githubusercontent.com/bitpay/csharp-bitpay-client/master/screenshots/utility-setup-pair.png)
 
 ### Change the targeted environment
 
@@ -108,9 +108,9 @@ Once you have gone through all steps, the environment file is ready to be used w
 - **Environment:** This value points the client on the direction of the **targeted environment**, which can be set to either **Test** or **Prod**.
 - **EnvConfig:** Holds the configuration of each available environment.
 - **ClientDescription:** Names the client name which will help to identify the API Tokens in your BitPay account.
-- **ApiUrl:** Defines the BitPay API End-point Url*.
-- **ApiVersion:** Defines the BitPay API version*.
-- **PrivateKeyPath:** Points to the path where the private key file is located**.
+- **ApiUrl:** Defines the BitPay API End-point Url.*
+- **ApiVersion:** Defines the BitPay API version.*
+- **PrivateKeyPath:** Points to the path where the private key file is located.**
 - **ApiTokens:** Holds the token for each one of the facades that you are allowed to use.
 <br/><sub><sub>* Do not change unless BitPay asks you to </sub></sub>
 <br/><sub><sub>** Do not change unless BitPay asks you to </sub></sub>
