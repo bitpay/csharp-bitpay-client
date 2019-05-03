@@ -6,11 +6,11 @@ This is the BitPay.Net Setup utility for the BitPay client setup.  This generate
 
 ## Getting Started
 
-To get up and running with our BitPay.Net Setup utility quickly, follow the GUIDE [Here](https://github.com/bitpay/csharp-bitpay-client/blob/master/BitPaySetup/GUIDE.md).
+To get up and running with our BitPay.Net Setup utility quickly, follow the GUIDE [Here](https://github.com/anbugal/csharp-bitpay-client/blob/master/BitPaySetup/GUIDE.md).
 
 ## Support
 
-* https://github.com/bitpay/csharp-bitpay-client/issues
+* https://github.com/anbugal/csharp-bitpay-client/issues
 * https://support.bitpay.com/
 
 ## Contribute

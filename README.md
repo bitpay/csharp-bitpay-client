@@ -6,11 +6,11 @@ This is the C# client library for the BitPay Payment Gateway.  This library impl
 
 ## Getting Started
 
-To get up and running with our C# library quickly, see the GUIDE here: https://github.com/bitpay/csharp-bitpay-client/blob/master/GUIDE.md
+To get up and running with our C# library quickly, see the GUIDE here: https://github.com/anbugal/csharp-bitpay-client/blob/master/GUIDE.md
 
 ## Support
 
-* https://github.com/bitpay/csharp-bitpay-client/issues
+* https://github.com/anbugal/csharp-bitpay-client/issues
 * https://support.bitpay.com
 
 ## Contribute
