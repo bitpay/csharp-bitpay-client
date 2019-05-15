@@ -1,6 +1,6 @@
 ﻿namespace BitPayAPI.Models.Invoice
 {
-    public class SupportedTransactionsCurrency
+    public class SupportedTransactionCurrency
     {
         public bool Enabled { get; set; }
     }

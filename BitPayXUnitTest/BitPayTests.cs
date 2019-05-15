@@ -35,7 +35,7 @@ namespace BitPayXUnitTest
         {
             // JSON minified with the BitPay configuration as in the required configuration file
             // and parsed into a IConfiguration object
-            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"ClientDescription\":\"" + ClientName + "\",\"ApiUrl\":\"https://test.bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"sec/bitpay_test_private.key\",\"ApiTokens\":{\"pos\":\"FrbBsxHFkoTbzJPDe6vzBghJzMvDe1nbGUJ3M6n5MHQd\",\"merchant\":\"EZYmyjSaUXh6NcF7Ej9g7dizhhsW2eRvWT29W6CG1omT\",\"payroll\":\"DjyLfN2JDeFoHgUV9Xpx3kvLpA5G2emiyFxUv1q9CREt\"}},\"Prod\":{\"ClientDescription\":\"\",\"ApiUrl\":\"https://bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"pos\":\"\",\"merchant\":\"\",\"payroll\":\"\"}}}}}";
+            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"ClientDescription\":\"Net_test_140519\",\"ApiUrl\":\"https://test.bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"bitpay_private_test.key\",\"ApiTokens\":{\"pos\":\"EyxfvwNGCnH31qwyED2YzuaBMewKhpnfSxBnm32e7R9E\",\"merchant\":\"NJ3nQUrmuH8RvBsKEGt7i1ocCFQfRo1qGSKUiUUPPbJ\",\"payroll\":\"8N17w4Aw3GXjykGyiqUzigswXf22MnfB7HP9vHqfDSHL\"}},\"Prod\":{\"ClientDescription\":\"\",\"ApiUrl\":\"https://bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"pos\":\"\",\"merchant\":\"\",\"payroll\":\"\"}}}}}";
             var memoryJsonFile = new MemoryFileInfo("config.json", Encoding.UTF8.GetBytes(json), DateTimeOffset.Now);
             var memoryFileProvider = new MockFileProvider(memoryJsonFile);
 
@@ -146,11 +146,29 @@ namespace BitPayXUnitTest
             // create an invoice and make sure we receive the correct fields values back
             var invoice = new Invoice(100.0, "USD") {
                 BuyerName = "Satoshi",
-                PosData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+                BuyerAddress1 = "street",
+                BuyerAddress2 = "911",
+                BuyerCity = "Washington",
+                BuyerState = "District of Columbia",
+                BuyerZip = "20000",
+                BuyerCountry = "USA",
+                //BuyerEmail = "",
+                BuyerPhone = "0644388250",
+                //BuyerNotify = "",
+                PosData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                FullNotifications = true,
+                //NotificationEmail = "",
+                //NotificationUrl = "",
+                OrderId = "1234",
+                Physical = true,
+                //RedirectUrl = "",
+                TransactionSpeed = "medium",
+                //ItemCode = "bitcoindonation",
+                ItemDesc = "dhdhdfgh"
             };
-            invoice = await _bitpay.CreateInvoice(invoice);
+            invoice = await _bitpay.CreateInvoice(invoice, Facade.Merchant);
             Assert.Equal(Invoice.StatusNew, invoice.Status);
-            Assert.Equal("Satoshi", invoice.BuyerName);
+            Assert.Equal("Satoshi", invoice.Buyer.Name);
             Assert.Equal("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", invoice.PosData);
         }
 

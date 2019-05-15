@@ -278,11 +278,13 @@
     <Compile Include="Exceptions\TokenRegistrationException.cs" />
     <Compile Include="Exceptions\TokensCacheLoadException.cs" />
     <Compile Include="Exceptions\TokensCacheWriteException.cs" />
+    <Compile Include="Models\Invoice\InvoiceBuyer.cs" />
     <Compile Include="Models\Invoice\ExchangeRate.cs" />
     <Compile Include="Models\Invoice\ExchangeRateBch.cs" />
     <Compile Include="Models\Invoice\ExchangeRateBtc.cs" />
     <Compile Include="Models\Invoice\ExchangeRates.cs" />
     <Compile Include="Models\InvoiceData.cs" />
+    <Compile Include="Models\Invoice\InvoiceBuyerProvidedInfo.cs" />
     <Compile Include="Models\Invoice\InvoiceFlags.cs" />
     <Compile Include="Models\Invoice\MinerFees.cs" />
     <Compile Include="Models\Invoice\MinerFeesItem.cs" />
@@ -301,8 +303,8 @@
     <Compile Include="Models\LedgerEntry.cs" />
     <Compile Include="Models\Policy.cs" />
     <Compile Include="KeyUtils.cs" />
-    <Compile Include="Models\Invoice\SupportedTransactionsCurrency.cs" />
-    <Compile Include="Models\Invoice\SupportedTransactionsCurrencies.cs" />
+    <Compile Include="Models\Invoice\SupportedTransactionCurrency.cs" />
+    <Compile Include="Models\Invoice\SupportedTransactionCurrencies.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Models\Rate.cs" />
     <Compile Include="Models\Rates.cs" />

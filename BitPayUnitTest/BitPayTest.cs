@@ -147,11 +147,29 @@ namespace BitPayUnitTest {
             // create an invoice and make sure we receive the correct fields values back
             var invoice = new Invoice(100.0, "USD") {
                 BuyerName = "Satoshi",
-                PosData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+                BuyerAddress1 = "street",
+                BuyerAddress2 = "911",
+                BuyerCity = "Washington",
+                BuyerState = "District of Columbia",
+                BuyerZip = "20000",
+                BuyerCountry = "USA",
+                //BuyerEmail = "",
+                BuyerPhone = "0644388250",
+                //BuyerNotify = "",
+                PosData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                FullNotifications = true,
+                //NotificationEmail = "",
+                //NotificationUrl = "",
+                OrderId = "1234",
+                Physical = true,
+                //RedirectUrl = "",
+                TransactionSpeed = "medium",
+                //ItemCode = "bitcoindonation",
+                ItemDesc = "dhdhdfgh"
             };
             invoice = await _bitpay.CreateInvoice(invoice);
             Assert.AreEqual(Invoice.StatusNew, invoice.Status, "Status is incorrect");
-            Assert.AreEqual("Satoshi", invoice.BuyerName, "BuyerName is incorrect");
+            Assert.AreEqual("Satoshi", invoice.Buyer.Name, "BuyerName is incorrect");
             Assert.AreEqual("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", invoice.PosData, "PosData is incorrect");
         }
 

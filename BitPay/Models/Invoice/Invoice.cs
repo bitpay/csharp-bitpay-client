@@ -25,7 +25,7 @@ namespace BitPayAPI.Models.Invoice
         {
         }
 
-        // Creates a minimal inovice request object.
+        // Creates a minimal invoice request object.
         public Invoice(double price, string currency)
         {
             Price = price;
@@ -35,16 +35,17 @@ namespace BitPayAPI.Models.Invoice
         // API fields
         //
 
-        [JsonProperty(PropertyName = "guid")] public string Guid { get; set; }
+        [JsonProperty(PropertyName = "guid")]
+        public string Guid { get; set; }
 
-        [JsonProperty(PropertyName = "nonce")] public long Nonce { get; set; }
-
-        [JsonProperty(PropertyName = "token")] public string Token { get; set; }
+        [JsonProperty(PropertyName = "token")]
+        public string Token { get; set; }
 
         // Required fields
         //
 
-        [JsonProperty(PropertyName = "price")] public double Price { get; set; }
+        [JsonProperty(PropertyName = "price")]
+        public double Price { get; set; }
 
         [JsonProperty(PropertyName = "currency")]
         public string Currency
@@ -91,6 +92,10 @@ namespace BitPayAPI.Models.Invoice
 
         [JsonProperty(PropertyName = "physical")]
         public bool Physical { get; set; }
+        
+
+        // Buyer data
+        //
 
         [JsonProperty(PropertyName = "buyerName")]
         public string BuyerName { get; set; }
@@ -119,17 +124,21 @@ namespace BitPayAPI.Models.Invoice
         [JsonProperty(PropertyName = "buyerPhone")]
         public string BuyerPhone { get; set; }
 
+        [JsonProperty(PropertyName = "buyerNotify")]
+        public string BuyerNotify { get; set; }
+
         // Response fields
         //
+
+        public InvoiceBuyer Buyer { get; set; }
 
         public string Id { get; set; }
 
         public string Url { get; set; }
 
         public string Status { get; set; }
-
-        [Obsolete("To be removed, use PaymentSubtotals")]
-        public double BtcPrice { get; set; }
+        
+        public string LowFeeDetected { get; set; }
 
         public long InvoiceTime { get; set; }
 
@@ -137,32 +146,18 @@ namespace BitPayAPI.Models.Invoice
 
         public long CurrentTime { get; set; }
 
-        [Obsolete("To be removed, use AmountPaid")]
-        public double BtcPaid { get; set; }
-
-        [Obsolete("To be removed, use PaymentTotals")]
-        public double BtcDue { get; set; }
-
         public List<InvoiceTransaction> Transactions { get; set; }
 
-        [Obsolete("To be removed, use ExchangeRates")]
-        public double Rate { get; set; }
-
-        [Obsolete("To be removed, use ExchangeRates")]
-        public Dictionary<string, string> ExRates { get; set; }
-
         public string ExceptionStatus { get; set; }
+        
+        public string RefundAddressRequestPending { get; set; }
+        
+        public InvoiceBuyerProvidedInfo BuyerProvidedInfo { get; set; }
 
-        [Obsolete("To be removed, use PaymentCodes")]
-        public InvoicePaymentUrls PaymentUrls { get; set; }
+        [Obsolete("To be removed")]
+        private InvoiceFlags Flags { get; set; } = new InvoiceFlags();
 
-        [Obsolete("To be removed")] public bool Refundable => Flags.Refundable;
-
-        [JsonProperty] private InvoiceFlags Flags { get; set; } = new InvoiceFlags();
-
-        public string TransactionCurrency { get; set; }
-
-        public SupportedTransactionsCurrencies SupportedTransactionsCurrencies { get; set; }
+        public SupportedTransactionCurrencies SupportedTransactionCurrencies { get; set; }
 
         public MinerFees MinerFees { get; set; }
 
@@ -172,14 +167,13 @@ namespace BitPayAPI.Models.Invoice
 
         public PaymentTotal PaymentTotals { get; set; }
 
+        public PaymentTotal PaymentDisplayTotals { get; set; }
+
+        public PaymentTotal PaymentDisplaySubTotals { get; set; }
+
         public double AmountPaid { get; set; }
 
         public ExchangeRates ExchangeRates { get; set; }
-
-        public bool ShouldSerializeNonce()
-        {
-            return Nonce != 0;
-        }
 
         public bool ShouldSerializeOrderId()
         {
@@ -276,6 +270,11 @@ namespace BitPayAPI.Models.Invoice
             return !string.IsNullOrEmpty(BuyerPhone);
         }
 
+        public bool ShouldSerializeBuyerNotify()
+        {
+            return !string.IsNullOrEmpty(BuyerNotify);
+        }
+
         public bool ShouldSerializeId()
         {
             return false;
@@ -291,7 +290,12 @@ namespace BitPayAPI.Models.Invoice
             return false;
         }
 
-        public bool ShouldSerializeBtcPrice()
+        public bool ShouldSerializeLowFeeDetected()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializePaymentSubtotals()
         {
             return false;
         }
@@ -311,12 +315,42 @@ namespace BitPayAPI.Models.Invoice
             return false;
         }
 
-        public bool ShouldSerializeBtcPaid()
+        public bool ShouldSerializeAmountPaid()
         {
             return false;
         }
 
-        public bool ShouldSerializeBtcDue()
+        public bool ShouldSerializePaymentTotals()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializePaymentDisplayTotals()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializePaymentDisplaySubTotals()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeExchangeRates()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeSupportedTransactionCurrencies()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeMinerFees()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializePaymentCodes()
         {
             return false;
         }
@@ -326,27 +360,17 @@ namespace BitPayAPI.Models.Invoice
             return false;
         }
 
-        public bool ShouldSerializeRate()
-        {
-            return false;
-        }
-
-        public bool ShouldSerializeExRates()
-        {
-            return false;
-        }
-
         public bool ShouldSerializeExceptionStatus()
         {
             return false;
         }
 
-        public bool ShouldSerializePaymentUrls()
+        public bool ShouldSerializeRefundAddressRequestPending()
         {
             return false;
         }
 
-        public bool ShouldSerializeRefundable()
+        public bool ShouldSerializeBuyerProvidedInfo()
         {
             return false;
         }
