@@ -158,15 +158,16 @@ namespace BitPayAPI
         /// </summary>
         /// <param name="invoice">An invoice request object.</param>
         /// <param name="facade">The facade to create the invoice against</param>
+        /// <param name="signRequest">Allow unsigned request</param>
         /// <returns>A new invoice object returned from the server.</returns>
-        public async Task<Invoice> CreateInvoice(Invoice invoice, string facade = Facade.PointOfSale)
+        public async Task<Invoice> CreateInvoice(Invoice invoice, string facade = Facade.PointOfSale, bool signRequest = true)
         {
             try
             {
                 invoice.Token = GetAccessToken(facade);
                 invoice.Guid = Guid.NewGuid().ToString();
                 var json = JsonConvert.SerializeObject(invoice);
-                var response = await PostWithSignature("invoices", json).ConfigureAwait(false);
+                var response = await Post("invoices", json, signRequest).ConfigureAwait(false);
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
                 JsonConvert.PopulateObject(responseString, invoice);
             }
@@ -190,27 +191,30 @@ namespace BitPayAPI
         /// <param name="invoiceId">The id of the requested invoice.</param>
         /// <param name="facade">The facade to get the invoice from</param>
         /// <returns>The invoice object retrieved from the server.</returns>
-        public async Task<Invoice> GetInvoice(string invoiceId, string facade = Facade.Merchant)
+        public async Task<Invoice> GetInvoice(string invoiceId, string facade = Facade.Merchant, bool signRequest = true)
         {
+            Dictionary<string, string> parameters = null;
             try
             {
-                // Provide the merchant token when the merchant facade is being used.
-                // GET/invoices expects the merchant token and not the merchant/invoice token.
-                Dictionary<string, string> parameters;
-                try
+                if (signRequest)
                 {
-                    parameters = new Dictionary<string, string>
+                    // Provide the merchant token when the merchant facade is being used.
+                    // GET/invoices expects the merchant token and not the merchant/invoice token.
+                    try
                     {
-                        {"token", GetAccessToken(facade)}
-                    };
-                }
-                catch (BitPayException)
-                {
-                    // No token for invoice.
-                    parameters = null;
+                        parameters = new Dictionary<string, string>
+                        {
+                            {"token", GetAccessToken(facade)}
+                        };
+                    }
+                    catch (BitPayException)
+                    {
+                        // No token for invoice.
+                        parameters = null;
+                    }
                 }
 
-                var response = await Get("invoices/" + invoiceId, parameters);
+                var response = await Get("invoices/" + invoiceId, parameters, signRequest);
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<Invoice>(responseString);
             }
@@ -259,7 +263,7 @@ namespace BitPayAPI
         {
             try
             {
-                var response = await Get("rates");
+                var response = await Get("rates", signatureRequired: false);
                 var responseString = await ResponseToJsonString(response);
                 var rates = JsonConvert.DeserializeObject<List<Rate>>(responseString);
                 return new Rates(rates, this);
@@ -685,7 +689,7 @@ namespace BitPayAPI
         /// <param name="uri">The URI to query</param>
         /// <param name="parameters">The request parameters</param>
         /// <returns>The HttpResponseMessage of the request</returns>
-        private async Task<HttpResponseMessage> Get(string uri, Dictionary<string, string> parameters = null)
+        private async Task<HttpResponseMessage> Get(string uri, Dictionary<string, string> parameters = null, bool signatureRequired = true)
         {
             try
             {
@@ -699,6 +703,10 @@ namespace BitPayAPI
                     foreach (var entry in parameters) fullUrl += entry.Key + "=" + entry.Value + "&";
 
                     fullUrl = fullUrl.Substring(0, fullUrl.Length - 1);
+                }
+
+                if (signatureRequired)
+                {
                     var signature = KeyUtils.Sign(_ecKey, fullUrl);
                     _httpClient.DefaultRequestHeaders.Add("x-signature", signature);
                     _httpClient.DefaultRequestHeaders.Add("x-identity", KeyUtils.BytesToHex(_ecKey.PublicKey));

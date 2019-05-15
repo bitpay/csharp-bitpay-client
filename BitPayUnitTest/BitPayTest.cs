@@ -141,6 +141,14 @@ namespace BitPayUnitTest {
             var retrievedInvoice = await _bitpay.GetInvoice(invoice.Id);
             Assert.AreEqual(invoice.Id, retrievedInvoice.Id, "Expected invoice not retrieved");
         }
+        
+        [TestMethod]
+        public async Task TestShouldGetInvoiceNoSigned() {
+            // create an invoice without signature then retrieve it through the get method - they should match
+            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, "EUR"), signRequest: false);
+            var retrievedInvoice = await _bitpay.GetInvoice(invoice.Id, Facade.PointOfSale, false);
+            Assert.Equal(invoice.Id, retrievedInvoice.Id);
+        }
 
         [TestMethod]
         public async Task TestShouldCreateInvoiceWithAdditionalParams() {
