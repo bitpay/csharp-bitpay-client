@@ -18,7 +18,7 @@ namespace BitPayXUnitTest
         // The pairing code generated in your BitPay account -
         // https://test.bitpay.com/dashboard/merchant/api-tokens
         // This is the POS Pairing Code
-        private static readonly string PairingCode = "fWASBGz";
+        private static readonly string PairingCode = "hWR3b8L";
 
         // Your favourite client name
         private static readonly string ClientName = "BitPay .Net Client v2.0.1904 Tester on " + Environment.MachineName;
@@ -35,7 +35,7 @@ namespace BitPayXUnitTest
         {
             // JSON minified with the BitPay configuration as in the required configuration file
             // and parsed into a IConfiguration object
-            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"ClientDescription\":\"" + ClientName + "\",\"ApiUrl\":\"https://test.bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"sec/bitpay_test_private.key\",\"ApiTokens\":{\"pos\":\"FrbBsxHFkoTbzJPDe6vzBghJzMvDe1nbGUJ3M6n5MHQd\",\"merchant\":\"EZYmyjSaUXh6NcF7Ej9g7dizhhsW2eRvWT29W6CG1omT\",\"payroll\":\"DjyLfN2JDeFoHgUV9Xpx3kvLpA5G2emiyFxUv1q9CREt\"}},\"Prod\":{\"ClientDescription\":\"\",\"ApiUrl\":\"https://bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"pos\":\"\",\"merchant\":\"\",\"payroll\":\"\"}}}}}";
+            var json = "{\"BitPayConfiguration\": {\"Environment\": \"Test\",\"EnvConfig\": {\"Test\": {\"ClientDescription\": \"nettest070519\",\"ApiUrl\": \"https://test.bitpay.com/\",\"ApiVersion\": \"2.0.0\",\"PrivateKeyPath\": \"bitpay_private_test.key\",\"ApiTokens\": {\"pos\": \"BDP91QpWyWKJHyKU6KNPK761uThySwjX9xZs6kp53rei\",\"merchant\": \"2dPvsuvCVx2am6aeJHzYJB6dBbGtYoCpNbfT9HkULeNG\",\"payroll\": \"EbZxUi7RBZt2y3jx3A41rASKQzJi17xzxJQPuAwGNWxd\"}},\"Prod\": {\"ClientDescription\": \"\",\"ApiUrl\": \"https://bitpay.com/\",\"ApiVersion\": \"2.0.0\",\"PrivateKeyPath\": \"\",\"ApiTokens\": {\"pos\": \"\",\"merchant\": \"\",\"payroll\": \"\"}} }}}";
             var memoryJsonFile = new MemoryFileInfo("config.json", Encoding.UTF8.GetBytes(json), DateTimeOffset.Now);
             var memoryFileProvider = new MockFileProvider(memoryJsonFile);
 
@@ -138,6 +138,14 @@ namespace BitPayXUnitTest
             // create an invoice then retrieve it through the get method - they should match
             var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, "EUR"));
             var retrievedInvoice = await _bitpay.GetInvoice(invoice.Id);
+            Assert.Equal(invoice.Id, retrievedInvoice.Id);
+        }
+        
+        [Fact]
+        public async Task TestShouldGetInvoiceNoSigned() {
+            // create an invoice then retrieve it through the get method - they should match
+            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, "EUR"), signRequest: false);
+            var retrievedInvoice = await _bitpay.GetInvoice(invoice.Id, Facade.PointOfSale, false);
             Assert.Equal(invoice.Id, retrievedInvoice.Id);
         }
 
