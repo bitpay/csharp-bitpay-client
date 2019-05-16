@@ -8,6 +8,7 @@ using BitPayAPI.Exceptions;
 using BitPayAPI.Models;
 using BitPayAPI.Models.Invoice;
 using Microsoft.Extensions.Configuration;
+using Buyer = BitPayAPI.Models.Invoice.Buyer;
 
 namespace BitPayXUnitTest
 {
@@ -18,7 +19,7 @@ namespace BitPayXUnitTest
         // The pairing code generated in your BitPay account -
         // https://test.bitpay.com/dashboard/merchant/api-tokens
         // This is the POS Pairing Code
-        private static readonly string PairingCode = "fWASBGz";
+        private static readonly string PairingCode = "Bh3yy6r";
 
         // Your favourite client name
         private static readonly string ClientName = "BitPay .Net Client v2.0.1904 Tester on " + Environment.MachineName;
@@ -35,7 +36,7 @@ namespace BitPayXUnitTest
         {
             // JSON minified with the BitPay configuration as in the required configuration file
             // and parsed into a IConfiguration object
-            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"ClientDescription\":\"Net_test_140519\",\"ApiUrl\":\"https://test.bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"bitpay_private_test.key\",\"ApiTokens\":{\"pos\":\"EyxfvwNGCnH31qwyED2YzuaBMewKhpnfSxBnm32e7R9E\",\"merchant\":\"NJ3nQUrmuH8RvBsKEGt7i1ocCFQfRo1qGSKUiUUPPbJ\",\"payroll\":\"8N17w4Aw3GXjykGyiqUzigswXf22MnfB7HP9vHqfDSHL\"}},\"Prod\":{\"ClientDescription\":\"\",\"ApiUrl\":\"https://bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"pos\":\"\",\"merchant\":\"\",\"payroll\":\"\"}}}}}";
+            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"ClientDescription\":\"Net_test_140519\",\"ApiUrl\":\"https://test.bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"bitpay_private_test.key\",\"ApiTokens\":{\"pos\":\"GzkfCV5uiRPW6WE82iFWmGiVKSBw2Sjxe8pYq2DnD7Z7\",\"merchant\":\"NJ3nQUrmuH8RvBsKEGt7i1ocCFQfRo1qGSKUiUUPPbJ\",\"payroll\":\"8N17w4Aw3GXjykGyiqUzigswXf22MnfB7HP9vHqfDSHL\"}},\"Prod\":{\"ClientDescription\":\"\",\"ApiUrl\":\"https://bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"pos\":\"\",\"merchant\":\"\",\"payroll\":\"\"}}}}}";
             var memoryJsonFile = new MemoryFileInfo("config.json", Encoding.UTF8.GetBytes(json), DateTimeOffset.Now);
             var memoryFileProvider = new MockFileProvider(memoryJsonFile);
 
@@ -85,7 +86,7 @@ namespace BitPayXUnitTest
         public async Task TestShouldGetInvoiceId() 
         {
             // create an invoice and make sure we receive an id - which means it has been successfully submitted
-            var invoice = new Invoice(50.0, "USD");
+            var invoice = new Invoice(50.0, Currency.USD);
             var basicInvoice = await _bitpay.CreateInvoice(invoice);
             Assert.NotNull(basicInvoice.Id);
         }
@@ -93,21 +94,21 @@ namespace BitPayXUnitTest
         [Fact]
         public async Task TestShouldGetInvoiceUrl() {
             // create an invoice and make sure we receive an invoice url - which means we can check it online
-            var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, "USD"));
+            var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, Currency.USD));
             Assert.NotNull(basicInvoice.Url);
         }
 
         [Fact]
         public async Task TestShouldGetInvoiceStatus() {
             // create an invoice and make sure we receive a correct invoice status (new)
-            var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, "USD"));
-            Assert.Equal(Invoice.StatusNew, basicInvoice.Status);
+            var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, Currency.USD));
+            Assert.Equal(Status.New, basicInvoice.Status);
         }
 
         [Fact]
         public async Task TestShouldGetInvoiceBtcPrice() {
             // create an invoice and make sure we receive values for the Bitcoin Cash and Bitcoin fields, respectively
-            var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, "USD"));
+            var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, Currency.USD));
             Assert.NotNull(basicInvoice.PaymentSubtotals.Btc);
             Assert.NotNull(basicInvoice.PaymentSubtotals.Bch);
         }
@@ -115,28 +116,28 @@ namespace BitPayXUnitTest
         [Fact]
         public async Task TestShouldCreateInvoiceOneTenthBtc() {
             // create an invoice and make sure we receive the correct price value back (under 1 BTC)
-            var invoice = await _bitpay.CreateInvoice(new Invoice(0.1, "BTC"));
+            var invoice = await _bitpay.CreateInvoice(new Invoice(0.1, Currency.BTC));
             Assert.Equal(0.1, invoice.Price);
         }
 
         [Fact]
         public async Task TestShouldCreateInvoice100Usd() {
             // create an invoice and make sure we receive the correct price value back (USD)
-            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, "USD"));
+            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, Currency.USD));
             Assert.Equal(100.0, invoice.Price);
         }
 
         [Fact]
         public async Task TestShouldCreateInvoice100Eur() {
             // create an invoice and make sure we receive the correct price value back (EUR)
-            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, "EUR"));
+            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, Currency.EUR));
             Assert.Equal(100.0, invoice.Price);
         }
 
         [Fact]
         public async Task TestShouldGetInvoice() {
             // create an invoice then retrieve it through the get method - they should match
-            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, "EUR"));
+            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, Currency.EUR));
             var retrievedInvoice = await _bitpay.GetInvoice(invoice.Id);
             Assert.Equal(invoice.Id, retrievedInvoice.Id);
         }
@@ -144,7 +145,7 @@ namespace BitPayXUnitTest
         [Fact]
         public async Task TestShouldGetInvoiceNoSigned() {
             // create an invoice then retrieve it through the get method - they should match
-            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, "EUR"), signRequest: false);
+            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, Currency.EUR), signRequest: false);
             var retrievedInvoice = await _bitpay.GetInvoice(invoice.Id, Facade.PointOfSale, false);
             Assert.Equal(invoice.Id, retrievedInvoice.Id);
         }
@@ -152,30 +153,39 @@ namespace BitPayXUnitTest
         [Fact]
         public async Task TestShouldCreateInvoiceWithAdditionalParams() {
             // create an invoice and make sure we receive the correct fields values back
-            var invoice = new Invoice(100.0, "USD") {
-                BuyerName = "Satoshi",
-                BuyerAddress1 = "street",
-                BuyerAddress2 = "911",
-                BuyerCity = "Washington",
-                BuyerState = "District of Columbia",
-                BuyerZip = "20000",
-                BuyerCountry = "USA",
-                //BuyerEmail = "",
-                BuyerPhone = "0644388250",
-                //BuyerNotify = "",
+            var buyerData = new Buyer();
+            buyerData.Name = "Satoshi";
+            buyerData.Address1 = "street";
+            buyerData.Address2 = "911";
+            buyerData.Locality = "Washington";
+            buyerData.Region = "District of Columbia";
+            buyerData.PostalCode = "20000";
+            buyerData.Country = "USA";
+//            buyerData.Email = "";
+//            buyerData.Phone = "";
+            buyerData.Notify = true;
+            
+            var invoice = new Invoice(100.0, Currency.USD)
+            {
+                Buyer = buyerData,
                 PosData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                PaymentCurrencies = new List<string> {
+                    Currency.BTC,
+                    Currency.BCH
+                },
+                AcceptanceWindow = 480000,
                 FullNotifications = true,
-                //NotificationEmail = "",
-                //NotificationUrl = "",
+//                NotificationEmail = "",
+//                NotificationUrl = "",
                 OrderId = "1234",
                 Physical = true,
-                //RedirectUrl = "",
+//                RedirectUrl = "",
                 TransactionSpeed = "medium",
-                //ItemCode = "bitcoindonation",
+                ItemCode = "bitcoindonation",
                 ItemDesc = "dhdhdfgh"
             };
             invoice = await _bitpay.CreateInvoice(invoice, Facade.Merchant);
-            Assert.Equal(Invoice.StatusNew, invoice.Status);
+            Assert.Equal(Status.New, invoice.Status);
             Assert.Equal("Satoshi", invoice.Buyer.Name);
             Assert.Equal("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", invoice.PosData);
         }
@@ -191,21 +201,21 @@ namespace BitPayXUnitTest
         public async Task TestShouldGetUsdExchangeRate() {
             // get the exchange rates and check the USD value
             var rates = await _bitpay.GetRates();
-            Assert.True(rates.GetRate("USD") != 0, "Exchange rate not retrieved: USD");
+            Assert.True(rates.GetRate(Currency.USD) != 0, "Exchange rate not retrieved: USD");
         }
 
         [Fact]
         public async Task TestShouldGetEurExchangeRate() {
             // get the exchange rates and check the EUR value
             var rates = await _bitpay.GetRates();
-            Assert.True(rates.GetRate("EUR") != 0, "Exchange rate not retrieved: EUR");
+            Assert.True(rates.GetRate(Currency.EUR) != 0, "Exchange rate not retrieved: EUR");
         }
 
         [Fact]
         public async Task TestShouldGetCnyExchangeRate() {
             // get the exchange rates and check the CNY value
             var rates = await _bitpay.GetRates();
-            Assert.True(rates.GetRate("CNY") != 0, "Exchange rate not retrieved: CNY");
+            Assert.True(rates.GetRate(Currency.CNY) != 0, "Exchange rate not retrieved: CNY");
         }
 
         [Fact]
@@ -219,7 +229,7 @@ namespace BitPayXUnitTest
         [Fact]
         public async Task TestShouldGetInvoiceIdOne() {
             // create an invoice and get it by its id
-            var invoice = await _bitpay.CreateInvoice(new Invoice(1.0, "USD"), Facade.Merchant);
+            var invoice = await _bitpay.CreateInvoice(new Invoice(1.0, Currency.USD), Facade.Merchant);
             invoice = await _bitpay.GetInvoice(invoice.Id);
             Assert.NotNull(invoice.Id);
         }
@@ -261,7 +271,7 @@ namespace BitPayXUnitTest
             var effectiveDate = threeDaysFromNow;
             var reference = "My test batch";
             var bankTransferId = "My bank transfer id";
-            var currency = "USD";
+            var currency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
                 new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u", "Alice"),
                 new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A", "Bob")
@@ -288,7 +298,7 @@ namespace BitPayXUnitTest
             var effectiveDate = threeDaysFromNow;
             var reference = "My test batch";
             var bankTransferId = "My bank transfer id";
-            var currency = "USD";
+            var currency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
                 new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u", "Alice"),
                 new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A", "Bob")
