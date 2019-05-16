@@ -7,15 +7,6 @@ namespace BitPayAPI.Models.Invoice
 {
     public class Invoice
     {
-        public const string StatusNew = "new";
-        public const string StatusPaid = "paid";
-        public const string StatusConfirmed = "confirmed";
-        public const string StatusComplete = "complete";
-        public const string StatusInvalid = "invalid";
-        public const string ExstatusFalse = "false";
-        public const string ExstatusPaidOver = "paidOver";
-        public const string ExstatusPaidPartial = "paidPartial";
-
         private string _currency = "";
 
         /// <summary>
@@ -53,8 +44,8 @@ namespace BitPayAPI.Models.Invoice
             get => _currency;
             set
             {
-                if (value.Length != 3)
-                    throw new BitPayException("Error: currency code must be exactly three characters");
+                if (typeof(Currency).GetMember(value).Length == 0)
+                    throw new BitPayException("Error: currency code must be a type of BitPayAPI.Models.Currency");
 
                 _currency = value;
             }
@@ -84,6 +75,9 @@ namespace BitPayAPI.Models.Invoice
         [JsonProperty(PropertyName = "fullNotifications")]
         public bool FullNotifications { get; set; }
 
+        [JsonProperty(PropertyName = "extendedNotifications")]
+        public bool ExtendedNotifications { get; set; }
+
         [JsonProperty(PropertyName = "notificationEmail")]
         public string NotificationEmail { get; set; }
 
@@ -92,45 +86,21 @@ namespace BitPayAPI.Models.Invoice
 
         [JsonProperty(PropertyName = "physical")]
         public bool Physical { get; set; }
-        
 
+        [JsonProperty(PropertyName = "paymentCurrencies")]
+        public List<string> PaymentCurrencies { get; set; }
+
+        [JsonProperty(PropertyName = "acceptanceWindow")]
+        public long AcceptanceWindow { get; set; }
+        
         // Buyer data
         //
 
-        [JsonProperty(PropertyName = "buyerName")]
-        public string BuyerName { get; set; }
-
-        [JsonProperty(PropertyName = "buyerAddress1")]
-        public string BuyerAddress1 { get; set; }
-
-        [JsonProperty(PropertyName = "buyerAddress2")]
-        public string BuyerAddress2 { get; set; }
-
-        [JsonProperty(PropertyName = "buyerCity")]
-        public string BuyerCity { get; set; }
-
-        [JsonProperty(PropertyName = "buyerState")]
-        public string BuyerState { get; set; }
-
-        [JsonProperty(PropertyName = "buyerZip")]
-        public string BuyerZip { get; set; }
-
-        [JsonProperty(PropertyName = "buyerCountry")]
-        public string BuyerCountry { get; set; }
-
-        [JsonProperty(PropertyName = "buyerEmail")]
-        public string BuyerEmail { get; set; }
-
-        [JsonProperty(PropertyName = "buyerPhone")]
-        public string BuyerPhone { get; set; }
-
-        [JsonProperty(PropertyName = "buyerNotify")]
-        public string BuyerNotify { get; set; }
+        [JsonProperty(PropertyName = "buyer")]
+        public Buyer Buyer { get; set; }
 
         // Response fields
         //
-
-        public InvoiceBuyer Buyer { get; set; }
 
         public string Id { get; set; }
 
@@ -210,6 +180,11 @@ namespace BitPayAPI.Models.Invoice
             return FullNotifications;
         }
 
+        public bool ShouldSerializeExtendedNotifications()
+        {
+            return ExtendedNotifications;
+        }
+
         public bool ShouldSerializeNotificationEmail()
         {
             return !string.IsNullOrEmpty(NotificationEmail);
@@ -225,54 +200,14 @@ namespace BitPayAPI.Models.Invoice
             return Physical;
         }
 
-        public bool ShouldSerializeBuyerName()
+        public bool ShouldSerializePaymentCurrencies()
         {
-            return !string.IsNullOrEmpty(BuyerName);
+            return (PaymentCurrencies != null);
         }
 
-        public bool ShouldSerializeBuyerAddress1()
+        public bool ShouldSerializeAcceptanceWindow()
         {
-            return !string.IsNullOrEmpty(BuyerAddress1);
-        }
-
-        public bool ShouldSerializeBuyerAddress2()
-        {
-            return !string.IsNullOrEmpty(BuyerAddress2);
-        }
-
-        public bool ShouldSerializeBuyerCity()
-        {
-            return !string.IsNullOrEmpty(BuyerCity);
-        }
-
-        public bool ShouldSerializeBuyerState()
-        {
-            return !string.IsNullOrEmpty(BuyerState);
-        }
-
-        public bool ShouldSerializeBuyerZip()
-        {
-            return !string.IsNullOrEmpty(BuyerZip);
-        }
-
-        public bool ShouldSerializeBuyerCountry()
-        {
-            return !string.IsNullOrEmpty(BuyerCountry);
-        }
-
-        public bool ShouldSerializeBuyerEmail()
-        {
-            return !string.IsNullOrEmpty(BuyerEmail);
-        }
-
-        public bool ShouldSerializeBuyerPhone()
-        {
-            return !string.IsNullOrEmpty(BuyerPhone);
-        }
-
-        public bool ShouldSerializeBuyerNotify()
-        {
-            return !string.IsNullOrEmpty(BuyerNotify);
+            return true;
         }
 
         public bool ShouldSerializeId()
