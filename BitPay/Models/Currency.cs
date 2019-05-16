@@ -1,7 +1,8 @@
-﻿using System;
-
-namespace BitPayAPI.Models
+﻿namespace BitPayAPI.Models
 {
+    /// <summary>
+    /// Model provided to avoid mistyping. Check the allowed currencies at: https://bitpay.com/currencies
+    /// </summary>
     public static class Currency
     {
         // Crypto
