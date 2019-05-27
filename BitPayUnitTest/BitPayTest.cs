@@ -245,7 +245,7 @@ namespace BitPayUnitTest {
         public async Task TestShouldGetBtcLedger() {
 
             // make sure we get a ledger with a not null Entries property
-            var ledger = await _bitpay.GetLedger(Ledger.LedgerBtc, yesterday, tomorrow);
+            var ledger = await _bitpay.GetLedger(Currency.BTC, yesterday, tomorrow);
             Assert.IsNotNull(ledger);
             Assert.IsNotNull(ledger.Entries);
 
@@ -260,7 +260,7 @@ namespace BitPayUnitTest {
             // Please see the comments from the GetBtcLedger concerning the Merchant facade
 
             // make sure we get a ledger with a not null Entries property
-            var ledger = await _bitpay.GetLedger(Ledger.LedgerUsd, yesterday, tomorrow);
+            var ledger = await _bitpay.GetLedger(Currency.USD, yesterday, tomorrow);
             Assert.IsNotNull(ledger);
             Assert.IsNotNull(ledger.Entries);
 

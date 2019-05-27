@@ -263,7 +263,6 @@
     <Compile Include="Exceptions\BitPayException.cs" />
     <Compile Include="Exceptions\ConfigNotFoundException.cs" />
     <Compile Include="Facades.cs" />
-    <Compile Include="Models\Buyer.cs" />
     <Compile Include="Converters.cs" />
     <Compile Include="EcKey.cs" />
     <Compile Include="Exceptions\ClientAuthorizationException.cs" />
@@ -292,6 +291,9 @@
     <Compile Include="Models\Invoice\PaymentCode.cs" />
     <Compile Include="Models\Invoice\PaymentCodes.cs" />
     <Compile Include="Models\Invoice\PaymentTotal.cs" />
+    <Compile Include="Models\Ledger\Buyer.cs" />
+    <Compile Include="Models\Ledger\Ledger.cs" />
+    <Compile Include="Models\Ledger\LedgerEntry.cs" />
     <Compile Include="Models\PayoutInfo.cs" />
     <Compile Include="Models\PayoutInstructionTransaction.cs" />
     <Compile Include="Models\PayoutInstructionBtcSummary.cs" />
@@ -300,8 +302,6 @@
     <Compile Include="Models\Invoice\Invoice.cs" />
     <Compile Include="Models\Invoice\InvoicePaymentUrls.cs" />
     <Compile Include="Models\Invoice\InvoiceTransaction.cs" />
-    <Compile Include="Models\Ledger.cs" />
-    <Compile Include="Models\LedgerEntry.cs" />
     <Compile Include="Models\Policy.cs" />
     <Compile Include="KeyUtils.cs" />
     <Compile Include="Models\Invoice\SupportedTransactionCurrency.cs" />
