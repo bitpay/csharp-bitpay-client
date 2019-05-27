@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Xunit;
 using BitPayAPI;
 using System.Collections.Generic;
@@ -245,7 +245,7 @@ namespace BitPayXUnitTest
         public async Task TestShouldGetLedgerBtc() {
             
             // make sure we get a ledger with a not null Entries property
-            var ledger = await _bitpay.GetLedger(Ledger.LedgerBtc, yesterday, tomorrow);
+            var ledger = await _bitpay.GetLedger(Currency.BTC, yesterday.AddMonths(-1).AddDays(3), tomorrow);
             Assert.NotNull(ledger);
             Assert.NotNull(ledger.Entries);
 
@@ -256,7 +256,7 @@ namespace BitPayXUnitTest
             // Please see the comments from the GetBtcLedger concerning the Merchant facade
 
             // make sure we get a ledger with a not null Entries property
-            var ledger = await _bitpay.GetLedger(Ledger.LedgerUsd, yesterday, tomorrow);
+            var ledger = await _bitpay.GetLedger(Currency.USD, yesterday.AddMonths(-1).AddDays(3), tomorrow);
             Assert.NotNull(ledger);
             Assert.NotNull(ledger.Entries);
 

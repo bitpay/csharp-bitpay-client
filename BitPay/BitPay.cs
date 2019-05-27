@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using BitPayAPI.Exceptions;
 using BitPayAPI.Models;
 using BitPayAPI.Models.Invoice;
+using BitPayAPI.Models.Ledger;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
