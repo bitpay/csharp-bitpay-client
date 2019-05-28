@@ -44,7 +44,7 @@ namespace BitPayAPI.Models.Invoice
             get => _currency;
             set
             {
-                if (typeof(Currency).GetMember(value).Length == 0)
+                if (!Models.Currency.isValid(value))
                     throw new BitPayException("Error: currency code must be a type of BitPayAPI.Models.Currency");
 
                 _currency = value;
