@@ -12,6 +12,7 @@ using BitPayAPI.Models;
 using BitPayAPI.Models.Invoice;
 using BitPayAPI.Models.Ledger;
 using BitPayAPI.Models.Rate;
+using BitPayAPI.Models.Settlement;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
@@ -873,6 +874,7 @@ namespace BitPayAPI
         {
             try
             {
+                string path = Directory.GetCurrentDirectory();
                 if (!File.Exists(_configFilePath))
                 {
                     throw new Exception("Configuration file not found");
