@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Xunit;
 using BitPayAPI;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ namespace BitPayXUnitTest
         private static readonly string PairingCode = "Bh3yy6r";
 
         // Your favourite client name
-        private static readonly string ClientName = "BitPay .Net Client v2.0.1904 Tester on " + Environment.MachineName;
+        private static readonly string ClientName = "BitPay .Net Client v2.1.1906 Tester on " + Environment.MachineName;
         
         // Define the date range for fetching results during the test
         private static DateTime today = DateTime.Now;
@@ -36,7 +36,7 @@ namespace BitPayXUnitTest
         {
             // JSON minified with the BitPay configuration as in the required configuration file
             // and parsed into a IConfiguration object
-            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"ClientDescription\":\"Net_test_140519\",\"ApiUrl\":\"https://test.bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"bitpay_private_test.key\",\"ApiTokens\":{\"pos\":\"GzkfCV5uiRPW6WE82iFWmGiVKSBw2Sjxe8pYq2DnD7Z7\",\"merchant\":\"NJ3nQUrmuH8RvBsKEGt7i1ocCFQfRo1qGSKUiUUPPbJ\",\"payroll\":\"8N17w4Aw3GXjykGyiqUzigswXf22MnfB7HP9vHqfDSHL\"}},\"Prod\":{\"ClientDescription\":\"\",\"ApiUrl\":\"https://bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"pos\":\"\",\"merchant\":\"\",\"payroll\":\"\"}}}}}";
+            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"ClientDescription\":\"Net_test\",\"ApiUrl\":\"https://test.bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"bitpay_private_test.key\",\"ApiTokens\":{\"pos\":\"AvJdGrEqTW9HVsJit9zabAnrJabqaQDhWHRacHYgfgxK\",\"merchant\":\"CE2WRSEEt9FgXvXboxNFA4YdQyyDJmgVAo752TGA7eUj\",\"payroll\":\"9pJ7fzW1GGeuDQfj32aNATCDnyY6YAacVMcDrs7HHUNo\"}},\"Prod\":{\"ClientDescription\":\"\",\"ApiUrl\":\"https://bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"pos\":\"\",\"merchant\":\"\",\"payroll\":\"\"}}}}}";
             var memoryJsonFile = new MemoryFileInfo("config.json", Encoding.UTF8.GetBytes(json), DateTimeOffset.Now);
             var memoryFileProvider = new MockFileProvider(memoryJsonFile);
 
@@ -86,7 +86,7 @@ namespace BitPayXUnitTest
         public async Task TestShouldGetInvoiceId() 
         {
             // create an invoice and make sure we receive an id - which means it has been successfully submitted
-            var invoice = new Invoice(50.0, Currency.USD);
+            var invoice = new Invoice(30.0, Currency.EUR);
             var basicInvoice = await _bitpay.CreateInvoice(invoice);
             Assert.NotNull(basicInvoice.Id);
         }
@@ -176,11 +176,11 @@ namespace BitPayXUnitTest
                 AcceptanceWindow = 480000,
                 FullNotifications = true,
 //                NotificationEmail = "",
-//                NotificationUrl = "",
+                NotificationUrl = "https://hookb.in/03EBRQJrzasGmGkNPNw9",
                 OrderId = "1234",
                 Physical = true,
 //                RedirectUrl = "",
-                TransactionSpeed = "medium",
+                TransactionSpeed = "high",
                 ItemCode = "bitcoindonation",
                 ItemDesc = "dhdhdfgh"
             };
@@ -318,5 +318,26 @@ namespace BitPayXUnitTest
             await _bitpay.CancelPayoutBatch(batch0.Id);
 
         }
+
+        [Fact]
+        public async Task TestGetSettlements() {
+            
+            // make sure we get a ledger with a not null Entries property
+            var settlements = await _bitpay.GetSettlements(Currency.EUR, yesterday.AddMonths(-1).AddDays(3), tomorrow);
+            Assert.NotNull(settlements);
+
+        }
+
+        [Fact]
+        public async Task TestGetSettlement() {
+            
+            // make sure we get a ledger with a not null Entries property
+            var settlements = await _bitpay.GetSettlements(Currency.EUR, yesterday.AddMonths(-1).AddDays(3), tomorrow);
+            var firstSettlement = settlements[0];
+            var settlement = await _bitpay.GetSettlement(firstSettlement.Id);
+            Assert.NotNull(settlement.Id);
+            Assert.Equal(firstSettlement.Id, settlement.Id);
+        }
+
     }
 }
