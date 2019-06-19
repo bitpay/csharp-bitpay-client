@@ -8,6 +8,7 @@ using BitPayAPI.Exceptions;
 using BitPayAPI.Models;
 using BitPayAPI.Models.Invoice;
 using Microsoft.Extensions.Configuration;
+using Buyer = BitPayAPI.Models.Invoice.Buyer;
 
 namespace BitPayUnitTest {
 
@@ -21,7 +22,7 @@ namespace BitPayUnitTest {
         private static readonly string PairingCode = "GHXnenG";
 
         // Your favourite client name
-        private static readonly string ClientName = "BitPay .Net Client v2.0.1904 Tester on " + Environment.MachineName;
+        private static readonly string ClientName = "BitPay .Net Client v2.1.1906 Tester on " + Environment.MachineName;
         
         // Define the date range for fetching results during the test
         private static DateTime today = DateTime.Now;
@@ -147,7 +148,7 @@ namespace BitPayUnitTest {
             // create an invoice without signature then retrieve it through the get method - they should match
             var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, Currency.EUR), signRequest: false);
             var retrievedInvoice = await _bitpay.GetInvoice(invoice.Id, Facade.PointOfSale, false);
-            Assert.Equal(invoice.Id, retrievedInvoice.Id);
+            Assert.AreEqual(invoice.Id, retrievedInvoice.Id);
         }
 
         [TestMethod]
@@ -170,21 +171,21 @@ namespace BitPayUnitTest {
                 Buyer = buyerData,
                 PosData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
                 PaymentCurrencies = new List<string> {
-                    Invoice.PaymentCurrencyBtc,
-                    Invoice.PaymentCurrencyBch
+                    Currency.BTC,
+                    Currency.BCH
                 },
                 AcceptanceWindow = 480000,
                 FullNotifications = true,
 //                NotificationEmail = "",
-//                NotificationUrl = "",
+                NotificationUrl = "https://hookb.in/03EBRQJrzasGmGkNPNw9",
                 OrderId = "1234",
                 Physical = true,
 //                RedirectUrl = "",
-                TransactionSpeed = "medium",
+                TransactionSpeed = "high",
                 ItemCode = "bitcoindonation",
                 ItemDesc = "dhdhdfgh"
             };
-            invoice = await _bitpay.CreateInvoice(invoice);
+            invoice = await _bitpay.CreateInvoice(invoice, Facade.Merchant);
             Assert.AreEqual(Status.New, invoice.Status, "Status is incorrect");
             Assert.AreEqual("Satoshi", invoice.Buyer.Name, "BuyerName is incorrect");
             Assert.AreEqual("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", invoice.PosData, "PosData is incorrect");
@@ -324,6 +325,26 @@ namespace BitPayUnitTest {
 
             await _bitpay.CancelPayoutBatch(batch0.Id);
 
+        }
+
+        [TestMethod]
+        public async Task TestGetSettlements() {
+            
+            // make sure we get a ledger with a not null Entries property
+            var settlements = await _bitpay.GetSettlements(Currency.EUR, yesterday.AddMonths(-1).AddDays(3), tomorrow);
+            Assert.IsNotNull(settlements);
+
+        }
+
+        [TestMethod]
+        public async Task TestGetSettlement() {
+            
+            // make sure we get a ledger with a not null Entries property
+            var settlements = await _bitpay.GetSettlements(Currency.EUR, yesterday.AddMonths(-1).AddDays(3), tomorrow);
+            var firstSettlement = settlements[0];
+            var settlement = await _bitpay.GetSettlement(firstSettlement.Id);
+            Assert.IsNotNull(settlement.Id);
+            Assert.AreEqual(firstSettlement.Id, settlement.Id);
         }
 
     }

@@ -3,7 +3,7 @@
     /// <summary>
     /// Model provided to avoid mistyping. Check the allowed currencies at: https://bitpay.com/currencies
     /// </summary>
-    public static class Currency
+    public class Currency
     {
         // Crypto
         public const string BCH = "BCH";
@@ -179,5 +179,10 @@
         public const string ZAR = "ZAR";
         public const string ZMW = "ZMW";
         public const string ZWL = "ZWL";
+
+        public static bool isValid(string value)
+        {
+            return typeof(Currency).GetMember(value).Length > 0;
+        }
     }
 }

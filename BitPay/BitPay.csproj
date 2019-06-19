@@ -11,7 +11,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BitPayAPI</RootNamespace>
     <AssemblyName>BitPay</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
@@ -79,6 +79,9 @@
     </Reference>
     <Reference Include="Multiformats.Base, Version=1.0.8.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Multiformats.Base.1.0.8\lib\net45\Multiformats.Base.dll</HintPath>
+    </Reference>
+    <Reference Include="netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+      <HintPath>..\..\..\..\..\..\Library\Frameworks\Mono.framework\Versions\5.18.1\lib\mono\4.7.2-api\Facades\netstandard.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -282,7 +285,6 @@
     <Compile Include="Models\Invoice\ExchangeRateBch.cs" />
     <Compile Include="Models\Invoice\ExchangeRateBtc.cs" />
     <Compile Include="Models\Invoice\ExchangeRates.cs" />
-    <Compile Include="Models\InvoiceData.cs" />
     <Compile Include="Models\Invoice\InvoiceBuyerProvidedInfo.cs" />
     <Compile Include="Models\Invoice\InvoiceFlags.cs" />
     <Compile Include="Models\Invoice\Status.cs" />
@@ -307,15 +309,16 @@
     <Compile Include="Models\Invoice\SupportedTransactionCurrency.cs" />
     <Compile Include="Models\Invoice\SupportedTransactionCurrencies.cs" />
     <Compile Include="Models\Currency.cs" />
+    <Compile Include="Models\Rate\Rate.cs" />
+    <Compile Include="Models\Rate\Rates.cs" />
+    <Compile Include="Models\Settlement\InvoiceData.cs" />
+    <Compile Include="Models\Settlement\RefundAmount.cs" />
+    <Compile Include="Models\Settlement\RefundInfo.cs" />
+    <Compile Include="Models\Settlement\Settlement.cs" />
+    <Compile Include="Models\Settlement\SettlementLedgerEntry.cs" />
+    <Compile Include="Models\Settlement\WithHoldings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Models\Rate.cs" />
-    <Compile Include="Models\Rates.cs" />
-    <Compile Include="Models\RefundAmount.cs" />
-    <Compile Include="Models\RefundInfo.cs" />
-    <Compile Include="Models\Settlement.cs" />
-    <Compile Include="Models\SettlementLedgerEntry.cs" />
     <Compile Include="Models\Token.cs" />
-    <Compile Include="Models\WithHoldings.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
