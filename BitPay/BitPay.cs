@@ -19,8 +19,8 @@ using Microsoft.Extensions.Configuration;
 
 /**
  * @author Antonio Buedo
- * @date 4.15.2019
- * @version 2.0.1904
+ * @date 6.19.2019
+ * @version 2.1.1904
  *
  * See bitpay.com/api for more information.
  */
@@ -35,7 +35,7 @@ namespace BitPayAPI
         private static string _configFilePath;
         
         private const string BitpayApiVersion = "2.0.0";
-        private const string BitpayPluginInfo = "BitPay_DotNet_Client_v2.0.1904";
+        private const string BitpayPluginInfo = "BitPay_DotNet_Client_v2.1.1906";
 
         private string _baseUrl;
         private string _clientName;
