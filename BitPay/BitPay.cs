@@ -9,8 +9,10 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BitPayAPI.Exceptions;
 using BitPayAPI.Models;
+using BitPayAPI.Models.Bill;
 using BitPayAPI.Models.Invoice;
 using BitPayAPI.Models.Ledger;
+using BitPayAPI.Models.Payout;
 using BitPayAPI.Models.Rate;
 using BitPayAPI.Models.Settlement;
 using Newtonsoft.Json;
@@ -19,8 +21,8 @@ using Microsoft.Extensions.Configuration;
 
 /**
  * @author Antonio Buedo
- * @date 6.19.2019
- * @version 2.1.1904
+ * @date 7.8.2019
+ * @version 2.2.1907
  *
  * See bitpay.com/api for more information.
  */
@@ -35,7 +37,7 @@ namespace BitPayAPI
         private static string _configFilePath;
         
         private const string BitpayApiVersion = "2.0.0";
-        private const string BitpayPluginInfo = "BitPay_DotNet_Client_v2.1.1906";
+        private const string BitpayPluginInfo = "BitPay_DotNet_Client_v2.2.1907";
 
         private string _baseUrl;
         private string _clientName;
@@ -256,6 +258,105 @@ namespace BitPayAPI
 
                 throw;
             }
+        }
+
+        /// <summary>
+        ///     Create a bill.
+        /// </summary>
+        /// <param name="bill">An invoice request object.</param>
+        /// <param name="facade">The facade to create the invoice against</param>
+        /// <param name="signRequest">Allow unsigned request</param>
+        /// <returns>A new bill object returned from the server.</returns>
+        public async Task<Bill> CreateBill(Bill bill, string facade = Facade.Merchant, bool signRequest = true)
+        {
+            try
+            {
+                bill.Token = GetAccessToken(facade);
+                var json = JsonConvert.SerializeObject(bill);
+                var response = await Post("bills", json, signRequest).ConfigureAwait(false);
+                var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
+                var serializerSettings = new JsonSerializerSettings {ObjectCreationHandling = ObjectCreationHandling.Replace};
+                JsonConvert.PopulateObject(responseString, bill, serializerSettings);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new BillCreationException(ex);
+
+                throw;
+            }
+
+            return bill;
+        }
+
+        /// <summary>
+        ///     Retrieve a bill by id.
+        /// </summary>
+        /// <param name="billId">The id of the requested bill.</param>
+        /// <param name="facade">The facade to get the bill from</param>
+        /// <param name="signRequest">Allow unsigned request</param>
+        /// <returns>The bill object retrieved from the server.</returns>
+        public async Task<Bill> GetBill(string billId, string facade = Facade.Merchant, bool signRequest = true)
+        {
+            Dictionary<string, string> parameters = null;
+            try
+            {
+                if (signRequest)
+                {
+                    // Provide the merchant token when the merchant facade is being used.
+                    // GET/invoices expects the merchant token and not the merchant/invoice token.
+                    try
+                    {
+                        parameters = new Dictionary<string, string>
+                        {
+                            {"token", GetAccessToken(facade)}
+                        };
+                    }
+                    catch (BitPayException)
+                    {
+                        // No token for invoice.
+                        parameters = null;
+                    }
+                }
+                var response = await Get("bills/" + billId, parameters, signRequest);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<Bill>(responseString);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new BillQueryException(ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Deliver a bill to the consumer.
+        /// </summary>
+        /// <param name="billId">The id of the requested bill.</param>
+        /// <param name="billToken">The token of the requested bill.</param>
+        /// <param name="facade">The facade to deliver the bill from</param>
+        /// <param name="signRequest">Allow unsigned request</param>
+        /// <returns>A response status returned from the API.</returns>
+        public async Task<string> DeliverBill(string billId, string billToken, bool signRequest = true)
+        {
+            var responseString = "";
+            try
+            {
+                var json = JsonConvert.SerializeObject(new Dictionary<string, string>{{"token", billToken}});
+                var response = await Post("bills/" + billId + "/deliveries", json, signRequest).ConfigureAwait(false);
+                responseString = await ResponseToJsonString(response).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new BillDeliveryException(ex);
+
+                throw;
+            }
+
+            return responseString;
         }
 
         /// <summary>

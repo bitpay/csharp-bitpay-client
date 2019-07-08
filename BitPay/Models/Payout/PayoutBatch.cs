@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using BitPayAPI.Exceptions;
 using Newtonsoft.Json;
 
-namespace BitPayAPI.Models
+namespace BitPayAPI.Models.Payout
 {
     public class PayoutBatch
     {

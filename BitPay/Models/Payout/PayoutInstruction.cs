@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace BitPayAPI.Models
+namespace BitPayAPI.Models.Payout
 {
     public class PayoutInstruction
     {
