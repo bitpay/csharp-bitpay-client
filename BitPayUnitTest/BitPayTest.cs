@@ -2,13 +2,18 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BitPayAPI.Exceptions;
 using BitPayAPI.Models;
+using BitPayAPI.Models.Bill;
 using BitPayAPI.Models.Invoice;
+using BitPayAPI.Models.Payout;
 using Microsoft.Extensions.Configuration;
 using Buyer = BitPayAPI.Models.Invoice.Buyer;
+using InvoiceStatus = BitPayAPI.Models.Invoice.Status;
+using BillStatus = BitPayAPI.Models.Bill.Status;
 
 namespace BitPayUnitTest {
 
@@ -22,7 +27,7 @@ namespace BitPayUnitTest {
         private static readonly string PairingCode = "GHXnenG";
 
         // Your favourite client name
-        private static readonly string ClientName = "BitPay .Net Client v2.1.1906 Tester on " + Environment.MachineName;
+        private static readonly string ClientName = "BitPay .Net Client v2.2.1907 Tester on " + Environment.MachineName;
         
         // Define the date range for fetching results during the test
         private static DateTime today = DateTime.Now;
@@ -103,7 +108,7 @@ namespace BitPayUnitTest {
         public async Task TestShouldGetInvoiceStatus() {
             // create an invoice and make sure we receive a correct invoice status (new)
             var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, Currency.USD));
-            Assert.AreEqual(Status.New, basicInvoice.Status, "Status is incorrect");
+            Assert.AreEqual(InvoiceStatus.New, basicInvoice.Status, "Status is incorrect");
         }
 
         [TestMethod]
@@ -186,7 +191,7 @@ namespace BitPayUnitTest {
                 ItemDesc = "dhdhdfgh"
             };
             invoice = await _bitpay.CreateInvoice(invoice, Facade.Merchant);
-            Assert.AreEqual(Status.New, invoice.Status, "Status is incorrect");
+            Assert.AreEqual(InvoiceStatus.New, invoice.Status, "Status is incorrect");
             Assert.AreEqual("Satoshi", invoice.Buyer.Name, "BuyerName is incorrect");
             Assert.AreEqual("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", invoice.PosData, "PosData is incorrect");
         }
@@ -346,6 +351,154 @@ namespace BitPayUnitTest {
             Assert.IsNotNull(settlement.Id);
             Assert.AreEqual(firstSettlement.Id, settlement.Id);
         }
+        
+        [TestMethod]
+        public async Task TestShouldCreateBillUSD() 
+        {
+            List<Item> items = new List<Item>();
+            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
+            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
+            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
+            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+            
+            // create a bill and make sure we receive an id - which means it has been successfully submitted
+            var bill = new Bill()
+            {
+                Number = "1", 
+                Currency = Currency.USD, 
+                Email = "agallardo@bitpay.com",
+                Items = items
+            };
+            var basicBill = await _bitpay.CreateBill(bill);
+            Assert.IsNotNull(basicBill.Id);
+        }
 
+        [TestMethod]
+        public async Task TestShouldCreateBillEur() {
+            List<Item> items = new List<Item>();
+            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
+            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
+            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
+            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+
+            // create a bill and make sure we receive an id - which means it has been successfully submitted
+            var bill = new Bill()
+            {
+                Number = "2", 
+                Currency = Currency.EUR, 
+                Email = "agallardo@bitpay.com",
+                Items = items
+            };
+            var basicBill = await _bitpay.CreateBill(bill);
+            Assert.IsNotNull(basicBill.Id);
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetBillUrl() {
+            List<Item> items = new List<Item>();
+            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
+            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
+            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
+            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+
+            // create a bill and make sure we receive a bill url - which means we can check it online
+            var bill = new Bill()
+            {
+                Number = "3", 
+                Currency = Currency.USD, 
+                Email = "agallardo@bitpay.com",
+                Items = items
+            };
+            var basicBill = await _bitpay.CreateBill(bill);
+            Assert.IsNotNull(basicBill.Url);
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetBillStatus() {
+            List<Item> items = new List<Item>();
+            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
+            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
+            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
+            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+
+            // create a bill and make sure we receive a correct bill status (draft)
+            var bill = new Bill()
+            {
+                Number = "4", 
+                Currency = Currency.USD, 
+                Email = "agallardo@bitpay.com",
+                Items = items
+            };
+            var basicBill = await _bitpay.CreateBill(bill);
+            Assert.AreEqual(BillStatus.Draft, basicBill.Status);
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetBillTotals() {
+            List<Item> items = new List<Item>();
+            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
+            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
+            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
+            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+
+            // create a bill and make sure we receive the same items sum as it was sent
+            var bill = new Bill()
+            {
+                Number = "5", 
+                Currency = Currency.USD, 
+                Email = "agallardo@bitpay.com",
+                Items = items
+            };
+            var basicBill = await _bitpay.CreateBill(bill);
+            Assert.AreEqual(basicBill.Items.Select(i => i.Price).Sum(), items.Select(i => i.Price).Sum());
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetBill() {
+            List<Item> items = new List<Item>();
+            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
+            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
+            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
+            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+
+            // create a bill then retrieve it through the get method - they should match
+            var bill = new Bill()
+            {
+                Number = "6", 
+                Currency = Currency.USD, 
+                Email = "agallardo@bitpay.com",
+                Items = items
+            };
+            var basicBill = await _bitpay.CreateBill(bill);
+            var retrievedBill = await _bitpay.GetBill(basicBill.Id);
+            Assert.AreEqual(bill.Id, retrievedBill.Id);
+        }
+
+        [TestMethod]
+        public async Task TestShouldDeliverBill()
+        {
+            List<Item> items = new List<Item>();
+            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
+            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
+            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
+            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+
+            // create a bill then retrieve it through the get method - they should match
+            var bill = new Bill()
+            {
+                Number = "7", 
+                Currency = Currency.USD, 
+                Email = "agallardo@bitpay.com",
+                Items = items
+            };
+            var basicBill = await _bitpay.CreateBill(bill);
+            var result = await _bitpay.DeliverBill(basicBill.Id, basicBill.Token);
+            // Retrieve the updated bill for status confirmation
+            var retrievedBill = await _bitpay.GetBill(basicBill.Id);
+            // Check the correct response
+            Assert.AreEqual("Success", result);
+            // Confirm that the bill is sent
+            Assert.AreEqual(BillStatus.Sent, retrievedBill.Status);
+        }
     }
 }
