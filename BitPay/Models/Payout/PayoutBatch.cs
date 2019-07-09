@@ -19,7 +19,6 @@ namespace BitPayAPI.Models.Payout
         {
             Amount = 0.0;
             Currency = "USD";
-            BankTransferId = "";
             NotificationEmail = "";
             NotificationUrl = "";
             PricingMethod = MethodVwap24;
@@ -87,9 +86,6 @@ namespace BitPayAPI.Models.Payout
 
         [JsonProperty(PropertyName = "notificationURL")]
         public string NotificationUrl { get; set; }
-
-        [JsonProperty(PropertyName = "bankTransferId")]
-        public string BankTransferId { get; set; }
 
         [JsonProperty(PropertyName = "pricingMethod")]
         public string PricingMethod { get; set; }

@@ -275,8 +275,6 @@ namespace BitPayXUnitTest
             var threeDaysFromNow = date.AddDays(3);
 
             var effectiveDate = threeDaysFromNow;
-            var reference = "My test batch";
-            var bankTransferId = "My bank transfer id";
             var currency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
                 new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u"),
@@ -297,8 +295,6 @@ namespace BitPayXUnitTest
             var threeDaysFromNow = date.AddDays(3);
 
             var effectiveDate = threeDaysFromNow;
-            var reference = "My test batch";
-            var bankTransferId = "My bank transfer id";
             var currency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
                 new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u"),
