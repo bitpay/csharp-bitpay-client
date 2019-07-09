@@ -1,4 +1,4 @@
-﻿namespace BitPayAPI.Models.Payout
+﻿namespace BitPayAPI.Models.Settlement
 {
     public class PayoutInfo
     {

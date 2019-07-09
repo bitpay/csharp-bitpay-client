@@ -423,14 +423,12 @@ namespace BitPayAPI
                 batch.Guid = Guid.NewGuid().ToString();
                 var json = JsonConvert.SerializeObject(batch);
                 var response = await PostWithSignature("payouts", json);
-
-                // To avoid having to merge instructions in the response with those we sent, we just remove the instructions
-                // we sent and replace with those in the response.
-                batch.Instructions = new List<PayoutInstruction>();
+                
                 var responseString = await ResponseToJsonString(response);
                 JsonConvert.PopulateObject(responseString, batch, new JsonSerializerSettings
                 {
-                    NullValueHandling = NullValueHandling.Ignore
+                    NullValueHandling = NullValueHandling.Ignore,
+                    ObjectCreationHandling = ObjectCreationHandling.Replace
                 });
 
                 // Track the token for this batch
@@ -450,12 +448,17 @@ namespace BitPayAPI
         /// <summary>
         ///     Retrieve a collection of BitPay payout batches.
         /// </summary>
+        /// <param name="status">The status to filter (optional).</param>
         /// <returns>A list of BitPay PayoutBatch objects.</returns>
-        public async Task<List<PayoutBatch>> GetPayoutBatches()
+        public async Task<List<PayoutBatch>> GetPayoutBatches(string status = null)
         {
             try
             {
                 var parameters = InitParams();
+                if (string.IsNullOrEmpty(status))
+                {
+                    parameters.Add("status", status);
+                }
                 parameters.Add("token", GetAccessToken(Facade.Payroll));
                 var response = await Get("payouts", parameters);
                 var responseString = await ResponseToJsonString(response);

@@ -307,10 +307,10 @@
     <Compile Include="Models\Invoice\InvoicePaymentUrls.cs" />
     <Compile Include="Models\Invoice\InvoiceTransaction.cs" />
     <Compile Include="Models\Payout\PayoutBatch.cs" />
-    <Compile Include="Models\Payout\PayoutInfo.cs" />
     <Compile Include="Models\Payout\PayoutInstruction.cs" />
     <Compile Include="Models\Payout\PayoutInstructionBtcSummary.cs" />
     <Compile Include="Models\Payout\PayoutInstructionTransaction.cs" />
+    <Compile Include="Models\Payout\Status.cs" />
     <Compile Include="Models\Policy.cs" />
     <Compile Include="KeyUtils.cs" />
     <Compile Include="Models\Invoice\SupportedTransactionCurrency.cs" />
@@ -319,6 +319,7 @@
     <Compile Include="Models\Rate\Rate.cs" />
     <Compile Include="Models\Rate\Rates.cs" />
     <Compile Include="Models\Settlement\InvoiceData.cs" />
+    <Compile Include="Models\Settlement\PayoutInfo.cs" />
     <Compile Include="Models\Settlement\RefundAmount.cs" />
     <Compile Include="Models\Settlement\RefundInfo.cs" />
     <Compile Include="Models\Settlement\Settlement.cs" />

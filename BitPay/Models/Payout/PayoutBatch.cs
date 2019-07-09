@@ -7,13 +7,6 @@ namespace BitPayAPI.Models.Payout
 {
     public class PayoutBatch
     {
-        public const string StatusNew = "new";
-        public const string StatusFunded = "funded";
-        public const string StatusProcessing = "processing";
-        public const string StatusComplete = "complete";
-        public const string StatusFailed = "failed";
-        public const string StatusCancelled = "cancelled";
-
         public const string MethodManual2 = "manual_2";
         public const string MethodVwap24 = "vwap_24hr";
 
@@ -26,7 +19,6 @@ namespace BitPayAPI.Models.Payout
         {
             Amount = 0.0;
             Currency = "USD";
-            Reference = "";
             BankTransferId = "";
             NotificationEmail = "";
             NotificationUrl = "";
@@ -36,21 +28,17 @@ namespace BitPayAPI.Models.Payout
         /// <summary>
         ///     Constructor, create an instruction-full request PayoutBatch object.
         /// </summary>
+        /// <param name="currency">Currency to use on payout.</param>
         /// <param name="effectiveDate">
         ///     Date when request is effective. Note that the time of day will automatically be set to
         ///     09:00:00.000 UTC time for the given day. Only requests submitted before 09:00:00.000 UTC are guaranteed to be
         ///     processed on the same day.
         /// </param>
-        /// <param name="reference">Merchant-provided data.</param>
-        /// <param name="bankTransferId">Merchant-provided data, to help match funding payments to payout batches.</param>
         /// <param name="instructions">Payout instructions.</param>
-        public PayoutBatch(string currency, DateTime effectiveDate, string bankTransferId, string reference,
-            List<PayoutInstruction> instructions) : this()
+        public PayoutBatch(string currency, DateTime effectiveDate, List<PayoutInstruction> instructions) : this()
         {
             Currency = currency;
             EffectiveDate = effectiveDate;
-            BankTransferId = bankTransferId;
-            Reference = reference;
             Instructions = instructions;
             _computeAndSetAmount();
         }
@@ -65,22 +53,6 @@ namespace BitPayAPI.Models.Payout
         // Required fields
         //
 
-        [JsonProperty(PropertyName = "effectiveDate")]
-        [JsonConverter(typeof(Converters.DateStringConverter))]
-        public DateTime EffectiveDate { get; set; }
-
-        [JsonProperty(PropertyName = "reference")]
-        public string Reference { get; set; }
-
-        [JsonProperty(PropertyName = "bankTransferId")]
-        public string BankTransferId { get; set; }
-
-        // Optional fields
-        //
-
-        [JsonProperty(PropertyName = "instructions")]
-        public List<PayoutInstruction> Instructions { get; set; }
-
         [JsonProperty(PropertyName = "amount")]
         public double Amount { get; set; }
 
@@ -90,20 +62,37 @@ namespace BitPayAPI.Models.Payout
             get => _currency;
             set
             {
-                if (value.Length != 3)
-                    throw new BitPayException("Error: currency code must be exactly three characters");
+                if (!Models.Currency.isValid(value))
+                    throw new BitPayException("Error: currency code must be a type of BitPayAPI.Models.Currency");
+
                 _currency = value;
             }
         }
 
-        [JsonProperty(PropertyName = "pricingMethod")]
-        public string PricingMethod { get; set; }
+        [JsonProperty(PropertyName = "effectiveDate")]
+        [JsonConverter(typeof(Converters.DateStringConverter))]
+        public DateTime EffectiveDate { get; set; }
+
+        [JsonProperty(PropertyName = "instructions")]
+        public List<PayoutInstruction> Instructions { get; set; }
+
+        // Optional fields
+        //
+
+        [JsonProperty(PropertyName = "reference")]
+        public string Reference { get; set; }
 
         [JsonProperty(PropertyName = "notificationEmail")]
         public string NotificationEmail { get; set; }
 
         [JsonProperty(PropertyName = "notificationURL")]
         public string NotificationUrl { get; set; }
+
+        [JsonProperty(PropertyName = "bankTransferId")]
+        public string BankTransferId { get; set; }
+
+        [JsonProperty(PropertyName = "pricingMethod")]
+        public string PricingMethod { get; set; }
 
         // Response fields
         //
@@ -112,12 +101,9 @@ namespace BitPayAPI.Models.Payout
 
         public string Account { get; set; }
 
+        public string SupportPhone { get; set; }
+
         public string Status { get; set; }
-
-        public double Btc { get; set; }
-
-        [JsonConverter(typeof(Converters.DateStringConverter))]
-        public DateTime RequestDate { get; set; }
 
         public double PercentFee { get; set; }
 
@@ -125,7 +111,15 @@ namespace BitPayAPI.Models.Payout
 
         public double DepositTotal { get; set; }
 
-        public string SupportPhone { get; set; }
+        public double Rate { get; set; }
+
+        public double Btc { get; set; }
+
+        [JsonConverter(typeof(Converters.DateStringConverter))]
+        public DateTime RequestDate { get; set; }
+
+        [JsonConverter(typeof(Converters.DateStringConverter))]
+        public DateTime DateExecuted { get; set; }
 
         // Private methods
         //
@@ -177,6 +171,11 @@ namespace BitPayAPI.Models.Payout
             return false;
         }
 
+        public bool ShouldSerializeRate()
+        {
+            return false;
+        }
+
         public bool ShouldSerializeBtc()
         {
             return false;
@@ -203,6 +202,16 @@ namespace BitPayAPI.Models.Payout
         }
 
         public bool ShouldSerializeSupportPhone()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeReference()
+        {
+            return !string.IsNullOrEmpty(Reference);
+        }
+
+        public bool ShouldSerializeDateExecuted()
         {
             return false;
         }

@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Buyer = BitPayAPI.Models.Invoice.Buyer;
 using InvoiceStatus = BitPayAPI.Models.Invoice.Status;
 using BillStatus = BitPayAPI.Models.Bill.Status;
+using PayoutStatus = BitPayAPI.Models.Payout.Status;
 
 namespace BitPayUnitTest {
 
@@ -282,15 +283,13 @@ namespace BitPayUnitTest {
             var threeDaysFromNow = date.AddDays(3);
 
             var effectiveDate = threeDaysFromNow;
-            var reference = "My test batch";
-            var bankTransferId = "My bank transfer id";
             var currency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u", "Alice"),
-                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A", "Bob")
+                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u"),
+                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A")
             };
 
-            var batch = new PayoutBatch(currency, effectiveDate, bankTransferId, reference, instructions);
+            var batch = new PayoutBatch(currency, effectiveDate, instructions);
             batch = await _bitpay.SubmitPayoutBatch(batch);
 
             Assert.IsNotNull(batch.Id, "Batch created with id=NULL");
@@ -300,24 +299,17 @@ namespace BitPayUnitTest {
         [TestMethod]
         public async Task TestShouldSubmitGetAndDeletePayoutBatch() {
 
-            /*
-               Unfortunately at the time of this writing the Payroll facade is not available through the API
-               so this test will always fail - since you can't approve the Payroll pairing code
-             */
-
             var date = DateTime.Now;
             var threeDaysFromNow = date.AddDays(3);
 
             var effectiveDate = threeDaysFromNow;
-            var reference = "My test batch";
-            var bankTransferId = "My bank transfer id";
             var currency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u", "Alice"),
-                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A", "Bob")
+                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u"),
+                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A")
             };
 
-            var batch0 = new PayoutBatch(currency, effectiveDate, bankTransferId, reference, instructions);
+            var batch0 = new PayoutBatch(currency, effectiveDate, instructions);
             batch0 = await _bitpay.SubmitPayoutBatch(batch0);
 
             Assert.IsNotNull(batch0.Id, "Batch (0) created with id=NULL");
@@ -330,6 +322,13 @@ namespace BitPayUnitTest {
 
             await _bitpay.CancelPayoutBatch(batch0.Id);
 
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetPayoutBatchesById() {
+            
+            var batches = await _bitpay.GetPayoutBatches(PayoutStatus.New);
+            Assert.IsNotNull(batches);
         }
 
         [TestMethod]
