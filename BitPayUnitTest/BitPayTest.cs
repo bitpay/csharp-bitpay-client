@@ -470,7 +470,7 @@ namespace BitPayUnitTest {
             };
             var basicBill = await _bitpay.CreateBill(bill);
             var retrievedBill = await _bitpay.GetBill(basicBill.Id);
-            Assert.AreEqual(bill.Id, retrievedBill.Id);
+            Assert.AreEqual(basicBill.Id, retrievedBill.Id);
         }
 
         [TestMethod]

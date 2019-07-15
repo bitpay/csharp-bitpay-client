@@ -266,6 +266,7 @@
     <Compile Include="Exceptions\BillDeliveryException.cs" />
     <Compile Include="Exceptions\BillException.cs" />
     <Compile Include="Exceptions\BillQueryException.cs" />
+    <Compile Include="Exceptions\BillUpdateException.cs" />
     <Compile Include="Exceptions\BitPayApiCommunicationException.cs" />
     <Compile Include="Exceptions\BitPayException.cs" />
     <Compile Include="Exceptions\ConfigNotFoundException.cs" />

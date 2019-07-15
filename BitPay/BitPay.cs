@@ -332,11 +332,76 @@ namespace BitPayAPI
         }
 
         /// <summary>
+        ///     Update a bill.
+        /// </summary>
+        /// <param name="bill">An invoice object containing the update.</param>
+        /// <param name="billId">The id of the bill to update.</param>
+        /// <returns>A new bill object returned from the server.</returns>
+        public async Task<Bill> UpdateBill(Bill bill, string billId)
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(bill);
+                var response = await Put("bills/" + billId, json).ConfigureAwait(false);
+                var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
+                var serializerSettings = new JsonSerializerSettings {ObjectCreationHandling = ObjectCreationHandling.Replace};
+                JsonConvert.PopulateObject(responseString, bill, serializerSettings);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new BillUpdateException(ex);
+
+                throw;
+            }
+
+            return bill;
+        }
+
+        /// <summary>
+        ///     Retrieve a bill by id.
+        /// </summary>
+        /// <param name="status">The status to filter the bills.</param>
+        /// <returns>The bill object retrieved from the server.</returns>
+        public async Task<List<Bill>> GetBills(string status = null)
+        {
+            Dictionary<string, string> parameters = null;
+            try
+            {
+                // Provide the merchant token when the merchant facade is being used.
+                // GET/invoices expects the merchant token and not the merchant/invoice token.
+                try
+                {
+                    parameters = new Dictionary<string, string>{};
+                    parameters.Add("token", GetAccessToken(Facade.Merchant));
+                    if (!String.IsNullOrEmpty(status))
+                    {
+                        parameters.Add("status", status);
+                    }
+                }
+                catch (BitPayException)
+                {
+                    // No token for invoice.
+                    parameters = null;
+                }
+                var response = await Get("bills", parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<List<Bill>>(responseString);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new BillQueryException(ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
         ///     Deliver a bill to the consumer.
         /// </summary>
         /// <param name="billId">The id of the requested bill.</param>
         /// <param name="billToken">The token of the requested bill.</param>
-        /// <param name="facade">The facade to deliver the bill from</param>
         /// <param name="signRequest">Allow unsigned request</param>
         /// <returns>A response status returned from the API.</returns>
         public async Task<string> DeliverBill(string billId, string billToken, bool signRequest = true)
@@ -455,7 +520,7 @@ namespace BitPayAPI
             try
             {
                 var parameters = InitParams();
-                if (string.IsNullOrEmpty(status))
+                if (!string.IsNullOrEmpty(status))
                 {
                     parameters.Add("status", status);
                 }
@@ -886,6 +951,29 @@ namespace BitPayAPI
                 }
 
                 var result = await _httpClient.PostAsync(uri, bodyContent).ConfigureAwait(false);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new BitPayApiCommunicationException(ex);
+            }
+        }
+
+        private async Task<HttpResponseMessage> Put(string uri, string json)
+        {
+            try
+            {
+                var bodyContent = new StringContent(UnicodeToAscii(json));
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Add("x-accept-version", BitpayApiVersion);
+                _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", BitpayPluginInfo);
+                bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                
+                var signature = KeyUtils.Sign(_ecKey, _baseUrl + uri + json);
+                _httpClient.DefaultRequestHeaders.Add("x-signature", signature);
+                _httpClient.DefaultRequestHeaders.Add("x-identity", _ecKey?.PublicKeyHexBytes);
+                
+                var result = await _httpClient.PutAsync(uri, bodyContent).ConfigureAwait(false);
                 return result;
             }
             catch (Exception ex)
