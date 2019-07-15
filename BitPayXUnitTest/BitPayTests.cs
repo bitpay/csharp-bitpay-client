@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Buyer = BitPayAPI.Models.Invoice.Buyer;
 using InvoiceStatus = BitPayAPI.Models.Invoice.Status;
 using BillStatus = BitPayAPI.Models.Bill.Status;
+using PayoutStatus = BitPayAPI.Models.Payout.Status;
 
 namespace BitPayXUnitTest
 {
@@ -146,14 +147,6 @@ namespace BitPayXUnitTest
             var retrievedInvoice = await _bitpay.GetInvoice(invoice.Id);
             Assert.Equal(invoice.Id, retrievedInvoice.Id);
         }
-        
-        [Fact]
-        public async Task TestShouldGetInvoiceNoSigned() {
-            // create an invoice then retrieve it through the get method - they should match
-            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, Currency.EUR), signRequest: false);
-            var retrievedInvoice = await _bitpay.GetInvoice(invoice.Id, Facade.PointOfSale, false);
-            Assert.Equal(invoice.Id, retrievedInvoice.Id);
-        }
 
         [Fact]
         public async Task TestShouldCreateInvoiceWithAdditionalParams() {
@@ -274,15 +267,13 @@ namespace BitPayXUnitTest
             var threeDaysFromNow = date.AddDays(3);
 
             var effectiveDate = threeDaysFromNow;
-            var reference = "My test batch";
-            var bankTransferId = "My bank transfer id";
             var currency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u", "Alice"),
-                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A", "Bob")
+                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u"),
+                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A")
             };
 
-            var batch = new PayoutBatch(currency, effectiveDate, bankTransferId, reference, instructions);
+            var batch = new PayoutBatch(currency, effectiveDate, instructions);
             batch = await _bitpay.SubmitPayoutBatch(batch);
 
             Assert.NotNull(batch.Id);
@@ -291,25 +282,18 @@ namespace BitPayXUnitTest
 
         [Fact]
         public async Task TestShouldSubmitGetAndDeletePayoutBatch() {
-
-            /*
-               Unfortunately at the time of this writing the Payroll facade is not available through the API
-               so this test will always fail - since you can't approve the Payroll pairing code
-             */
-
+            
             var date = DateTime.Now;
             var threeDaysFromNow = date.AddDays(3);
 
             var effectiveDate = threeDaysFromNow;
-            var reference = "My test batch";
-            var bankTransferId = "My bank transfer id";
             var currency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u", "Alice"),
-                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A", "Bob")
+                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u"),
+                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A")
             };
 
-            var batch0 = new PayoutBatch(currency, effectiveDate, bankTransferId, reference, instructions);
+            var batch0 = new PayoutBatch(currency, effectiveDate, instructions);
             batch0 = await _bitpay.SubmitPayoutBatch(batch0);
 
             Assert.NotNull(batch0.Id);
@@ -322,6 +306,20 @@ namespace BitPayXUnitTest
 
             await _bitpay.CancelPayoutBatch(batch0.Id);
 
+        }
+
+        [Fact]
+        public async Task TestShouldGetPayoutBatches() {
+            
+            var batches = await _bitpay.GetPayoutBatches();
+            Assert.True(batches.Count > 0, "No batches retrieved");
+        }
+
+        [Fact]
+        public async Task TestShouldGetPayoutBatchesByStatus() {
+            
+            var batches = await _bitpay.GetPayoutBatches(PayoutStatus.New);
+            Assert.True(batches.Count > 0, "No batches retrieved");
         }
 
         [Fact]
@@ -463,7 +461,36 @@ namespace BitPayXUnitTest
             };
             var basicBill = await _bitpay.CreateBill(bill);
             var retrievedBill = await _bitpay.GetBill(basicBill.Id);
-            Assert.Equal(bill.Id, retrievedBill.Id);
+            Assert.Equal(basicBill.Id, retrievedBill.Id);
+        }
+
+        [Fact]
+        public async Task TestShouldGetAndUpdateBill() {
+            List<Item> items = new List<Item>();
+            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
+            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
+            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
+            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+
+            var bill = new Bill()
+            {
+                Number = "6", 
+                Currency = Currency.USD, 
+                Email = "agallardo@bitpay.com",
+                Items = items,
+                Name = "basicBill"
+            };
+            var basicBill = await _bitpay.CreateBill(bill);
+            var retrievedBill = await _bitpay.GetBill(basicBill.Id);
+            retrievedBill.Currency = Currency.EUR;
+            retrievedBill.Name = "updatedBill";
+            retrievedBill.Items.Add(new Item(){Price = 60.0, Quantity = 7, Description = "product-added"});
+                
+            var updatedBill = await _bitpay.UpdateBill(retrievedBill, retrievedBill.Id);
+            Assert.Equal(basicBill.Id, retrievedBill.Id);
+            Assert.Equal(retrievedBill.Id, updatedBill.Id);
+            Assert.Equal(updatedBill.Currency, Currency.EUR);
+            Assert.Equal(updatedBill.Name, "updatedBill");
         }
 
         [Fact]
@@ -493,5 +520,18 @@ namespace BitPayXUnitTest
             Assert.Equal(BillStatus.Sent, retrievedBill.Status);
         }
 
+        [Fact]
+        public async Task TestShouldGetBills() {
+            
+            var bills = await _bitpay.GetBills();
+            Assert.True(bills.Count > 0, "No bills retrieved");
+        }
+
+        [Fact]
+        public async Task TestShouldGetBillsByStatus() {
+            
+            var bills = await _bitpay.GetBills(BillStatus.Sent);
+            Assert.True(bills.Count > 0, "No bills retrieved");
+        }
     }
 }

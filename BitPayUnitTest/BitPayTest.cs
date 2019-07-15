@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Buyer = BitPayAPI.Models.Invoice.Buyer;
 using InvoiceStatus = BitPayAPI.Models.Invoice.Status;
 using BillStatus = BitPayAPI.Models.Bill.Status;
+using PayoutStatus = BitPayAPI.Models.Payout.Status;
 
 namespace BitPayUnitTest {
 
@@ -147,14 +148,6 @@ namespace BitPayUnitTest {
             var retrievedInvoice = await _bitpay.GetInvoice(invoice.Id);
             Assert.AreEqual(invoice.Id, retrievedInvoice.Id, "Expected invoice not retrieved");
         }
-        
-        [TestMethod]
-        public async Task TestShouldGetInvoiceNoSigned() {
-            // create an invoice without signature then retrieve it through the get method - they should match
-            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, Currency.EUR), signRequest: false);
-            var retrievedInvoice = await _bitpay.GetInvoice(invoice.Id, Facade.PointOfSale, false);
-            Assert.AreEqual(invoice.Id, retrievedInvoice.Id);
-        }
 
         [TestMethod]
         public async Task TestShouldCreateInvoiceWithAdditionalParams() {
@@ -282,15 +275,13 @@ namespace BitPayUnitTest {
             var threeDaysFromNow = date.AddDays(3);
 
             var effectiveDate = threeDaysFromNow;
-            var reference = "My test batch";
-            var bankTransferId = "My bank transfer id";
             var currency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u", "Alice"),
-                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A", "Bob")
+                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u"),
+                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A")
             };
 
-            var batch = new PayoutBatch(currency, effectiveDate, bankTransferId, reference, instructions);
+            var batch = new PayoutBatch(currency, effectiveDate, instructions);
             batch = await _bitpay.SubmitPayoutBatch(batch);
 
             Assert.IsNotNull(batch.Id, "Batch created with id=NULL");
@@ -300,24 +291,17 @@ namespace BitPayUnitTest {
         [TestMethod]
         public async Task TestShouldSubmitGetAndDeletePayoutBatch() {
 
-            /*
-               Unfortunately at the time of this writing the Payroll facade is not available through the API
-               so this test will always fail - since you can't approve the Payroll pairing code
-             */
-
             var date = DateTime.Now;
             var threeDaysFromNow = date.AddDays(3);
 
             var effectiveDate = threeDaysFromNow;
-            var reference = "My test batch";
-            var bankTransferId = "My bank transfer id";
             var currency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u", "Alice"),
-                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A", "Bob")
+                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u"),
+                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A")
             };
 
-            var batch0 = new PayoutBatch(currency, effectiveDate, bankTransferId, reference, instructions);
+            var batch0 = new PayoutBatch(currency, effectiveDate, instructions);
             batch0 = await _bitpay.SubmitPayoutBatch(batch0);
 
             Assert.IsNotNull(batch0.Id, "Batch (0) created with id=NULL");
@@ -330,6 +314,20 @@ namespace BitPayUnitTest {
 
             await _bitpay.CancelPayoutBatch(batch0.Id);
 
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetPayoutBatches() {
+            
+            var batches = await _bitpay.GetPayoutBatches();
+            Assert.IsTrue(batches.Count > 0, "No batches retrieved");
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetPayoutBatchesByStatus() {
+            
+            var batches = await _bitpay.GetPayoutBatches(PayoutStatus.New);
+            Assert.IsTrue(batches.Count > 0, "No batches retrieved");
         }
 
         [TestMethod]
@@ -471,7 +469,36 @@ namespace BitPayUnitTest {
             };
             var basicBill = await _bitpay.CreateBill(bill);
             var retrievedBill = await _bitpay.GetBill(basicBill.Id);
-            Assert.AreEqual(bill.Id, retrievedBill.Id);
+            Assert.AreEqual(basicBill.Id, retrievedBill.Id);
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetAndUpdateBill() {
+            List<Item> items = new List<Item>();
+            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
+            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
+            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
+            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+
+            var bill = new Bill()
+            {
+                Number = "6", 
+                Currency = Currency.USD, 
+                Email = "agallardo@bitpay.com",
+                Items = items,
+                Name = "basicBill"
+            };
+            var basicBill = await _bitpay.CreateBill(bill);
+            var retrievedBill = await _bitpay.GetBill(basicBill.Id);
+            retrievedBill.Currency = Currency.EUR;
+            retrievedBill.Name = "updatedBill";
+            retrievedBill.Items.Add(new Item(){Price = 60.0, Quantity = 7, Description = "product-added"});
+                
+            var updatedBill = await _bitpay.UpdateBill(retrievedBill, retrievedBill.Id);
+            Assert.Equals(basicBill.Id, retrievedBill.Id);
+            Assert.Equals(retrievedBill.Id, updatedBill.Id);
+            Assert.Equals(updatedBill.Currency, Currency.EUR);
+            Assert.Equals(updatedBill.Name, "updatedBill");
         }
 
         [TestMethod]
@@ -499,6 +526,20 @@ namespace BitPayUnitTest {
             Assert.AreEqual("Success", result);
             // Confirm that the bill is sent
             Assert.AreEqual(BillStatus.Sent, retrievedBill.Status);
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetBills() {
+
+            var bills = await _bitpay.GetBills();
+            Assert.IsTrue(bills.Count > 0, "No bills retrieved");
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetBillsByStatus() {
+
+            var bills = await _bitpay.GetBills(BillStatus.Sent);
+            Assert.IsTrue(bills.Count > 0, "No bills retrieved");
         }
     }
 }
