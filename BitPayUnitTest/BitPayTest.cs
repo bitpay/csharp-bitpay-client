@@ -550,5 +550,4 @@ namespace BitPayUnitTest {
             Assert.IsTrue(bills.Count > 0, "No bills retrieved");
         }
     }
-    }
 }
