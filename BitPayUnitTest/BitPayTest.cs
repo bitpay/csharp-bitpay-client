@@ -325,10 +325,17 @@ namespace BitPayUnitTest {
         }
 
         [TestMethod]
-        public async Task TestShouldGetPayoutBatchesById() {
+        public async Task TestShouldGetPayoutBatches() {
+            
+            var batches = await _bitpay.GetPayoutBatches();
+            Assert.IsTrue(batches.Count > 0, "No batches retrieved");
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetPayoutBatchesByStatus() {
             
             var batches = await _bitpay.GetPayoutBatches(PayoutStatus.New);
-            Assert.IsNotNull(batches);
+            Assert.IsTrue(batches.Count > 0, "No batches retrieved");
         }
 
         [TestMethod]
@@ -474,6 +481,35 @@ namespace BitPayUnitTest {
         }
 
         [TestMethod]
+        public async Task TestShouldGetAndUpdateBill() {
+            List<Item> items = new List<Item>();
+            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
+            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
+            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
+            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+
+            var bill = new Bill()
+            {
+                Number = "6", 
+                Currency = Currency.USD, 
+                Email = "agallardo@bitpay.com",
+                Items = items,
+                Name = "basicBill"
+            };
+            var basicBill = await _bitpay.CreateBill(bill);
+            var retrievedBill = await _bitpay.GetBill(basicBill.Id);
+            retrievedBill.Currency = Currency.EUR;
+            retrievedBill.Name = "updatedBill";
+            retrievedBill.Items.Add(new Item(){Price = 60.0, Quantity = 7, Description = "product-added"});
+                
+            var updatedBill = await _bitpay.UpdateBill(retrievedBill, retrievedBill.Id);
+            Assert.Equals(basicBill.Id, retrievedBill.Id);
+            Assert.Equals(retrievedBill.Id, updatedBill.Id);
+            Assert.Equals(updatedBill.Currency, Currency.EUR);
+            Assert.Equals(updatedBill.Name, "updatedBill");
+        }
+
+        [TestMethod]
         public async Task TestShouldDeliverBill()
         {
             List<Item> items = new List<Item>();
@@ -499,5 +535,20 @@ namespace BitPayUnitTest {
             // Confirm that the bill is sent
             Assert.AreEqual(BillStatus.Sent, retrievedBill.Status);
         }
+
+        [TestMethod]
+        public async Task TestShouldGetBills() {
+
+            var bills = await _bitpay.GetBills();
+            Assert.IsTrue(bills.Count > 0, "No bills retrieved");
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetBillsByStatus() {
+
+            var bills = await _bitpay.GetBills(BillStatus.Sent);
+            Assert.IsTrue(bills.Count > 0, "No bills retrieved");
+        }
+    }
     }
 }
