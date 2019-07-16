@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace BitPayAPI.Models.Payout
+namespace BitPaySDK.Models.Payout
 {
     public class PayoutInstructionBtcSummary
     {

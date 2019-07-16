@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using BitPayAPI.Exceptions;
+using System.Linq;
+using BitPaySDK.Exceptions;
 using Newtonsoft.Json;
 
-namespace BitPayAPI.Models.Payout
+namespace BitPaySDK.Models.Payout
 {
     public class PayoutBatch
     {
@@ -123,7 +124,7 @@ namespace BitPayAPI.Models.Payout
         private void _computeAndSetAmount()
         {
             var amount = 0.0;
-            for (var i = 0; i < Instructions.Count; i++) amount += Instructions[i].Amount;
+            amount += Instructions.Select(i => i.Amount).Sum();
             Amount = amount;
         }
 

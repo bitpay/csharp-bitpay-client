@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace BitPayAPI.Models.Ledger
+namespace BitPaySDK.Models.Ledger
 {
     public class LedgerEntry
     {

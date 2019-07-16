@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace BitPayAPI.Models.Invoice
+namespace BitPaySDK.Models.Invoice
 {
     public class Buyer
     {
