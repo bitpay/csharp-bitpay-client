@@ -1102,7 +1102,6 @@ namespace BitPaySDK
 
                 var builder = new ConfigurationBuilder().AddInMemoryCollection(config);
                 _configuration = builder.Build();
-                _env = _configuration.GetSection("BitPayConfiguration:Environment").Value;
             }
             catch (Exception ex)
             {

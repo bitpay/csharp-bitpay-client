@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>BitPay</PackageId>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net451;net452;net46;net461;net462;net47;net471;net472;netstandard2.0;netcoreapp2.0;netcoreapp2.1;netcoreapp2.2</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <!-- version numbers will be updated by build -->
     <AssemblyVersion>3.0.1907.0</AssemblyVersion>
@@ -29,6 +29,23 @@
     <RepositoryUrl>https://github.com/bitpay/csharp-bitpay-client</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
+
+  <!-- Conditionally obtain references for the .NET Framework 4.5.2 target -->
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.2" />
+  </ItemGroup>
+
+  <!-- Conditionally obtain references for the .NET Framework 4.6 target -->
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.2" />
+  </ItemGroup>
+
+  <!-- Conditionally obtain references for the .NET Framework 4.7.2 target -->
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BouncyCastle" Version="1.8.5" />
