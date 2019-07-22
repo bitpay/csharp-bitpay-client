@@ -1,13 +1,17 @@
-## Using the BitPay C# library
+## Using the BitPay .NET client
 
 This SDK provides a convenient abstraction of BitPay's [cryptographically-secure API](https://bitpay.com/api) and allows payment gateway developers to focus on payment flow/e-commerce integration rather than on the specific details of client-server interaction using the API.  This SDK optionally provides the flexibility for developers to have control over important details, including the handling of private keys needed for client-server communication.
 
-This SDK implements BitPay's remote client authentication and authorization strategy.  No private or shared-secret information is ever transmitted over the wire.
+It also implements BitPay's remote client authentication and authorization strategy.  No private or shared-secret information is ever transmitted over the wire.
 
 ### Dependencies
 
 You must have a BitPay merchant account to use this SDK.  It's free to [sign-up for a BitPay merchant account](https://bitpay.com/start).
 
+### Installation
+
+You can find and download this package from [NuGet Package Manager](https://www.nuget.org/packages/BitPay).  
+Make sure you have the latest version to avoid implementation and security issues.
 
 ### Handling your client private key
 
@@ -39,9 +43,23 @@ var configuration = new ConfigurationBuilder()
 BitPay bitpay = new BitPay(configuration);
 ```
 
+```c#
+// Initialize with separate variables.
+
+BitPay bitpay = new BitPay(
+    Env.Test,
+    "[PATH_TO_THE_PRIVATE_KEY]",
+    new Env.Tokens(){
+        POS = "AvJdGrEqTW9HVbqaQDhWHRacHYgfgxsJit9zabAnrJaK",
+        Merchant = "CE2WRSEExNFA4YdQyyDJmgVAot9FgXvXbo752TGA7eUj",
+        Payout = "9pJ7fzW1GGeucVMcDrs7HDQfj32aNATCDnyY6YAaHUNo"
+    }
+);
+```
+
 ### Pair your client with BitPay
 
-Your client must be paired with the BitPay server.  The pairing initializes authentication and authorization for your client to communicate with BitPay for your specific merchant account.
+Your client must be paired with the BitPay server. The pairing initializes authentication and authorization for your client to communicate with BitPay for your specific merchant account.
 
 Pairing is accomplished by having the BitPay.Net Setup utility request a pairing code from the BitPay server.
 Meanwhile a new pairing code is generated, the BitPay.Net Setup utility will ask you to activate it in your BitPay account. It will also store the paired token in the environment file.
@@ -51,7 +69,7 @@ The pairing code is then entered into the BitPay merchant dashboard for the desi
 ### Create an invoice
 
 ```c#
-Invoice invoice = bitpay.createInvoice(100.0, "USD");
+Invoice invoice = bitpay.createInvoice(100.0, "USD").Result;
 
 String invoiceUrl = invoice.getURL();
 
@@ -69,13 +87,13 @@ invoice.FullNotifications = true;
 invoice.NotificationEmail = "satoshi@example.com";
 invoice.PosData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
-invoice = this.bitpay.createInvoice(invoice);
+invoice = this.bitpay.createInvoice(invoice).Result;
 ```
 
 ### Retreive an invoice
 
 ```c#
-Invoice invoice = bitpay.getInvoice(invoice.getId());
+Invoice invoice = bitpay.getInvoice(invoice.getId()).Result;
 ```
 
 ### Get exchange rates
@@ -83,11 +101,11 @@ Invoice invoice = bitpay.getInvoice(invoice.getId());
 You can retrieve BitPay's [BBB exchange rates](https://bitpay.com/exchange-rates).
 
 ```c#
-Rates rates = this.bitpay.getRates();
+Rates rates = this.bitpay.getRates().Result;
 
 double rate = rates.getRate("USD");
 
 rates.update();
 ```
 
-See also the tests project for more examples of API calls.
+See also the xUnit test project for more examples of API calls.

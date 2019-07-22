@@ -56,7 +56,7 @@ namespace BitPayXUnitTest
             
             // Initialize with separate variables
             _bitpay = new BitPay(
-                Env.Test, 
+                Env.Test,
                 "bitpay_private_test.key",
                 new Env.Tokens(){
                     POS = "AvJdGrEqTW9HVsJit9zabAnrJabqaQDhWHRacHYgfgxK",
@@ -367,8 +367,8 @@ namespace BitPayXUnitTest
             var bill = new Bill()
             {
                 Number = "1", 
-                Currency = Currency.USD, 
-                Email = "agallardo@bitpay.com",
+                Currency = Currency.USD,
+                Email = "", //email address mandatory
                 Items = items
             };
             var basicBill = await _bitpay.CreateBill(bill);
@@ -387,8 +387,8 @@ namespace BitPayXUnitTest
             var bill = new Bill()
             {
                 Number = "2", 
-                Currency = Currency.EUR, 
-                Email = "agallardo@bitpay.com",
+                Currency = Currency.EUR,
+                Email = "", //email address mandatory
                 Items = items
             };
             var basicBill = await _bitpay.CreateBill(bill);
@@ -407,8 +407,8 @@ namespace BitPayXUnitTest
             var bill = new Bill()
             {
                 Number = "3", 
-                Currency = Currency.USD, 
-                Email = "agallardo@bitpay.com",
+                Currency = Currency.USD,
+                Email = "", //email address mandatory
                 Items = items
             };
             var basicBill = await _bitpay.CreateBill(bill);
@@ -427,8 +427,8 @@ namespace BitPayXUnitTest
             var bill = new Bill()
             {
                 Number = "4", 
-                Currency = Currency.USD, 
-                Email = "agallardo@bitpay.com",
+                Currency = Currency.USD,
+                Email = "", //email address mandatory
                 Items = items
             };
             var basicBill = await _bitpay.CreateBill(bill);
@@ -447,8 +447,8 @@ namespace BitPayXUnitTest
             var bill = new Bill()
             {
                 Number = "5", 
-                Currency = Currency.USD, 
-                Email = "agallardo@bitpay.com",
+                Currency = Currency.USD,
+                Email = "", //email address mandatory
                 Items = items
             };
             var basicBill = await _bitpay.CreateBill(bill);
@@ -467,8 +467,8 @@ namespace BitPayXUnitTest
             var bill = new Bill()
             {
                 Number = "6", 
-                Currency = Currency.USD, 
-                Email = "agallardo@bitpay.com",
+                Currency = Currency.USD,
+                Email = "", //email address mandatory
                 Items = items
             };
             var basicBill = await _bitpay.CreateBill(bill);
@@ -487,8 +487,8 @@ namespace BitPayXUnitTest
             var bill = new Bill()
             {
                 Number = "6", 
-                Currency = Currency.USD, 
-                Email = "agallardo@bitpay.com",
+                Currency = Currency.USD,
+                Email = "", //email address mandatory
                 Items = items,
                 Name = "basicBill"
             };
@@ -518,8 +518,8 @@ namespace BitPayXUnitTest
             var bill = new Bill()
             {
                 Number = "7", 
-                Currency = Currency.USD, 
-                Email = "agallardo@bitpay.com",
+                Currency = Currency.USD,
+                Email = "", //email address mandatory
                 Items = items
             };
             var basicBill = await _bitpay.CreateBill(bill);
