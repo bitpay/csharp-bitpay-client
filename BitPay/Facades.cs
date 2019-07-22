@@ -1,4 +1,4 @@
-namespace BitPayAPI
+namespace BitPaySDK
 {
     public static class Facade
     {

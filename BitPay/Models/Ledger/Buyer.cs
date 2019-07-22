@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace BitPayAPI.Models.Ledger
+namespace BitPaySDK.Models.Ledger
 {
     /// <summary>
     ///     Provides an interface to a buyer.

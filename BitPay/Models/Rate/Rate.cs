@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace BitPayAPI.Models.Rate
+namespace BitPaySDK.Models.Rate
 {
     /// <summary>
     ///     Provides an interface to a single exchange rate.

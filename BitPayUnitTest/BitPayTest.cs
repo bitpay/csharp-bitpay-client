@@ -1,20 +1,20 @@
-﻿using BitPayAPI;
+﻿using BitPaySDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BitPayAPI.Exceptions;
-using BitPayAPI.Models;
-using BitPayAPI.Models.Bill;
-using BitPayAPI.Models.Invoice;
-using BitPayAPI.Models.Payout;
+using BitPaySDK.Exceptions;
+using BitPaySDK.Models;
+using BitPaySDK.Models.Bill;
+using BitPaySDK.Models.Invoice;
+using BitPaySDK.Models.Payout;
 using Microsoft.Extensions.Configuration;
-using Buyer = BitPayAPI.Models.Invoice.Buyer;
-using InvoiceStatus = BitPayAPI.Models.Invoice.Status;
-using BillStatus = BitPayAPI.Models.Bill.Status;
-using PayoutStatus = BitPayAPI.Models.Payout.Status;
+using Buyer = BitPaySDK.Models.Invoice.Buyer;
+using InvoiceStatus = BitPaySDK.Models.Invoice.Status;
+using BillStatus = BitPaySDK.Models.Bill.Status;
+using PayoutStatus = BitPaySDK.Models.Payout.Status;
 
 namespace BitPayUnitTest {
 
@@ -364,7 +364,7 @@ namespace BitPayUnitTest {
             {
                 Number = "1", 
                 Currency = Currency.USD, 
-                Email = "agallardo@bitpay.com",
+                Email = "", //email address mandatory
                 Items = items
             };
             var basicBill = await _bitpay.CreateBill(bill);
@@ -384,7 +384,7 @@ namespace BitPayUnitTest {
             {
                 Number = "2", 
                 Currency = Currency.EUR, 
-                Email = "agallardo@bitpay.com",
+                Email = "", //email address mandatory
                 Items = items
             };
             var basicBill = await _bitpay.CreateBill(bill);
@@ -404,7 +404,7 @@ namespace BitPayUnitTest {
             {
                 Number = "3", 
                 Currency = Currency.USD, 
-                Email = "agallardo@bitpay.com",
+                Email = "", //email address mandatory
                 Items = items
             };
             var basicBill = await _bitpay.CreateBill(bill);
@@ -424,7 +424,7 @@ namespace BitPayUnitTest {
             {
                 Number = "4", 
                 Currency = Currency.USD, 
-                Email = "agallardo@bitpay.com",
+                Email = "", //email address mandatory
                 Items = items
             };
             var basicBill = await _bitpay.CreateBill(bill);
@@ -444,7 +444,7 @@ namespace BitPayUnitTest {
             {
                 Number = "5", 
                 Currency = Currency.USD, 
-                Email = "agallardo@bitpay.com",
+                Email = "", //email address mandatory
                 Items = items
             };
             var basicBill = await _bitpay.CreateBill(bill);
@@ -464,7 +464,7 @@ namespace BitPayUnitTest {
             {
                 Number = "6", 
                 Currency = Currency.USD, 
-                Email = "agallardo@bitpay.com",
+                Email = "", //email address mandatory
                 Items = items
             };
             var basicBill = await _bitpay.CreateBill(bill);
@@ -484,7 +484,7 @@ namespace BitPayUnitTest {
             {
                 Number = "6", 
                 Currency = Currency.USD, 
-                Email = "agallardo@bitpay.com",
+                Email = "", //email address mandatory
                 Items = items,
                 Name = "basicBill"
             };
@@ -515,7 +515,7 @@ namespace BitPayUnitTest {
             {
                 Number = "7", 
                 Currency = Currency.USD, 
-                Email = "agallardo@bitpay.com",
+                Email = "", //email address mandatory
                 Items = items
             };
             var basicBill = await _bitpay.CreateBill(bill);

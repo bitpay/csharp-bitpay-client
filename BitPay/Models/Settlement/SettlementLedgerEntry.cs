@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BitPayAPI.Models.Settlement
+namespace BitPaySDK.Models.Settlement
 {
     public class SettlementLedgerEntry
     {

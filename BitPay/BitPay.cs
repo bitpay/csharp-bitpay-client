@@ -7,27 +7,27 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using BitPayAPI.Exceptions;
-using BitPayAPI.Models;
-using BitPayAPI.Models.Bill;
-using BitPayAPI.Models.Invoice;
-using BitPayAPI.Models.Ledger;
-using BitPayAPI.Models.Payout;
-using BitPayAPI.Models.Rate;
-using BitPayAPI.Models.Settlement;
+using BitPaySDK.Exceptions;
+using BitPaySDK.Models;
+using BitPaySDK.Models.Bill;
+using BitPaySDK.Models.Invoice;
+using BitPaySDK.Models.Ledger;
+using BitPaySDK.Models.Payout;
+using BitPaySDK.Models.Rate;
+using BitPaySDK.Models.Settlement;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
 
 /**
  * @author Antonio Buedo
- * @date 7.8.2019
- * @version 2.2.1907
+ * @date 7.18.2019
+ * @version 3.0.1907
  *
  * See bitpay.com/api for more information.
  */
 
-namespace BitPayAPI
+namespace BitPaySDK
 {
     public class BitPay
     {
@@ -35,15 +35,24 @@ namespace BitPayAPI
         private static string _env;
         private Dictionary<string, string> _tokenCache; // {facade, token}
         private static string _configFilePath;
-        
-        private const string BitpayApiVersion = "2.0.0";
-        private const string BitpayPluginInfo = "BitPay_DotNet_Client_v2.2.1907";
-
         private string _baseUrl;
-        private string _clientName;
         private EcKey _ecKey;
 
         private HttpClient _httpClient;
+        
+        /// <summary>
+        ///     Constructor for use if the keys and SIN are managed by this library.
+        /// </summary>
+        /// <param name="environment">Target environment. Options: Env.Test / Env.Prod</param>
+        /// <param name="privateKeyPath">Private Key file path.</param>
+        /// <param name="tokens">Env.Tokens containing the available tokens.</param>
+        public BitPay(string environment, string privateKeyPath, Env.Tokens tokens)
+        {
+            _env = environment;
+            BuildConfig(privateKeyPath, tokens);
+            InitKeys().Wait();
+            Init().Wait();
+        }
         
         /// <summary>
         ///     Constructor for use if the keys and SIN are managed by this library.
@@ -84,7 +93,7 @@ namespace BitPayAPI
             {
                 var token = new Token
                 {
-                    Id = Identity, Guid = Guid.NewGuid().ToString(), PairingCode = pairingCode, Label = _clientName
+                    Id = Identity, Guid = Guid.NewGuid().ToString(), PairingCode = pairingCode
                 };
                 var json = JsonConvert.SerializeObject(token);
                 var response = await Post("tokens", json);
@@ -114,8 +123,7 @@ namespace BitPayAPI
                 {
                     Id = Identity,
                     Guid = Guid.NewGuid().ToString(),
-                    Facade = facade,
-                    Label = _clientName
+                    Facade = facade
                 };
                 var json = JsonConvert.SerializeObject(token);
                 var response = await Post("tokens", json).ConfigureAwait(false);
@@ -725,9 +733,8 @@ namespace BitPayAPI
         {
             try
             {
-                _baseUrl = _configuration.GetSection("BitPayConfiguration:EnvConfig:"+ _env +":ApiUrl").Value;
+                _baseUrl = _env == Env.Test ? Env.TestUrl : Env.ProdUrl;
                 _httpClient = new HttpClient {BaseAddress = new Uri(_baseUrl)};
-                NormalizeClientName(_configuration.GetSection("BitPayConfiguration:EnvConfig:"+ _env +":ClientDescription").Value);
                 DeriveIdentity();
                 await LoadAccessTokens();
             }
@@ -867,8 +874,8 @@ namespace BitPayAPI
             {
                 var fullUrl = _baseUrl + uri;
                 _httpClient.DefaultRequestHeaders.Clear();
-                _httpClient.DefaultRequestHeaders.Add("x-accept-version", BitpayApiVersion);
-                _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", BitpayPluginInfo);
+                _httpClient.DefaultRequestHeaders.Add("x-accept-version", Env.BitpayApiVersion);
+                _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", Env.BitpayPluginInfo);
                 if (parameters != null)
                 {
                     fullUrl += "?";
@@ -905,8 +912,8 @@ namespace BitPayAPI
             {
                 var fullUrl = _baseUrl + uri;
                 _httpClient.DefaultRequestHeaders.Clear();
-                _httpClient.DefaultRequestHeaders.Add("x-accept-version", BitpayApiVersion);
-                _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", BitpayPluginInfo);
+                _httpClient.DefaultRequestHeaders.Add("x-accept-version", Env.BitpayApiVersion);
+                _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", Env.BitpayPluginInfo);
 
                 if (parameters != null)
                 {
@@ -940,8 +947,8 @@ namespace BitPayAPI
             {
                 var bodyContent = new StringContent(UnicodeToAscii(json));
                 _httpClient.DefaultRequestHeaders.Clear();
-                _httpClient.DefaultRequestHeaders.Add("x-accept-version", BitpayApiVersion);
-                _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", BitpayPluginInfo);
+                _httpClient.DefaultRequestHeaders.Add("x-accept-version", Env.BitpayApiVersion);
+                _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", Env.BitpayPluginInfo);
                 bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 if (signatureRequired)
                 {
@@ -965,8 +972,8 @@ namespace BitPayAPI
             {
                 var bodyContent = new StringContent(UnicodeToAscii(json));
                 _httpClient.DefaultRequestHeaders.Clear();
-                _httpClient.DefaultRequestHeaders.Add("x-accept-version", BitpayApiVersion);
-                _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", BitpayPluginInfo);
+                _httpClient.DefaultRequestHeaders.Add("x-accept-version", Env.BitpayApiVersion);
+                _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", Env.BitpayPluginInfo);
                 bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 
                 var signature = KeyUtils.Sign(_ecKey, _baseUrl + uri + json);
@@ -1049,15 +1056,6 @@ namespace BitPayAPI
             return new string(asciiChars);
         }
 
-        private void NormalizeClientName(string clientName)
-        {
-            if (clientName.Equals(BitpayPluginInfo)) clientName += " on " + Environment.MachineName;
-
-            // Eliminate special characters from the client name (used as a token label).  Trim to 60 chars.
-            _clientName = new Regex("[^a-zA-Z0-9_ ]").Replace(clientName, "_");
-            if (_clientName.Length > 60) _clientName = _clientName.Substring(0, 60);
-        }
-
         /// <summary>
         ///     Loads the configuration file (JSON)
         /// </summary>
@@ -1074,6 +1072,36 @@ namespace BitPayAPI
                 var builder = new ConfigurationBuilder().AddJsonFile(_configFilePath, false, true);
                 _configuration = builder.Build();
                 _env = _configuration.GetSection("BitPayConfiguration:Environment").Value;
+            }
+            catch (Exception ex)
+            {
+                throw new ConfigNotFoundException(ex);
+            }
+        }
+
+        /// <summary>
+        ///     Builds the configuration object
+        /// </summary>
+        /// <returns></returns>
+        private void BuildConfig(string privateKeyPath, Env.Tokens tokens)
+        {
+            try
+            {
+                if (!File.Exists(privateKeyPath))
+                {
+                    throw new Exception("Private Key file not found");
+                }
+                var config = new Dictionary<string, string>
+                {
+                    {"BitPayConfiguration:Environment", _env},
+                    {"BitPayConfiguration:EnvConfig:" + _env + ":PrivateKeyPath", privateKeyPath},
+                    {"BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:pos", tokens.POS},
+                    {"BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:merchant", tokens.Merchant},
+                    {"BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:payroll", tokens.Payout}
+                };
+
+                var builder = new ConfigurationBuilder().AddInMemoryCollection(config);
+                _configuration = builder.Build();
             }
             catch (Exception ex)
             {

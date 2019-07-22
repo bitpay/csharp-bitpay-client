@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BitPayAPI.Models.Rate
+namespace BitPaySDK.Models.Rate
 {
 	/// <summary>
 	///     Provides an interface to the BitPay server to obtain exchange rate information.

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BitPayAPI.Models.Payout
+namespace BitPaySDK.Models.Payout
 {
     public class PayoutInstructionTransaction
     {

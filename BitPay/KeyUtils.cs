@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Math;
 
-namespace BitPayAPI
+namespace BitPaySDK
 {
     public class KeyUtils
     {

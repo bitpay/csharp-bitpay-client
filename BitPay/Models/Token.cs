@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace BitPayAPI.Models
+namespace BitPaySDK.Models
 {
     /// <summary>
     ///     Provides an interface to the BitPay server for the token resource.

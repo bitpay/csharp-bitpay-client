@@ -1,6 +1,6 @@
-namespace BitPayAPI
+namespace BitPaySDK
 {
-    public static class Env
+    public class Env
     {
         public const string Test = "Test";
         public const string Prod = "Prod";
@@ -8,5 +8,12 @@ namespace BitPayAPI
         public const string ProdUrl = "https://bitpay.com/";
         public const string BitpayApiVersion = "2.0.0";
         public const string TokensFolderPath = "tokens";
+        public const string BitpayPluginInfo = "BitPay_DotNet_Client_v3.0.1907";
+        public class Tokens
+        {
+            public string POS { get; set; }
+            public string Merchant { get; set; }
+            public string Payout { get; set; }
+        }
     }
 }

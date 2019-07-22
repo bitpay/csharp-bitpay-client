@@ -1,11 +1,8 @@
 {
   "BitPayConfiguration": {
-    "Environment": "Test",
+    "Environment": "",
     "EnvConfig": {
       "Test": {
-        "ClientDescription": "",
-        "ApiUrl": "https://test.bitpay.com/",
-        "ApiVersion": "2.0.0",
         "PrivateKeyPath": "",
         "ApiTokens": {
           "pos": "",
@@ -14,9 +11,6 @@
         }
       },
       "Prod": {
-        "ClientDescription": "",
-        "ApiUrl": "https://bitpay.com/",
-        "ApiVersion": "2.0.0",
         "PrivateKeyPath": "",
         "ApiTokens": {
           "pos": "",

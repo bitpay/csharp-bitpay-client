@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace BitPayAPI.Models.Bill
+namespace BitPaySDK.Models.Bill
 {
     public class Item
     {

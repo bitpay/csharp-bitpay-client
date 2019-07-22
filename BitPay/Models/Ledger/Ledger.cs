@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BitPayAPI.Models.Ledger
+namespace BitPaySDK.Models.Ledger
 {
     public class Ledger
     {
