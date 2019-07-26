@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
-using BitPayAPI;
+using BitPaySDK;
+using BitPaySDK.Models.Invoice;
 using BitPaySetup.Models;
 using Newtonsoft.Json;
 
@@ -17,91 +18,32 @@ namespace BitPaySetup
         private static string pairingCode = "";
         private static string facade = "";
         private static string notification = "";
+        private static string envUrl = "";
+        private static ConsoleColor notificationColor;
 
         private static void Main()
         {
             if (string.IsNullOrEmpty(confFilePath)) {LoadConfFile();}
-            Console.Clear();
+//            Console.Clear();
             DrawTitle();
             if (string.IsNullOrEmpty(env)) {SelectEnvironment();}
-            var maxMenuItems = 5;
-            var selector = 0;
-            bool valid;
-            while (selector != maxMenuItems)
-            {
-                Console.Clear();
-                DrawTitle();
-                DrawMenu(maxMenuItems);
-                valid = int.TryParse(Console.ReadLine(), out selector);
-                if (valid)
-                    switch (selector)
-                    {
-                        case 1:
-                            GenerateKeyPair(ecKey);
-                            break;
-                        case 2:
-                            SetClientDescription();
-                            break;
-                        case 3:
-                            GetPairingCodeAndToken();
-                            break;
-                        case 4:
-                            SelectEnvironment();
-                            break;
-                        default:
-                            if (selector != maxMenuItems) SetNotification();
-                            break;
-                    }
-                else
-                    SetNotification();
-            }
-        }
+            GenerateKeyPair(ecKey);
+            GetPairingCodeAndToken();
+            
+            SetNotification(" Congratulations, you are all setup!\n You can now move the configuration and private key files\n to a secure location away from being shared or exposed.\n " +
+                            "In case this files could be compromised, we strongly recommend to run\n this utility to replace them by new ones.", 1);
 
-        private static void SetClientDescription()
-        {
             Console.Clear();
             DrawTitle();
-
-            string clientDefinition = null;
-            if (env == Env.Test) clientDefinition = appConfig.BitPayConfiguration.EnvConfig.Test.ClientDescription;
-            if (env == Env.Prod) clientDefinition = appConfig.BitPayConfiguration.EnvConfig.Prod.ClientDescription;
-
-            if (!string.IsNullOrEmpty(clientDefinition))
-            {
-                Console.WriteLine(" The current set client description is: " + clientDefinition);
-                Console.WriteLine(" Would you like to change it? [yes|no] (default: no)");
-                Console.WriteLine();
-                Console.Write(" > ");
-                var answer = Console.ReadLine();
-                while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
-                    answer = Console.ReadLine();
-
-                if (answer.ToLower() == "no" || answer.ToLower() == "")
-                {
-                    SetNotification(" Selected client description: " + clientDefinition);
-
-                    return;
-                }
-            }
-
-            Console.WriteLine(" Enter a new client description:");
-            Console.WriteLine();
-            Console.Write(" > ");
-            clientDefinition = Console.ReadLine();
-
-            if (env == Env.Test) appConfig.BitPayConfiguration.EnvConfig.Test.ClientDescription = clientDefinition;
-            if (env == Env.Prod) appConfig.BitPayConfiguration.EnvConfig.Prod.ClientDescription = clientDefinition;
-
-            SetNotification(" Selected client description: " + clientDefinition);
-
-            GenerateConfFile(confFilePath);
+            Console.Write(" Press any key to close this application.");
+            Console.ReadKey();
         }
 
         private static void SelectEnvironment()
         {
             var maxMenuItems = 3;
             var selector = 0;
-            bool valid;
+            bool valid = false;
             while (selector != maxMenuItems)
             {
                 Console.Clear();
@@ -120,49 +62,53 @@ namespace BitPaySetup
 
                     if (answer.ToLower() == "no" || answer.ToLower() == "")
                     {
-                        SetNotification(" Selected environment: " + env + "\n IMPORTANT: If this is the first time you set up your client, follow the below steps in order.");
+                        SetNotification(" Selected environment: " + env, 1);
 
                         return;
                     }
                 }
 
-                Console.WriteLine(" Select the working environment:");
+                Console.WriteLine(" Select the working environment (default: Production)");
                 Console.WriteLine(" 1. Test");
                 Console.WriteLine(" 2. Production");
-                Console.WriteLine(" 3. Cancel");
                 Console.WriteLine();
                 Console.Write(" Select an option: ");
 
-                valid = int.TryParse(Console.ReadLine(), out selector);
+                var key = Console.ReadKey();
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    valid = true;
+                }
+                else if (char.IsDigit(key.KeyChar))
+                {
+                    valid = int.Parse(key.KeyChar.ToString()) == 1 || int.Parse(key.KeyChar.ToString()) == 2;
+                }
 
                 if (valid)
                 {
-                    switch (selector)
+                    switch (key.KeyChar)
                     {
-                        case 1:
+                        case '1':
+                            Console.WriteLine(key.KeyChar.ToString());
                             env = Env.Test;
-                            SetNotification(" Selected environment: " + env);
+                            SetNotification(" Selected environment: " + env, 1);
 
                             break;
-                        case 2:
+                        default:
+                            Console.WriteLine(key.KeyChar.ToString());
                             env = Env.Prod;
                             GenerateConfFile(confFilePath);
-                            SetNotification(" Selected environment: " + env);
+                            SetNotification(" Selected environment: " + env, 1);
 
                             break;
-                        case 3:
-                            Main();
-                            return;
                     }
-                    SetNotification(notification + "\n IMPORTANT: If this is the first time you set up your client, follow the below steps in order.");
-
                     appConfig.BitPayConfiguration.Environment = env;
                     GenerateConfFile(confFilePath);
 
                     return;
                 }
 
-                SetNotification();
+                SetNotification(notificationColorCode: 2);
             }
         }
 
@@ -188,19 +134,19 @@ namespace BitPaySetup
                 {
                     if (File.Exists(ecKeyFilePath))
                     {
-                        SetNotification(" Selected private key file: " + ecKeyFilePath);
+                        SetNotification(" Selected private key file: " + ecKeyFilePath, 1);
 
                         return;
                     }
 
                     SetNotification(" The private key file does not longer exists in: \n \"" + ecKeyFilePath +
-                                    "\"\n Please, proceed with the following instructions.");
+                                    "\"\n Please, proceed with the following instructions.", 2);
                     Console.Clear();
                     DrawTitle();
                 }
             }
 
-            Console.WriteLine(" Enter the full path for the private key files where this will loaded from or generated:");
+            Console.WriteLine(" Enter the full path for the private key file where this will loaded from:");
             Console.WriteLine(" If click Enter, a file named \"bitpay_private_" + env.ToLower() +
                               " will be generated in the root of this application and");
             Console.WriteLine(" any file with the same name in this directory will be overwritten.");
@@ -213,22 +159,36 @@ namespace BitPaySetup
                 ecKeyFilePath = @"bitpay_private_" + env.ToLower() + ".key";
                 if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
                 {
-                    SetNotification(" The file name entered already exists: \n \"" + ecKeyFilePath +
-                                    "\"\n Make sure you want to modify it and then delete it before trying again");
+                    SetNotification(" A file with the same name already exists: \n \"" + ecKeyFilePath +
+                                    "\"\n Make sure you want to modify it, then delete it manually before trying again" +
+                                    "\"\n For security reasons we won't delete a private key.", 2);
 
+                    GenerateKeyPair(ecKey);
                     return;
                 }
 
                 ecKey = KeyUtils.CreateEcKey();
                 KeyUtils.SaveEcKey(ecKey);
-                SetNotification(" New private key generated successfully with public key:\n " + ecKey.PublicKeyHexBytes +
-                                "\n in: \"" + ecKeyFilePath + "\"");
+
+                if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
+                {
+                    SetNotification(" New private key generated successfully with public key:\n " +
+                                    ecKey.PublicKeyHexBytes +
+                                    "\n in: \"" + ecKeyFilePath + "\"", 1);
+                }
+                else {
+                    SetNotification(" Something went wrong when creating the file: \n \"" + newEcKeyPath +
+                                    "\"\n Make sure the directory exists and you have the right permissions, then trying again.", 2);
+                
+                    GenerateKeyPair(ecKey);
+                    return;
+                }
             }
             else
             {
                 if (!File.Exists(newEcKeyPath))
                 {
-                    SetNotification(" The file entered not found in: \n \"" + newEcKeyPath + "\"");
+                    SetNotification(" The file entered not found in: \n \"" + newEcKeyPath + "\"", 2);
                     Console.Clear();
                     DrawTitle();
                     Console.WriteLine(" Would you like to provide a different file path? [yes|no] (default: no)");
@@ -241,33 +201,42 @@ namespace BitPaySetup
                         answer = Console.ReadLine();
 
                     if (answer.ToLower() == "yes") GenerateKeyPair(ecKey);
-
+                    ecKeyFilePath = newEcKeyPath;
+                }
+                else
+                {
                     if (KeyUtils.PrivateKeyExists(newEcKeyPath))
                     {
-                        SetNotification(" The file name entered already exists: \n \"" + newEcKeyPath +
-                                        "\"\n Be sure you want to modify it and then delete it manually before trying again");
+                        SetNotification(" A file with the same name already exists: \n \"" + newEcKeyPath +
+                                        "\"\n Make sure you want to modify it, then delete it manually before trying again" +
+                                        "\"\n For security reasons we won't delete a private key.", 2);
 
+                        GenerateKeyPair(ecKey);
                         return;
                     }
-                    ecKeyFilePath = newEcKeyPath;
                 }
 
                 try
                 {
                     ecKey = KeyUtils.CreateEcKey();
                     KeyUtils.SaveEcKey(ecKey);
+
+                    if (!KeyUtils.PrivateKeyExists(newEcKeyPath))
+                    {
+                        throw new Exception(" Could not store the file: \n \"" + newEcKeyPath);
+                    }
                 }
                 catch (Exception e)
                 {
                     SetNotification(
                         " An error occurred, please, check if the you have the right\n permissions to write in the specified directory.\n Error Details: " +
-                        e.Message);
+                        e.Message, 2);
 
-                    return;
+                    GenerateKeyPair(ecKey);
                 }
 
-                SetNotification(" New key pair generated successfully with public key: " + ecKey.PublicKeyHexBytes +
-                                " in: \n \"" + newEcKeyPath + "\"");
+                SetNotification(" New Private key generated successfully with public key: " + ecKey.PublicKeyHexBytes +
+                                " in: \n \"" + newEcKeyPath + "\"", 1);
             }
 
             if (env == Env.Test) appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKeyPath = ecKeyFilePath;
@@ -278,9 +247,32 @@ namespace BitPaySetup
 
         private static void GetPairingCodeAndToken()
         {
-            string newToken;
+            string newToken = "";
             
             SetFacade();
+
+            if (facade == Facade.Payroll)
+            {
+                SetNotification(
+                    " In order to get access to the Payroll facade, you need to contact Support at support@bitpay.com", 3);
+                Console.Clear();
+                DrawTitle();
+                Console.WriteLine(" Did you contact and receive confirmation yet? [yes|no] (default: yes)");
+                Console.WriteLine(
+                    " If 'no', a new file will be generated in the entered location with the given name.");
+                Console.WriteLine();
+                Console.Write(" > ");
+                var answer = Console.ReadLine();
+                while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
+                    answer = Console.ReadLine();
+
+                if (answer.ToLower() == "no")
+                {
+                    GetPairingCodeAndToken();
+                    return;
+                }
+            }
+
             var apiTokens = new ApiTokens();
             if (env == Env.Test) apiTokens = appConfig.BitPayConfiguration.EnvConfig.Test.ApiTokens;
             if (env == Env.Prod) apiTokens = appConfig.BitPayConfiguration.EnvConfig.Prod.ApiTokens;
@@ -288,107 +280,162 @@ namespace BitPaySetup
             if (TokenCurrentlyExists(facade, apiTokens))
             {
                 SetNotification(" A token for this Facade (" + facade + ") on this Environment (" + env +
-                                ") already exists.");
+                                ") already exists.", 3);
                 Console.Clear();
                 DrawTitle();
-                Console.WriteLine(" Would you want to replace it for a new one? [yes|no] (default: no)");
+                Console.WriteLine(" Would you like to replace it for a new one? [yes|no] (default: no)");
                 Console.WriteLine();
                 Console.Write(" > ");
                 var answer = Console.ReadLine();
-                while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
+                while (answer.ToLower() != "yes" && answer.ToLower() != "no")
                     answer = Console.ReadLine();
 
-                if (answer.ToLower() == "no") return;
-            }
-
-            try
-            {
-                var bitpay = new BitPay(confFilePath);
-    
-                var pairingCodeObj = bitpay.RequestClientAuthorization(facade);
-    
-                pairingCode = pairingCodeObj.Result;
-    
-                newToken = bitpay.GetTokenByFacade(facade);
-            }
-            catch (Exception e)
-            {
-                SetNotification(
-                    " An error occurred while generating a new token pair.\n Make sure you have created a/o selected a private key.\n Error Details: " +
-                    e.Message);
-
-                return;
+                if (answer.ToLower() == "no" || answer.ToLower() == "") return;
             }
             
-            switch (facade)
+            var retry = true;
+            while (retry)
             {
-                case Facade.PointOfSale:
-                    apiTokens.pos = newToken;
-                    break;
-                case Facade.Merchant:
-                    apiTokens.merchant = newToken;
-                    break;
-                case Facade.Payroll:
-                    apiTokens.payroll = newToken;
-                    break;
+                try
+                {
+                    var bitpay = new BitPay(confFilePath);
+
+                    pairingCode = bitpay.RequestClientAuthorization(facade).Result;
+
+                    newToken = bitpay.GetTokenByFacade(facade);
+                }
+                catch (Exception e)
+                {
+                    SetNotification(
+                        " An error occurred while generating a new token pair.\n Make sure you have created a/o selected a private key.\n Error Details: " +
+                        e.Message, 2);
+
+                    GetPairingCodeAndToken();
+                    return;
+                }
+
+                switch (facade)
+                {
+                    case Facade.Merchant:
+                        apiTokens.merchant = newToken;
+                        break;
+                    case Facade.Payroll:
+                        apiTokens.payroll = newToken;
+                        break;
+                }
+
+                if (env == Env.Test)
+                {
+                    appConfig.BitPayConfiguration.EnvConfig.Test.ApiTokens = apiTokens;
+                    envUrl = "https://test.bitpay.com/";
+                }
+
+                if (env == Env.Prod)
+                {
+                    appConfig.BitPayConfiguration.EnvConfig.Prod.ApiTokens = apiTokens;
+                    envUrl = "https://bitpay.com/";
+                }
+
+                GenerateConfFile(confFilePath);
+
+                SetNotification(" New pairing code for " + facade + " facade: " + pairingCode +
+                                "\n Please, copy the above pairing code and approve on your BitPay Account at the following link:\n \"" +
+                                envUrl +
+                                "dashboard/merchant/api-tokens\".\n Once this Pairing Code is approved, press Enter to run some tests.",
+                    1);
+
+                Console.Clear();
+                DrawTitle();
+                Console.Write(" If you approved the pairing code on your Dashboard, press Enter to continue: ");
+                var input = Console.ReadKey();
+                while (input.Key != ConsoleKey.Enter)
+                    input = Console.ReadKey();
+                
+                while (retry = !TestTokenSuccess(facade))
+                {
+                    SetNotification(" Something went wrong\n Please, make sure you approved the pairing code: " +
+                                    pairingCode + " for " + facade +
+                                    " facade\n Copy the above pairing code and approve on your BitPay Account at the following link:\n \"" +
+                                    envUrl +
+                                    "dashboard/merchant/api-tokens\".\n Once this Pairing Code is approved, press Enter to run some tests again.",
+                        2);
+
+                    Console.Clear();
+                    DrawTitle();
+                    Console.Write(
+                        " If you approved the pairing code on your Dashboard, press Enter to try again, N to generate a new one or X to cancel: ");
+                    input = Console.ReadKey();
+                    while (input.Key != ConsoleKey.Enter && input.Key != ConsoleKey.N && input.Key != ConsoleKey.X)
+                        input = Console.ReadKey();
+
+                    if (input.Key == ConsoleKey.X)
+                    {
+                        GetPairingCodeAndToken();
+                        
+                        return;
+                    }
+                    if (input.Key == ConsoleKey.N)
+                    {
+                        retry = true;
+                        break;
+                    }
+                }
             }
+            
+            SetNotification(" Token tested successfully!\n A new token for the " + facade + " facade has been added to the configuration file.", 1);
 
-            var envUrl = "";
-            if (env == Env.Test)
-            {
-                appConfig.BitPayConfiguration.EnvConfig.Test.ApiTokens = apiTokens;
-                envUrl = appConfig.BitPayConfiguration.EnvConfig.Test.ApiUrl;
-            }
+            Console.Clear();
+            DrawTitle();
+            Console.WriteLine(" Would you like to generate a token for a different facade? [yes|no] (default: no)");
+            Console.WriteLine();
+            Console.Write(" > ");
+            var redo = Console.ReadLine();
+            while (redo.ToLower() != "yes" && redo.ToLower() != "no" && redo.ToLower() != "")
+                redo = Console.ReadLine();
 
-            if (env == Env.Prod)
-            {
-                appConfig.BitPayConfiguration.EnvConfig.Prod.ApiTokens = apiTokens;
-                envUrl = appConfig.BitPayConfiguration.EnvConfig.Prod.ApiUrl;
-            }
+            if (redo.ToLower() == "no" || redo.ToLower() == "") return;
 
-            GenerateConfFile(confFilePath);
-
-            SetNotification(" New pairing code for " + facade + " facade: " + pairingCode + "\n Please, copy the above pairing code and approve on your BitPay Account at the following link:\n \"" +
-                            envUrl + "dashboard/merchant/api-tokens\".\n Once this Pairing Code is approved, your .Net Client will be ready to work with the API.\n A new token for this pairing code has been added to the configuration file.");
+            GetPairingCodeAndToken();
         }
 
         private static void SetFacade()
         {
-            var maxMenuItems = 3;
+            var maxMenuItems = 2;
             var selector = 0;
             var valid = false;
             while (selector != maxMenuItems)
             {
                 Console.Clear();
                 DrawTitle();
-                Console.WriteLine(" Select a facade for which you want to generate a new token pair:");
-                Console.WriteLine(" 1. POS (Point-Of-Sale)");
-                Console.WriteLine(" 2. Merchant");
-                Console.WriteLine(" 3. Payroll");
-                Console.WriteLine(" 4. Cancel");
+                Console.WriteLine(" Select a facade for which you want to generate a new token pair (Press Enter to skip)");
+                Console.WriteLine(" 1. Merchant");
+                Console.WriteLine(" 2. Payroll");
                 Console.WriteLine();
                 Console.Write(" Select an option: ");
 
-                valid = int.TryParse(Console.ReadLine(), out selector);
+                var key = Console.ReadKey();
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    valid = true;
+                }
+                else if (char.IsDigit(key.KeyChar))
+                {
+                    valid = int.Parse(key.KeyChar.ToString()) > 0 && int.Parse(key.KeyChar.ToString()) < 4;
+                }
 
                 if (valid)
-                    switch (selector)
+                    switch (key.KeyChar)
                     {
-                        case 1:
-                            facade = Facade.PointOfSale;
-                            return;
-                        case 2:
+                        case '1':
                             facade = Facade.Merchant;
                             return;
-                        case 3:
+                        case '2':
                             facade = Facade.Payroll;
                             return;
-                        case 4:
-                            Main();
+                        default:
                             return;
                     }
-                else
-                    SetNotification();
+                SetNotification(notificationColorCode: 2);
             }
         }
 
@@ -397,9 +444,6 @@ namespace BitPaySetup
             var tokenExists = true;
             switch (facade)
             {
-                case Facade.PointOfSale:
-                    if (string.IsNullOrEmpty(apiTokens.pos)) tokenExists = false;
-                    break;
                 case Facade.Merchant:
                     if (string.IsNullOrEmpty(apiTokens.merchant)) tokenExists = false;
                     break;
@@ -411,19 +455,64 @@ namespace BitPaySetup
             return tokenExists;
         }
 
-        private static void SetNotification(string message = " Typing error")
+        private static bool TestTokenSuccess(string facade)
+        {
+            try
+            {
+                var bitpay = new BitPay(confFilePath);
+                if (facade == Facade.Merchant)
+                {
+                    var response = bitpay.GetInvoice("1", facade).Result;
+                }
+                else if (facade == Facade.Payroll)
+                {
+                    var response = bitpay.GetPayoutBatch("1").Result;
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                if (e.Message.ToLower().Contains("object not found"))
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        private static void SetNotification(string message = " Typing error", int notificationColorCode = 0)
         {
             notification = message;
+            switch (notificationColorCode)
+            {
+                case 1:
+                    notificationColor = ConsoleColor.Green;
+                    break;
+                case 2:
+                    notificationColor = ConsoleColor.Red;
+                    break;
+                case 3:
+                    notificationColor = ConsoleColor.Blue;
+                    break;
+                default:
+                    Console.ResetColor();
+                    break;
+            }
         }
 
         private static void DrawTitle()
         {
+            Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine(
-                "\n   ___   _  __   ___             \n  / _ ) (_)/ /_ / _ \\ ___ _ __ __\n / _  |/ // __// ___// _ `// // /\n/____//_/ \\__//_/    \\_,_/ \\_, / \n                          /___/");
-            Console.WriteLine("                          Setup");
+                "\n   ___   _  __   ___             \n  / _ ) (_)/ /_ / _ \\ ___ _ __ __\n / _  |/ // __// ___// _ `// // /\n/____//_/ \\__//_/    \\_,_/ \\_, / \n                          /___/  ");
+            Console.WriteLine("                          Setup  ");
+            Console.ResetColor();
             Console.WriteLine();
             if (string.IsNullOrEmpty(notification)) return;
+            Console.ForegroundColor = notificationColor;
             Console.WriteLine(notification);
+            Console.ResetColor();
             Console.WriteLine();
         }
 
@@ -457,13 +546,13 @@ namespace BitPaySetup
                 if (string.IsNullOrEmpty(newConfFilePath))
                 {
                     GenerateConfFile();
-                    SetNotification(" The new configuration file is been generated in: \n \"" + confFilePath + "\"");
+                    SetNotification(" The new configuration file has been generated in: \n \"" + confFilePath + "\"", 1);
                 }
                 else
                 {
                     if (!File.Exists(newConfFilePath))
                     {
-                        SetNotification(" The file entered not found in: \n \"" + newConfFilePath + "\"");
+                        SetNotification(" The file entered not found in: \n \"" + newConfFilePath + "\"", 2);
                         Console.Clear();
                         DrawTitle();
                         Console.WriteLine(" Would you like to provide a different file path? [yes|no] (default: no)");
@@ -474,11 +563,15 @@ namespace BitPaySetup
                         var answer = Console.ReadLine();
                         while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
                             answer = Console.ReadLine();
-    
-                        if (answer.ToLower() == "yes") LoadConfFile();
+
+                        if (answer.ToLower() == "yes")
+                        {
+                            LoadConfFile();
+                            return;
+                        }
     
                         GenerateConfFile(newConfFilePath);
-                        SetNotification(" The new configuration file is been generated in: \n \"" + confFilePath + "\"");
+                        SetNotification(" The new configuration file has been generated in: \n \"" + confFilePath + "\"", 1);
     
                         return;
                     }
@@ -491,7 +584,7 @@ namespace BitPaySetup
             {
                 SetNotification(
                     " An error occurred while loading the configuration.\n Error Details: " +
-                    e.Message);
+                    e.Message, 2);
                 LoadConfFile();
             }
         }
@@ -508,7 +601,7 @@ namespace BitPaySetup
             {
                 SetNotification(
                     " An error occurred, please, check if the file format and structure are correct.\n Error Details: " +
-                    e.Message);
+                    e.Message, 2);
                 LoadConfFile();
             }
         }

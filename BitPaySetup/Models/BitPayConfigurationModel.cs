@@ -14,12 +14,10 @@
     {
         public ApiTokens()
         {
-            pos = "";
             merchant = "";
             payroll = "";
         }
 
-        public string pos { get; set; }
         public string merchant { get; set; }
         public string payroll { get; set; }
     }
@@ -28,16 +26,10 @@
     {
         public Test()
         {
-            ClientDescription = "";
-            ApiUrl = "https://test.bitpay.com/";
-            ApiVersion = "2.0.0";
             PrivateKeyPath = "";
             ApiTokens = new ApiTokens();
         }
 
-        public string ClientDescription { get; set; }
-        public string ApiUrl { get; set; }
-        public string ApiVersion { get; set; }
         public string PrivateKeyPath { get; set; }
         public ApiTokens ApiTokens { get; set; }
     }
@@ -46,16 +38,9 @@
     {
         public Prod()
         {
-            ClientDescription = "";
-            ApiUrl = "https://bitpay.com/";
-            ApiVersion = "2.0.0";
             PrivateKeyPath = "";
             ApiTokens = new ApiTokens();
         }
-
-        public string ClientDescription { get; set; }
-        public string ApiUrl { get; set; }
-        public string ApiVersion { get; set; }
         public string PrivateKeyPath { get; set; }
         public ApiTokens ApiTokens { get; set; }
     }
