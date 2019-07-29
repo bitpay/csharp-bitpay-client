@@ -5,7 +5,6 @@
       "Test": {
         "PrivateKeyPath": "",
         "ApiTokens": {
-          "pos": "",
           "merchant": "",
           "payroll": ""
         }
@@ -13,7 +12,6 @@
       "Prod": {
         "PrivateKeyPath": "",
         "ApiTokens": {
-          "pos": "",
           "merchant": "",
           "payroll": ""
         }

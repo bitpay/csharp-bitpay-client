@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using BitPaySDK;
-using BitPaySDK.Models.Invoice;
 using BitPaySetup.Models;
 using Newtonsoft.Json;
 
@@ -24,7 +23,6 @@ namespace BitPaySetup
         private static void Main()
         {
             if (string.IsNullOrEmpty(confFilePath)) {LoadConfFile();}
-//            Console.Clear();
             DrawTitle();
             if (string.IsNullOrEmpty(env)) {SelectEnvironment();}
             GenerateKeyPair(ecKey);
@@ -156,7 +154,20 @@ namespace BitPaySetup
 
             if (string.IsNullOrEmpty(newEcKeyPath))
             {
-                ecKeyFilePath = @"bitpay_private_" + env.ToLower() + ".key";
+                ecKeyFilePath = @"output\bitpay_private_" + env.ToLower() + ".key";
+                
+                try
+                {
+                    if (!Directory.Exists(ecKeyFilePath))
+                    {
+                        DirectoryInfo di = Directory.CreateDirectory("output");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                
                 if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
                 {
                     SetNotification(" A file with the same name already exists: \n \"" + ecKeyFilePath +
@@ -250,6 +261,7 @@ namespace BitPaySetup
             string newToken = "";
             
             SetFacade();
+            if (String.IsNullOrEmpty(facade)){return;}
 
             if (facade == Facade.Payroll)
             {
@@ -433,6 +445,7 @@ namespace BitPaySetup
                             facade = Facade.Payroll;
                             return;
                         default:
+                            facade = null;
                             return;
                     }
                 SetNotification(notificationColorCode: 2);
@@ -606,23 +619,35 @@ namespace BitPaySetup
             }
         }
 
-        private static void GenerateConfFile(string newConfFilePath = @"BitPay.config.json")
+        private static void GenerateConfFile(string newConfFilePath = @"output\BitPay.config.json")
         {
-            if (!confInitiated)
+            try
             {
-                appConfig = new BitPayConfigurationModel();
-                confInitiated = true;
-                appConfig.BitPayConfiguration.Environment = env;
-            }
+                if (!confInitiated)
+                {
+                    appConfig = new BitPayConfigurationModel();
+                    confInitiated = true;
+                    appConfig.BitPayConfiguration.Environment = env;
+                }
 
-            // serialize JSON directly to a new config file
-            using (var file = File.CreateText(newConfFilePath))
-            {
-                var serializer = new JsonSerializer {Formatting = Formatting.Indented};
-                serializer.Serialize(file, appConfig);
+                if (!Directory.Exists(newConfFilePath))
+                {
+                    DirectoryInfo di = Directory.CreateDirectory("output");
+                }
+
+                // serialize JSON directly to a new config file
+                using (var file = File.CreateText(newConfFilePath))
+                {
+                    var serializer = new JsonSerializer {Formatting = Formatting.Indented};
+                    serializer.Serialize(file, appConfig);
+                }
+
+                confFilePath = newConfFilePath;
             }
-            
-            confFilePath = newConfFilePath;
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }
