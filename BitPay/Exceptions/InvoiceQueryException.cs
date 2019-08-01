@@ -5,7 +5,7 @@ namespace BitPaySDK.Exceptions
     public class InvoiceQueryException : InvoiceException
     {
         private const string BitPayCode = "BITPAY-INVOICE-GET";
-        private const string BitPayMessage = "Failed to create invoice";
+        private const string BitPayMessage = "Failed to retrieve invoice";
 
         public InvoiceQueryException() : base(BitPayCode, BitPayMessage)
         {

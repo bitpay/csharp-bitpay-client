@@ -8,6 +8,7 @@ namespace BitPaySDK.Models.Invoice
     public class Invoice
     {
         private string _currency = "";
+        private dynamic _exchangeRates;
 
         /// <summary>
         ///     Creates an uninitialized invoice request object.
@@ -143,7 +144,10 @@ namespace BitPaySDK.Models.Invoice
 
         public double AmountPaid { get; set; }
 
-        public ExchangeRates ExchangeRates { get; set; }
+        public dynamic ExchangeRates {
+            get => _exchangeRates;
+            set => _exchangeRates = JsonConvert.DeserializeObject(value.ToString(Formatting.None));
+        }
 
         public bool ShouldSerializeOrderId()
         {

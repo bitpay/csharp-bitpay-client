@@ -9,6 +9,9 @@
         public const string BCH = "BCH";
         public const string BTC = "BTC";
         public const string ETH = "ETH";
+        public const string USDC = "USDC";
+        public const string GUSD = "GUSD";
+        public const string PAX = "PAX";
         
         // FIAT
         public const string AED = "AED";
