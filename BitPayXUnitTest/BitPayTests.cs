@@ -273,6 +273,15 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
+        public async Task TestShouldGetLedgers() {
+            
+            var ledgers = await _bitpay.GetLedgers();
+            Assert.NotNull(ledgers);
+            Assert.True(ledgers.Count > 0, "No ledgers retrieved");
+
+        }
+
+        [Fact]
         public async Task TestShouldSubmitPayoutBatch() {
 
             var date = DateTime.Now;

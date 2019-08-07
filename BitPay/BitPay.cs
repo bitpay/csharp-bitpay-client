@@ -460,7 +460,7 @@ namespace BitPaySDK
         /// <param name="currency">The three digit currency string for the ledger to retrieve.</param>
         /// <param name="dateStart">The start date for the query.</param>
         /// <param name="dateEnd">The end date for the query.</param>
-        /// <returns>A list of invoice objects retrieved from the server.</returns>
+        /// <returns>A Ledger object populated with the BitPay ledger entries list.</returns>
         public async Task<Ledger> GetLedger(string currency, DateTime dateStart, DateTime dateEnd)
         {
             try
@@ -471,8 +471,40 @@ namespace BitPaySDK
                 parameters.Add("endDate", "" + dateEnd.ToString("yyyy-MM-dd"));
                 var response = await Get("ledgers/" + currency, parameters);
                 var responseString = await ResponseToJsonString(response);
-                var entries = JsonConvert.DeserializeObject<List<LedgerEntry>>(responseString);
+                var entries = JsonConvert.DeserializeObject<List<LedgerEntry>>(responseString,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
                 return new Ledger(entries);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new LedgerQueryException(ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Retrieve a list of ledgers available and its current balance using the merchant facade.
+        /// </summary>
+        /// <returns>A list of Ledger objects retrieved from the server.</returns>
+        public async Task<List<Ledger>> GetLedgers()
+        {
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Merchant));
+                var response = await Get("ledgers/", parameters);
+                var responseString = await ResponseToJsonString(response);
+                var ledgers = JsonConvert.DeserializeObject<List<Ledger>>(responseString,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+                return ledgers;
             }
             catch (Exception ex)
             {
