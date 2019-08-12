@@ -370,7 +370,7 @@ namespace BitPaySDK
         ///     Retrieve a bill by id.
         /// </summary>
         /// <param name="status">The status to filter the bills.</param>
-        /// <returns>The bill object retrieved from the server.</returns>
+        /// <returns>A list of bill objects.</returns>
         public async Task<List<Bill>> GetBills(string status = null)
         {
             Dictionary<string, string> parameters = null;
