@@ -8,6 +8,13 @@ It also implements BitPay's remote client authentication and authorization strat
 
 You must have a BitPay merchant account to use this SDK.  It's free to [sign-up for a BitPay merchant account](https://bitpay.com/start).
 
+If you need a test account, please visit https://test.bitpay.com/dashboard/signup and register for a BitPay merchant test account. Please fill in all questions, so you get a fully working test account.
+If you are looking for a testnet bitcoin wallet to test with, please visit https://bitpay.com/wallet and
+create a new wallet.
+If you need testnet bitcoin please visit a testnet faucet, e.g. https://testnet.coinfaucet.eu/en/ or http://tpfaucet.appspot.com/
+
+For more information about testing, please see https://bitpay.com/docs/testing
+
 ### Installation
 
 You can find and download this package from [NuGet Package Manager](https://www.nuget.org/packages/BitPay).  
@@ -97,7 +104,7 @@ The pairing code is then entered into the BitPay merchant dashboard for the desi
 ### Create an invoice
 
 ```c#
-Invoice invoice = bitpay.createInvoice(100.0, "USD").Result;
+Invoice invoice = bitpay.createInvoice(new Invoice(50.0, "USD")).Result;
 
 String invoiceUrl = invoice.getURL();
 
@@ -118,7 +125,7 @@ invoice.PosData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 invoice = this.bitpay.createInvoice(invoice).Result;
 ```
 
-### Retreive an invoice
+### Retrieve an invoice
 
 ```c#
 Invoice invoice = bitpay.getInvoice(invoice.getId()).Result;
