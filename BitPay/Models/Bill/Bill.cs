@@ -9,13 +9,13 @@ namespace BitPaySDK.Models.Bill
         private string _currency = "";
 
         /// <summary>
-        ///     Creates an uninitialized invoice request object.
+        ///     Creates an uninitialized bill request object.
         /// </summary>
         public Bill()
         {
         }
 
-        // Creates a minimal invoice request object.
+        // Creates a minimal bill request object.
         public Bill(string number, string currency, string email, List<Item> items)
         {
             Number = number;

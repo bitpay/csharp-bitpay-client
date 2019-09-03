@@ -125,12 +125,11 @@ namespace BitPaySDK.Models.Invoice
         
         public InvoiceBuyerProvidedInfo BuyerProvidedInfo { get; set; }
 
-        [Obsolete("To be removed")]
-        private InvoiceFlags Flags { get; set; } = new InvoiceFlags();
-
         public SupportedTransactionCurrencies SupportedTransactionCurrencies { get; set; }
 
         public MinerFees MinerFees { get; set; }
+        
+        public string TransactionCurrency { get; set; }
 
         public PaymentCodes PaymentCodes { get; set; }
 

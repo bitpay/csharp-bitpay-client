@@ -6,7 +6,6 @@
 
 Full implementation of the BitPay Payment Gateway. This library implements BitPay's [Cryptographically Secure RESTful API](https://bitpay.com/api).
 
-
 ## Getting Started
 
 To get up and running with our C# library quickly, follow [The GUIDE](https://github.com/bitpay/csharp-bitpay-client/blob/master/GUIDE.md)

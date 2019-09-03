@@ -39,6 +39,11 @@ namespace BitPaySDK
         private EcKey _ecKey;
 
         private HttpClient _httpClient;
+
+        /// <summary>
+        ///     Return the identity of this client (i.e. the public key).
+        /// </summary>
+        public string Identity { get; private set; }
         
         /// <summary>
         ///     Constructor for use if the keys and SIN are managed by this library.
@@ -77,11 +82,6 @@ namespace BitPaySDK
             InitKeys().Wait();
             Init().Wait();
         }
-
-        /// <summary>
-        ///     Return the identity of this client (i.e. the public key).
-        /// </summary>
-        public string Identity { get; private set; }
 
         /// <summary>
         ///     Authorize (pair) this client with the server using the specified pairing code.
@@ -157,7 +157,7 @@ namespace BitPaySDK
         ///     Returns the token for the specified facade.
         /// </summary>
         /// <param name="facade">The facade name for which the token is requested.</param>
-        /// <returns></returns>
+        /// <returns>The token for the given facade.</returns>
         public string GetTokenByFacade(string facade)
         {
             if (!_tokenCache.ContainsKey(facade))
@@ -370,7 +370,7 @@ namespace BitPaySDK
         ///     Retrieve a bill by id.
         /// </summary>
         /// <param name="status">The status to filter the bills.</param>
-        /// <returns>The bill object retrieved from the server.</returns>
+        /// <returns>A list of bill objects.</returns>
         public async Task<List<Bill>> GetBills(string status = null)
         {
             Dictionary<string, string> parameters = null;
@@ -460,7 +460,7 @@ namespace BitPaySDK
         /// <param name="currency">The three digit currency string for the ledger to retrieve.</param>
         /// <param name="dateStart">The start date for the query.</param>
         /// <param name="dateEnd">The end date for the query.</param>
-        /// <returns>A list of invoice objects retrieved from the server.</returns>
+        /// <returns>A Ledger object populated with the BitPay ledger entries list.</returns>
         public async Task<Ledger> GetLedger(string currency, DateTime dateStart, DateTime dateEnd)
         {
             try
@@ -471,8 +471,40 @@ namespace BitPaySDK
                 parameters.Add("endDate", "" + dateEnd.ToString("yyyy-MM-dd"));
                 var response = await Get("ledgers/" + currency, parameters);
                 var responseString = await ResponseToJsonString(response);
-                var entries = JsonConvert.DeserializeObject<List<LedgerEntry>>(responseString);
+                var entries = JsonConvert.DeserializeObject<List<LedgerEntry>>(responseString,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
                 return new Ledger(entries);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new LedgerQueryException(ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Retrieve a list of ledgers available and its current balance using the merchant facade.
+        /// </summary>
+        /// <returns>A list of Ledger objects retrieved from the server.</returns>
+        public async Task<List<Ledger>> GetLedgers()
+        {
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Merchant));
+                var response = await Get("ledgers/", parameters);
+                var responseString = await ResponseToJsonString(response);
+                var ledgers = JsonConvert.DeserializeObject<List<Ledger>>(responseString,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+                return ledgers;
             }
             catch (Exception ex)
             {
@@ -495,7 +527,7 @@ namespace BitPaySDK
                 batch.Token = GetAccessToken(Facade.Payroll);
                 batch.Guid = Guid.NewGuid().ToString();
                 var json = JsonConvert.SerializeObject(batch);
-                var response = await PostWithSignature("payouts", json);
+                var response = await Post("payouts", json, true);
                 
                 var responseString = await ResponseToJsonString(response);
                 JsonConvert.PopulateObject(responseString, batch, new JsonSerializerSettings
@@ -779,7 +811,7 @@ namespace BitPaySDK
         }
 
         /// <summary>
-        ///     Add this token to the token cache
+        ///     Add this token to the token cache.
         /// </summary>
         /// <param name="key">The token type</param>
         /// <param name="token">The token value</param>
@@ -801,7 +833,7 @@ namespace BitPaySDK
         }
 
         /// <summary>
-        ///     Persist the token cache to disk
+        ///     Persist the token cache to disk.
         /// </summary>
         /// <returns></returns>
         private void WriteTokenCache()
@@ -933,12 +965,6 @@ namespace BitPaySDK
             {
                 throw new BitPayApiCommunicationException(ex);
             }
-        }
-
-
-        private async Task<HttpResponseMessage> PostWithSignature(string uri, string json)
-        {
-            return await Post(uri, json, true);
         }
 
         private async Task<HttpResponseMessage> Post(string uri, string json, bool signatureRequired = false)
