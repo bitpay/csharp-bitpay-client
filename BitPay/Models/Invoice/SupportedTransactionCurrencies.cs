@@ -4,5 +4,6 @@
     {
         public SupportedTransactionCurrency Btc { get; set; }
         public SupportedTransactionCurrency Bch { get; set; }
+        public SupportedTransactionCurrency Eth { get; set; }
     }
 }

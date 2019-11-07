@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BitPaySDK.Exceptions;
 using Newtonsoft.Json;
 
@@ -116,20 +115,32 @@ namespace BitPaySDK.Models.Invoice
         public long ExpirationTime { get; set; }
 
         public long CurrentTime { get; set; }
+        
+        public int TargetConfirmations { get; set; }
 
         public List<InvoiceTransaction> Transactions { get; set; }
 
         public string ExceptionStatus { get; set; }
         
+        public Dictionary<string, string> RefundAddresses { get; set; }
+        
         public string RefundAddressRequestPending { get; set; }
+        
+        public string BuyerProvidedEmail { get; set; }
         
         public InvoiceBuyerProvidedInfo BuyerProvidedInfo { get; set; }
 
         public SupportedTransactionCurrencies SupportedTransactionCurrencies { get; set; }
+        
+        public Shopper Shopper { get; set; }
 
         public MinerFees MinerFees { get; set; }
         
         public string TransactionCurrency { get; set; }
+        
+        public string BillId { get; set; }
+
+        public RefundInfo RefundInfo { get; set; }
 
         public PaymentCodes PaymentCodes { get; set; }
 
@@ -283,12 +294,32 @@ namespace BitPaySDK.Models.Invoice
             return false;
         }
 
+        public bool ShouldSerializeShopper()
+        {
+            return false;
+        }
+
         public bool ShouldSerializeMinerFees()
         {
             return false;
         }
 
+        public bool ShouldSerializeBillId()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeRefundInfo()
+        {
+            return false;
+        }
+
         public bool ShouldSerializePaymentCodes()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeTargetConfirmations()
         {
             return false;
         }
@@ -303,7 +334,17 @@ namespace BitPaySDK.Models.Invoice
             return false;
         }
 
+        public bool ShouldSerializeRefundAddresses()
+        {
+            return false;
+        }
+
         public bool ShouldSerializeRefundAddressRequestPending()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeBuyerProvidedEmail()
         {
             return false;
         }

@@ -4,5 +4,6 @@
     {
         public double Btc { get; set; }
         public double Bch { get; set; }
+        public double Eth { get; set; }
     }
 }
