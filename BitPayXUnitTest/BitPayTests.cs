@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Xunit;
 using BitPaySDK;
@@ -108,6 +108,39 @@ namespace BitPayXUnitTest
             var basicInvoice = await _bitpay.CreateInvoice(invoice);
             Assert.NotNull(basicInvoice.Id);
         }
+        
+        [Fact]
+        public async Task testShouldCreateInvoiceBTC() 
+        {
+            // create an invoice and make sure we receive an id - which means it has been successfully submitted
+            var invoice = new Invoice(30.0, Currency.USD);
+            invoice.PaymentCurrencies = new List<string>();
+            invoice.PaymentCurrencies.Add(Currency.BTC);
+            var basicInvoice = await _bitpay.CreateInvoice(invoice);
+            Assert.NotNull(basicInvoice.Id);
+        }
+        
+        [Fact]
+        public async Task testShouldCreateInvoiceBCH() 
+        {
+            // create an invoice and make sure we receive an id - which means it has been successfully submitted
+            var invoice = new Invoice(30.0, Currency.USD);
+            invoice.PaymentCurrencies = new List<string>();
+            invoice.PaymentCurrencies.Add(Currency.BCH);
+            var basicInvoice = await _bitpay.CreateInvoice(invoice);
+            Assert.NotNull(basicInvoice.Id);
+        }
+        
+        [Fact]
+        public async Task testShouldCreateInvoiceETH() 
+        {
+            // create an invoice and make sure we receive an id - which means it has been successfully submitted
+            var invoice = new Invoice(30.0, Currency.USD);
+            invoice.PaymentCurrencies = new List<string>();
+            invoice.PaymentCurrencies.Add(Currency.ETH);
+            var basicInvoice = await _bitpay.CreateInvoice(invoice);
+            Assert.NotNull(basicInvoice.Id);
+        }
 
         [Fact]
         public async Task TestShouldGetInvoiceUrl() {
@@ -129,6 +162,7 @@ namespace BitPayXUnitTest
             var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, Currency.USD));
             Assert.NotNull(basicInvoice.PaymentSubtotals.Btc);
             Assert.NotNull(basicInvoice.PaymentSubtotals.Bch);
+            Assert.NotNull(basicInvoice.PaymentSubtotals.Eth);
         }
 
         [Fact]
