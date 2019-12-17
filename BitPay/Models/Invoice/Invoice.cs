@@ -8,6 +8,7 @@ namespace BitPaySDK.Models.Invoice
     {
         private string _currency = "";
         private dynamic _exchangeRates;
+        private dynamic _refundAddresses;
 
         /// <summary>
         ///     Creates an uninitialized invoice request object.
@@ -122,7 +123,10 @@ namespace BitPaySDK.Models.Invoice
 
         public string ExceptionStatus { get; set; }
         
-        public Dictionary<string, string> RefundAddresses { get; set; }
+        public dynamic RefundAddresses {
+            get => _refundAddresses;
+            set => _refundAddresses = JsonConvert.DeserializeObject(value.ToString(Formatting.None));
+        }
         
         public string RefundAddressRequestPending { get; set; }
         
@@ -218,10 +222,15 @@ namespace BitPaySDK.Models.Invoice
         {
             return (PaymentCurrencies != null);
         }
+        
+        public bool ShouldSerializeBuyer()
+        {
+            return (Buyer != null);
+        }
 
         public bool ShouldSerializeAcceptanceWindow()
         {
-            return true;
+            return (AcceptanceWindow > 0);
         }
 
         public bool ShouldSerializeId()
@@ -302,6 +311,11 @@ namespace BitPaySDK.Models.Invoice
         public bool ShouldSerializeMinerFees()
         {
             return false;
+        }
+        
+        public bool ShouldSerializeTransactionCurrency()
+        {
+            return !string.IsNullOrEmpty(TransactionCurrency);
         }
 
         public bool ShouldSerializeBillId()
