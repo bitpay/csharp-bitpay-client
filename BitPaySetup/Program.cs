@@ -486,7 +486,7 @@ namespace BitPaySetup
             }
             catch (Exception e)
             {
-                if (e.Message.ToLower().Contains("object not found"))
+                if (e.InnerException.Message.ToLower().Contains("object not found"))
                 {
                     return true;
                 }
