@@ -245,8 +245,12 @@ namespace BitPaySDK
         /// </summary>
         /// <param name="dateStart">The start date for the query.</param>
         /// <param name="dateEnd">The end date for the query.</param>
+        /// <param name="status">The invoice status you want to query on.</param>
+        /// <param name="orderId">The optional order id specified at time of invoice creation.</param>
+        /// <param name="limit">Maximum results that the query will return (useful for paging results)</param>
+        /// <param name="offset">Number of results to offset (ex. skip 10 will give you results starting with the 11th.</param>
         /// <returns>A list of invoice objects retrieved from the server.</returns>
-        public async Task<List<Invoice>> GetInvoices(DateTime dateStart, DateTime dateEnd)
+        public async Task<List<Invoice>> GetInvoices(DateTime dateStart, DateTime dateEnd, string status = null, string orderId = null, int limit = -1, int offset = -1)
         {
             try
             {
@@ -255,6 +259,11 @@ namespace BitPaySDK
                 parameters.Add("token", GetAccessToken(Facade.Merchant));
                 parameters.Add("dateStart", dateStart.ToString("yyyy-MM-dd"));
                 parameters.Add("dateEnd", dateEnd.ToString("yyyy-MM-dd"));
+                if (!String.IsNullOrEmpty(status)) { parameters.Add("status", status); }
+                if (!String.IsNullOrEmpty(orderId)) { parameters.Add("orderId", orderId); }
+                if (limit >= 0) { parameters.Add("limit", limit.ToString()); }
+                if (offset >= 0) { parameters.Add("offset", offset.ToString()); }
+                
                 var response = await Get("invoices", parameters);
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<List<Invoice>>(responseString);

@@ -5,7 +5,7 @@ namespace BitPaySDK.Exceptions
     public class LedgerQueryException : BitPayException
     {
         private const string BitPayCode = "BITPAY-LEDGER-GET";
-        private const string BitPayMessage = "Failed to create invoice";
+        private const string BitPayMessage = "Failed to retrieve ledger";
 
         public LedgerQueryException() : base(BitPayCode, BitPayMessage)
         {

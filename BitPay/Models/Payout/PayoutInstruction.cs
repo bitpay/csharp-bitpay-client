@@ -32,6 +32,9 @@ namespace BitPaySDK.Models.Payout
         [JsonProperty(PropertyName = "label")]
         public string Label { get; set; }
 
+        [JsonProperty(PropertyName = "walletProvider")]
+        public string WalletProvider { get; set; }
+
         // Response fields
         //
 
@@ -76,6 +79,11 @@ namespace BitPaySDK.Models.Payout
         public bool ShouldSerializeStatus()
         {
             return false;
+        }
+
+        public bool ShouldSerializeWalletProvider()
+        {
+            return !string.IsNullOrEmpty(WalletProvider);
         }
     }
 }
