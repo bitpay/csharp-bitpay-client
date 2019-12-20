@@ -21,8 +21,8 @@ using Microsoft.Extensions.Configuration;
 
 /**
  * @author Antonio Buedo
- * @date 7.18.2019
- * @version 3.0.1907
+ * @date 20.12.2019
+ * @version 3.1.1912
  *
  * See bitpay.com/api for more information.
  */

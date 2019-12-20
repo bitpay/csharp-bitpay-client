@@ -1,14 +1,15 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.2",
-    "signature": "80a8f55388d9b2f28995086c98c8fcd09bac533a"
+    "signature": "d07ab26d185d4587bd7691268d0ba8ca672ebbaf"
   },
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v2.2": {
-      "BitPay/3.0.1907": {
+      "BitPay/3.1.1912": {
         "dependencies": {
           "BouncyCastle": "1.8.5",
+          "Microsoft.CSharp": "4.5.0",
           "Microsoft.Extensions.Configuration": "2.2.0",
           "Microsoft.Extensions.Configuration.Json": "2.2.0",
           "Newtonsoft.Json": "12.0.2"
@@ -25,6 +26,7 @@
           }
         }
       },
+      "Microsoft.CSharp/4.5.0": {},
       "Microsoft.Extensions.Configuration/2.2.0": {
         "dependencies": {
           "Microsoft.Extensions.Configuration.Abstractions": "2.2.0"
@@ -135,7 +137,7 @@
     }
   },
   "libraries": {
-    "BitPay/3.0.1907": {
+    "BitPay/3.1.1912": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -146,6 +148,13 @@
       "sha512": "sha512-SvTtEA1DksJBu5Ucps4BSUrTseISTvIRcIvCUwicv+eTqkFHTq1hlcdWeYcwJsnmRvfQhODEUVsqLlYi4Umw2g==",
       "path": "bouncycastle/1.8.5",
       "hashPath": "bouncycastle.1.8.5.nupkg.sha512"
+    },
+    "Microsoft.CSharp/4.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-kaj6Wb4qoMuH3HySFJhxwQfe8R/sJsNJnANrvv8WdFPMoNbKY5htfNscv+LHCu5ipz+49m2e+WQXpLXr9XYemQ==",
+      "path": "microsoft.csharp/4.5.0",
+      "hashPath": "microsoft.csharp.4.5.0.nupkg.sha512"
     },
     "Microsoft.Extensions.Configuration/2.2.0": {
       "type": "package",
