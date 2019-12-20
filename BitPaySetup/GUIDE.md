@@ -81,21 +81,14 @@ Once you have gone through all steps, the environment file is ready to be used w
     "Environment": "Prod",
     "EnvConfig": {
       "Test": {
-        "ClientDescription": "Testing client",
-        "ApiUrl": "https://test.bitpay.com/",
-        "ApiVersion": "2.0.0",
-        "PrivateKeyPath": "bitpay_private_test.key",
+        "PrivateKeyPath": "/full-directory/bitpay_private_test.key",
         "ApiTokens": {
-          "pos": "6KrZJk6yY69r67bnHmMymCk4ch9NrWB6pf8BjPHZrciU",
           "merchant": "AjrKe6WZs6D3D37vkYM3Q1AED4TU4yZGs99BtDzcJuT7",
           "payroll": "wZ4Q7GZdETCiz3mVVFVitFWDcdp6bppEVRYcBTxjkGg"
         }
       },
       "Prod": {
-        "ClientDescription": "Production client",
-        "ApiUrl": "https://bitpay.com/",
-        "ApiVersion": "2.0.0",
-        "PrivateKeyPath": "bitpay_private_prod.key",
+        "PrivateKeyPath": "/full-directory/bitpay_private_prod.key",
         "ApiTokens": {
           "pos": "AgwE4UPVBwZwcZAWiNLPQewD4AKMCzTQxjTsDTHt7esi",
           "merchant": "9PLzuhu6X2wRNqDWVzot7V",
@@ -109,9 +102,6 @@ Once you have gone through all steps, the environment file is ready to be used w
 
 - **Environment:** This value points the client on the direction of the **targeted environment**, which can be set to either **Test** or **Prod**.
 - **EnvConfig:** Holds the configuration of each available environment.
-- **ClientDescription:** Names the client name which will help to identify the API Tokens in your BitPay account.
-- **ApiUrl:** Defines the BitPay API End-point Url.*
-- **ApiVersion:** Defines the BitPay API version.*
 - **PrivateKeyPath:** Points to the path where the private key file is located.**
 - **ApiTokens:** Holds the token for each one of the facades that you are allowed to use.
 <br/><sub><sub>* Do not change unless BitPay asks you to </sub></sub>
