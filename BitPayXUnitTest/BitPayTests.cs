@@ -285,6 +285,36 @@ namespace BitPayXUnitTest
             Assert.True(invoices.Count > 0, "No invoices retrieved");
         }
 
+        /*
+        To use this test:
+	    You must have a paid/completed invoice in your account (list of invoices). The test looks for the first invoice in the "complete"
+	    state and authorises a refund. The actual refund will not be executed until the email receiver enters his bitcoin refund address.
+        */
+        [Fact]
+        public async Task testShouldCreateGetCancelRefundRequest() {
+            //check within the last few days
+            var date = DateTime.Now;
+            var today = date;
+            var sevenDaysAgo = date.AddDays(-95);
+            var invoices = await _bitpay.GetInvoices(sevenDaysAgo, today, InvoiceStatus.Complete);
+            Invoice firstInvoice = invoices.First();
+                
+            Assert.NotNull(firstInvoice);
+            string refundEmail = "";
+
+            Boolean createdRefund = await _bitpay.CreateRefund(firstInvoice, refundEmail, firstInvoice.Price, firstInvoice.Currency);
+            List<Refund> retrievedRefunds = await _bitpay.GetRefunds(firstInvoice);
+            Refund firstRefund = retrievedRefunds.First();
+            Refund retrievedRefund = await _bitpay.GetRefund(firstInvoice, firstRefund.Id);
+            Boolean cancelled = await _bitpay.CancelRefund(firstInvoice, firstRefund.Id);
+
+            Assert.True(createdRefund);
+            Assert.True(retrievedRefunds.Count > 0);
+            Assert.NotNull(firstRefund);
+            Assert.NotNull(retrievedRefund);
+            Assert.True(cancelled);
+        }
+
         [Fact]
         public async Task TestShouldGetLedgerBtc() {
             
