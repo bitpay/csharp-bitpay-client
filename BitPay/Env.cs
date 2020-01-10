@@ -7,7 +7,7 @@ namespace BitPaySDK
         public const string TestUrl = "https://test.bitpay.com/";
         public const string ProdUrl = "https://bitpay.com/";
         public const string BitpayApiVersion = "2.0.0";
-        public const string BitpayPluginInfo = "BitPay_DotNet_Client_v3.1.1912";
+        public const string BitpayPluginInfo = "BitPay_DotNet_Client_v3.2.2001";
         public class Tokens
         {
             public string POS { get; set; }
