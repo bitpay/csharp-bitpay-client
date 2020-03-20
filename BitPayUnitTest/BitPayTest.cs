@@ -55,12 +55,6 @@ namespace BitPayUnitTest {
             // Initialize the BitPay object to be used in the following tests
             _bitpay = new BitPay(configuration);
 
-            // If the client doesn't have a POS token yet, fetch one.
-            // For the Merchant and Payroll Facades, see below, in their corresponding tests
-            if (!_bitpay.tokenExist(Facade.PointOfSale)) {
-                _bitpay.AuthorizeClient(PairingCode);
-            }
-
             // ledgers require the Merchant Facade
             if (!_bitpay.tokenExist(Facade.Merchant)) {
                 // get a pairing code for the merchant facade for this client
@@ -110,14 +104,6 @@ namespace BitPayUnitTest {
             // create an invoice and make sure we receive a correct invoice status (new)
             var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, Currency.USD));
             Assert.AreEqual(InvoiceStatus.New, basicInvoice.Status, "Status is incorrect");
-        }
-
-        [TestMethod]
-        public async Task TestShouldGetInvoiceBtcPrice() {
-            // create an invoice and make sure we receive values for the Bitcoin Cash and Bitcoin fields, respectively
-            var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, Currency.USD));
-            Assert.IsNotNull(basicInvoice.PaymentSubtotals.Btc, "Invoice created with PaymentSubtotals.Btc=NULL");
-            Assert.IsNotNull(basicInvoice.PaymentSubtotals.Bch, "Invoice created with PaymentSubtotals.Bch=NULL");
         }
 
         [TestMethod]
