@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using BitPaySDK.Exceptions;
 using Newtonsoft.Json;
 
@@ -27,17 +28,14 @@ namespace BitPaySDK.Models.Invoice
         // API fields
         //
 
-        [JsonProperty(PropertyName = "guid")]
-        public string Guid { get; set; }
+        [JsonProperty(PropertyName = "guid")] public string Guid { get; set; }
 
-        [JsonProperty(PropertyName = "token")]
-        public string Token { get; set; }
+        [JsonProperty(PropertyName = "token")] public string Token { get; set; }
 
         // Required fields
         //
 
-        [JsonProperty(PropertyName = "price")]
-        public double Price { get; set; }
+        [JsonProperty(PropertyName = "price")] public double Price { get; set; }
 
         [JsonProperty(PropertyName = "currency")]
         public string Currency
@@ -93,12 +91,11 @@ namespace BitPaySDK.Models.Invoice
 
         [JsonProperty(PropertyName = "acceptanceWindow")]
         public long AcceptanceWindow { get; set; }
-        
+
         // Buyer data
         //
 
-        [JsonProperty(PropertyName = "buyer")]
-        public Buyer Buyer { get; set; }
+        [JsonProperty(PropertyName = "buyer")] public Buyer Buyer { get; set; }
 
         // Response fields
         //
@@ -108,7 +105,7 @@ namespace BitPaySDK.Models.Invoice
         public string Url { get; set; }
 
         public string Status { get; set; }
-        
+
         public string LowFeeDetected { get; set; }
 
         public long InvoiceTime { get; set; }
@@ -116,49 +113,86 @@ namespace BitPaySDK.Models.Invoice
         public long ExpirationTime { get; set; }
 
         public long CurrentTime { get; set; }
-        
+
         public int TargetConfirmations { get; set; }
 
         public List<InvoiceTransaction> Transactions { get; set; }
 
         public string ExceptionStatus { get; set; }
-        
-        public dynamic RefundAddresses {
+
+        public dynamic RefundAddresses
+        {
             get => _refundAddresses;
             set => _refundAddresses = JsonConvert.DeserializeObject(value.ToString(Formatting.None));
         }
-        
+
         public string RefundAddressRequestPending { get; set; }
-        
+
         public string BuyerProvidedEmail { get; set; }
-        
+
         public InvoiceBuyerProvidedInfo BuyerProvidedInfo { get; set; }
 
         public SupportedTransactionCurrencies SupportedTransactionCurrencies { get; set; }
-        
+
         public Shopper Shopper { get; set; }
 
         public MinerFees MinerFees { get; set; }
-        
+
         public string TransactionCurrency { get; set; }
-        
+
         public string BillId { get; set; }
 
         public RefundInfo RefundInfo { get; set; }
 
-        public PaymentCodes PaymentCodes { get; set; }
+        private PaymentCodes _paymentCodes = null; //TODO remove on version 4.0
 
-        public PaymentTotal PaymentSubtotals { get; set; }
+        [Obsolete("PaymentCodes will be deprecated on version 4.0", false)]
+        public PaymentCodes PaymentCodes
+        {
+            get => _paymentCodes;
+            set => _paymentCodes = null;
+        }
 
-        public PaymentTotal PaymentTotals { get; set; }
+        private PaymentTotal _paymentSubtotals = null; //TODO remove on version 4.0
 
-        public PaymentTotal PaymentDisplayTotals { get; set; }
+        [Obsolete("PaymentSubtotals will be deprecated on version 4.0", false)]
+        public PaymentTotal PaymentSubtotals
+        {
+            get => _paymentSubtotals;
+            set => _paymentSubtotals = null;
+        }
 
-        public PaymentTotal PaymentDisplaySubTotals { get; set; }
+        private PaymentTotal _paymentTotals = null; //TODO remove on version 4.0
+
+        [Obsolete("PaymentTotals will be deprecated on version 4.0", false)]
+        public PaymentTotal PaymentTotals
+        {
+            get => _paymentTotals;
+            set => _paymentTotals = null;
+        }
+
+        private PaymentTotal _paymentDisplayTotals = null; //TODO remove on version 4.0
+
+        [Obsolete("PaymentDisplayTotals will be deprecated on version 4.0", false)]
+        public PaymentTotal PaymentDisplayTotals
+        {
+            get => _paymentDisplayTotals;
+            set => _paymentDisplayTotals = null;
+        }
+
+        private PaymentTotal _paymentDisplaySubTotals = null; //TODO remove on version 4.0
+
+        [Obsolete("PaymentDisplaySubTotals will be deprecated on version 4.0", false)]
+        public PaymentTotal PaymentDisplaySubTotals
+        {
+            get => _paymentDisplaySubTotals;
+            set => _paymentDisplaySubTotals = null;
+        }
 
         public double AmountPaid { get; set; }
 
-        public dynamic ExchangeRates {
+        public dynamic ExchangeRates
+        {
             get => _exchangeRates;
             set => _exchangeRates = JsonConvert.DeserializeObject(value.ToString(Formatting.None));
         }
@@ -222,7 +256,7 @@ namespace BitPaySDK.Models.Invoice
         {
             return (PaymentCurrencies != null);
         }
-        
+
         public bool ShouldSerializeBuyer()
         {
             return (Buyer != null);
@@ -312,7 +346,7 @@ namespace BitPaySDK.Models.Invoice
         {
             return false;
         }
-        
+
         public bool ShouldSerializeTransactionCurrency()
         {
             return !string.IsNullOrEmpty(TransactionCurrency);
@@ -331,6 +365,11 @@ namespace BitPaySDK.Models.Invoice
         public bool ShouldSerializePaymentCodes()
         {
             return false;
+        }
+
+        public bool ShouldIgnorePaymentCodes()
+        {
+            return true;
         }
 
         public bool ShouldSerializeTargetConfirmations()
@@ -364,11 +403,6 @@ namespace BitPaySDK.Models.Invoice
         }
 
         public bool ShouldSerializeBuyerProvidedInfo()
-        {
-            return false;
-        }
-
-        public bool ShouldSerializeFlags()
         {
             return false;
         }
