@@ -21,8 +21,8 @@ using Microsoft.Extensions.Configuration;
 
 /**
  * @author Antonio Buedo
- * @date 10.01.2020
- * @version 3.2.2001
+ * @date 20.03.2020
+ * @version 3.3.2003
  *
  * See bitpay.com/api for more information.
  */
@@ -44,7 +44,7 @@ namespace BitPaySDK
         ///     Return the identity of this client (i.e. the public key).
         /// </summary>
         public string Identity { get; private set; }
-        
+
         /// <summary>
         ///     Constructor for use if the keys and SIN are managed by this library.
         /// </summary>
@@ -58,7 +58,7 @@ namespace BitPaySDK
             InitKeys().Wait();
             Init().Wait();
         }
-        
+
         /// <summary>
         ///     Constructor for use if the keys and SIN are managed by this library.
         /// </summary>
@@ -70,7 +70,7 @@ namespace BitPaySDK
             InitKeys().Wait();
             Init().Wait();
         }
-        
+
         /// <summary>
         ///     Constructor for use if the keys and SIN are managed by this library.
         /// </summary>
@@ -173,7 +173,8 @@ namespace BitPaySDK
         /// <param name="facade">The facade to create the invoice against</param>
         /// <param name="signRequest">Allow unsigned request</param>
         /// <returns>A new invoice object returned from the server.</returns>
-        public async Task<Invoice> CreateInvoice(Invoice invoice, string facade = Facade.Merchant, bool signRequest = true)
+        public async Task<Invoice> CreateInvoice(Invoice invoice, string facade = Facade.Merchant,
+            bool signRequest = true)
         {
             try
             {
@@ -193,7 +194,7 @@ namespace BitPaySDK
             }
 
             // Track the token for this invoice
-            CacheToken(invoice.Id, invoice.Token);
+            // CacheToken(invoice.Id, invoice.Token);
 
             return invoice;
         }
@@ -204,7 +205,8 @@ namespace BitPaySDK
         /// <param name="invoiceId">The id of the requested invoice.</param>
         /// <param name="facade">The facade to get the invoice from</param>
         /// <returns>The invoice object retrieved from the server.</returns>
-        public async Task<Invoice> GetInvoice(string invoiceId, string facade = Facade.Merchant, bool signRequest = true)
+        public async Task<Invoice> GetInvoice(string invoiceId, string facade = Facade.Merchant,
+            bool signRequest = true)
         {
             Dictionary<string, string> parameters = null;
             try
@@ -250,7 +252,8 @@ namespace BitPaySDK
         /// <param name="limit">Maximum results that the query will return (useful for paging results)</param>
         /// <param name="offset">Number of results to offset (ex. skip 10 will give you results starting with the 11th.</param>
         /// <returns>A list of invoice objects retrieved from the server.</returns>
-        public async Task<List<Invoice>> GetInvoices(DateTime dateStart, DateTime dateEnd, string status = null, string orderId = null, int limit = -1, int offset = -1)
+        public async Task<List<Invoice>> GetInvoices(DateTime dateStart, DateTime dateEnd, string status = null,
+            string orderId = null, int limit = -1, int offset = -1)
         {
             try
             {
@@ -259,11 +262,26 @@ namespace BitPaySDK
                 parameters.Add("token", GetAccessToken(Facade.Merchant));
                 parameters.Add("dateStart", dateStart.ToString("yyyy-MM-dd"));
                 parameters.Add("dateEnd", dateEnd.ToString("yyyy-MM-dd"));
-                if (!String.IsNullOrEmpty(status)) { parameters.Add("status", status); }
-                if (!String.IsNullOrEmpty(orderId)) { parameters.Add("orderId", orderId); }
-                if (limit >= 0) { parameters.Add("limit", limit.ToString()); }
-                if (offset >= 0) { parameters.Add("offset", offset.ToString()); }
-                
+                if (!String.IsNullOrEmpty(status))
+                {
+                    parameters.Add("status", status);
+                }
+
+                if (!String.IsNullOrEmpty(orderId))
+                {
+                    parameters.Add("orderId", orderId);
+                }
+
+                if (limit >= 0)
+                {
+                    parameters.Add("limit", limit.ToString());
+                }
+
+                if (offset >= 0)
+                {
+                    parameters.Add("offset", offset.ToString());
+                }
+
                 var response = await Get("invoices", parameters);
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<List<Invoice>>(responseString);
@@ -287,8 +305,8 @@ namespace BitPaySDK
         /// <returns>ATrue if the refund was successfully created, false otherwise.</returns>
         /// <throws>RefundCreationException RefundCreationException class</throws>
         ///
-        public async Task<bool> CreateRefund(Invoice invoice, string refundEmail, double amount, string currency) {
-            
+        public async Task<bool> CreateRefund(Invoice invoice, string refundEmail, double amount, string currency)
+        {
             try
             {
                 bool result;
@@ -303,7 +321,7 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
                 bool.TryParse(responseObject.GetValue("success").ToString(), out result);
-                
+
                 return result;
             }
             catch (Exception ex)
@@ -314,7 +332,7 @@ namespace BitPaySDK
                 throw;
             }
         }
-        
+
         /// <summary>
         ///     Retrieve all refund requests on a BitPay invoice.
         /// </summary>
@@ -331,7 +349,7 @@ namespace BitPaySDK
 
                 var response = await Get("invoices/" + invoice.Id + "/refunds", parameters);
                 var responseString = await ResponseToJsonString(response);
-                
+
                 return JsonConvert.DeserializeObject<List<Refund>>(responseString);
             }
             catch (Exception ex)
@@ -359,7 +377,7 @@ namespace BitPaySDK
 
                 var response = await Get("invoices/" + invoice.Id + "/refunds/" + refundId, parameters);
                 var responseString = await ResponseToJsonString(response);
-                
+
                 return JsonConvert.DeserializeObject<Refund>(responseString);
             }
             catch (Exception ex)
@@ -407,7 +425,7 @@ namespace BitPaySDK
             try
             {
                 var refund = await GetRefund(invoice, refundId);
-                
+
                 return await CancelRefund(invoice.Id, refund);
             }
             catch (Exception ex)
@@ -444,7 +462,6 @@ namespace BitPaySDK
 
                 throw;
             }
-
         }
 
         /// <summary>
@@ -462,7 +479,8 @@ namespace BitPaySDK
                 var json = JsonConvert.SerializeObject(bill);
                 var response = await Post("bills", json, signRequest).ConfigureAwait(false);
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
-                var serializerSettings = new JsonSerializerSettings {ObjectCreationHandling = ObjectCreationHandling.Replace};
+                var serializerSettings = new JsonSerializerSettings
+                    {ObjectCreationHandling = ObjectCreationHandling.Replace};
                 JsonConvert.PopulateObject(responseString, bill, serializerSettings);
             }
             catch (Exception ex)
@@ -505,6 +523,7 @@ namespace BitPaySDK
                         parameters = null;
                     }
                 }
+
                 var response = await Get("bills/" + billId, parameters, signRequest);
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<Bill>(responseString);
@@ -531,7 +550,8 @@ namespace BitPaySDK
                 var json = JsonConvert.SerializeObject(bill);
                 var response = await Put("bills/" + billId, json).ConfigureAwait(false);
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
-                var serializerSettings = new JsonSerializerSettings {ObjectCreationHandling = ObjectCreationHandling.Replace};
+                var serializerSettings = new JsonSerializerSettings
+                    {ObjectCreationHandling = ObjectCreationHandling.Replace};
                 JsonConvert.PopulateObject(responseString, bill, serializerSettings);
             }
             catch (Exception ex)
@@ -559,7 +579,7 @@ namespace BitPaySDK
                 // GET/invoices expects the merchant token and not the merchant/invoice token.
                 try
                 {
-                    parameters = new Dictionary<string, string>{};
+                    parameters = new Dictionary<string, string> { };
                     parameters.Add("token", GetAccessToken(Facade.Merchant));
                     if (!String.IsNullOrEmpty(status))
                     {
@@ -571,6 +591,7 @@ namespace BitPaySDK
                     // No token for invoice.
                     parameters = null;
                 }
+
                 var response = await Get("bills", parameters);
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<List<Bill>>(responseString);
@@ -596,7 +617,7 @@ namespace BitPaySDK
             var responseString = "";
             try
             {
-                var json = JsonConvert.SerializeObject(new Dictionary<string, string>{{"token", billToken}});
+                var json = JsonConvert.SerializeObject(new Dictionary<string, string> {{"token", billToken}});
                 var response = await Post("bills/" + billId + "/deliveries", json, signRequest).ConfigureAwait(false);
                 responseString = await ResponseToJsonString(response).ConfigureAwait(false);
             }
@@ -707,7 +728,7 @@ namespace BitPaySDK
                 batch.Guid = Guid.NewGuid().ToString();
                 var json = JsonConvert.SerializeObject(batch);
                 var response = await Post("payouts", json, true);
-                
+
                 var responseString = await ResponseToJsonString(response);
                 JsonConvert.PopulateObject(responseString, batch, new JsonSerializerSettings
                 {
@@ -743,6 +764,7 @@ namespace BitPaySDK
                 {
                     parameters.Add("status", status);
                 }
+
                 parameters.Add("token", GetAccessToken(Facade.Payroll));
                 var response = await Get("payouts", parameters);
                 var responseString = await ResponseToJsonString(response);
@@ -964,7 +986,8 @@ namespace BitPaySDK
         /// <returns></returns>
         private async Task InitKeys()
         {
-            if (KeyUtils.PrivateKeyExists(_configuration.GetSection("BitPayConfiguration:EnvConfig:"+ _env +":PrivateKeyPath").Value))
+            if (KeyUtils.PrivateKeyExists(_configuration
+                .GetSection("BitPayConfiguration:EnvConfig:" + _env + ":PrivateKeyPath").Value))
             {
                 _ecKey = await KeyUtils.LoadEcKey();
             }
@@ -1040,11 +1063,14 @@ namespace BitPaySDK
             try
             {
                 ClearAccessTokenCache();
-                
-                IConfigurationSection tokenList = _configuration.GetSection("BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens");
+
+                IConfigurationSection tokenList =
+                    _configuration.GetSection("BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens");
                 foreach (IConfigurationSection token in tokenList.GetChildren().ToArray())
                 {
-                    if (_configuration["BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:" + token.Key] != null && !string.IsNullOrEmpty(token.Value)) {
+                    if (_configuration["BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:" + token.Key] != null &&
+                        !string.IsNullOrEmpty(token.Value))
+                    {
                         _tokenCache.Add(token.Key, token.Value);
                     }
                 }
@@ -1079,7 +1105,8 @@ namespace BitPaySDK
         /// <param name="uri">The URI to query</param>
         /// <param name="parameters">The request parameters</param>
         /// <returns>The HttpResponseMessage of the request</returns>
-        private async Task<HttpResponseMessage> Get(string uri, Dictionary<string, string> parameters = null, bool signatureRequired = true)
+        private async Task<HttpResponseMessage> Get(string uri, Dictionary<string, string> parameters = null,
+            bool signatureRequired = true)
         {
             try
             {
@@ -1087,6 +1114,8 @@ namespace BitPaySDK
                 _httpClient.DefaultRequestHeaders.Clear();
                 _httpClient.DefaultRequestHeaders.Add("x-accept-version", Env.BitpayApiVersion);
                 _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", Env.BitpayPluginInfo);
+                _httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame", Env.BitpayApiFrame);
+                _httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame-version", Env.BitpayApiFrameVersion);
                 if (parameters != null)
                 {
                     fullUrl += "?";
@@ -1125,6 +1154,8 @@ namespace BitPaySDK
                 _httpClient.DefaultRequestHeaders.Clear();
                 _httpClient.DefaultRequestHeaders.Add("x-accept-version", Env.BitpayApiVersion);
                 _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", Env.BitpayPluginInfo);
+                _httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame", Env.BitpayApiFrame);
+                _httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame-version", Env.BitpayApiFrameVersion);
 
                 if (parameters != null)
                 {
@@ -1154,6 +1185,8 @@ namespace BitPaySDK
                 _httpClient.DefaultRequestHeaders.Clear();
                 _httpClient.DefaultRequestHeaders.Add("x-accept-version", Env.BitpayApiVersion);
                 _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", Env.BitpayPluginInfo);
+                _httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame", Env.BitpayApiFrame);
+                _httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame-version", Env.BitpayApiFrameVersion);
                 bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 if (signatureRequired)
                 {
@@ -1179,12 +1212,14 @@ namespace BitPaySDK
                 _httpClient.DefaultRequestHeaders.Clear();
                 _httpClient.DefaultRequestHeaders.Add("x-accept-version", Env.BitpayApiVersion);
                 _httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", Env.BitpayPluginInfo);
+                _httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame", Env.BitpayApiFrame);
+                _httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame-version", Env.BitpayApiFrameVersion);
                 bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                
+
                 var signature = KeyUtils.Sign(_ecKey, _baseUrl + uri + json);
                 _httpClient.DefaultRequestHeaders.Add("x-signature", signature);
                 _httpClient.DefaultRequestHeaders.Add("x-identity", _ecKey?.PublicKeyHexBytes);
-                
+
                 var result = await _httpClient.PutAsync(uri, bodyContent).ConfigureAwait(false);
                 return result;
             }
@@ -1274,6 +1309,7 @@ namespace BitPaySDK
                 {
                     throw new Exception("Configuration file not found");
                 }
+
                 var builder = new ConfigurationBuilder().AddJsonFile(_configFilePath, false, true);
                 _configuration = builder.Build();
                 _env = _configuration.GetSection("BitPayConfiguration:Environment").Value;
@@ -1296,11 +1332,11 @@ namespace BitPaySDK
                 {
                     throw new Exception("Private Key file not found");
                 }
+
                 var config = new Dictionary<string, string>
                 {
                     {"BitPayConfiguration:Environment", _env},
                     {"BitPayConfiguration:EnvConfig:" + _env + ":PrivateKeyPath", privateKeyPath},
-                    {"BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:pos", tokens.POS},
                     {"BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:merchant", tokens.Merchant},
                     {"BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:payroll", tokens.Payout}
                 };

@@ -1,5 +1,8 @@
-﻿namespace BitPaySDK.Models.Invoice
+﻿using System;
+
+namespace BitPaySDK.Models.Invoice
 {
+    [Obsolete("PaymentTotal will be deprecated on version 4.0", false)]  //TODO remove on version 4.0
     public class PaymentTotal
     {
         public double Btc { get; set; }

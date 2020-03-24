@@ -42,7 +42,7 @@ namespace BitPayXUnitTest
         {
             // JSON minified with the BitPay configuration as in the required configuration file
             // and parsed into a IConfiguration object
-            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"ClientDescription\":\"Net_test\",\"ApiUrl\":\"https://test.bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"bitpay_private_test.key\",\"ApiTokens\":{\"pos\":\"AvJdGrEqTW9HVsJit9zabAnrJabqaQDhWHRacHYgfgxK\",\"merchant\":\"CE2WRSEEt9FgXvXboxNFA4YdQyyDJmgVAo752TGA7eUj\",\"payroll\":\"9pJ7fzW1GGeuDQfj32aNATCDnyY6YAacVMcDrs7HHUNo\"}},\"Prod\":{\"ClientDescription\":\"\",\"ApiUrl\":\"https://bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"pos\":\"\",\"merchant\":\"\",\"payroll\":\"\"}}}}}";
+            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"PrivateKeyPath\":\"bitpay_private_test.key\",\"ApiTokens\":{\"merchant\":\"CE2WRSEEt9FgXvXboxNFA4YdQyyDJmgVAo752TGA7eUj\",\"payroll\":\"9pJ7fzW1GGeuDQfj32aNATCDnyY6YAacVMcDrs7HHUNo\"}},\"Prod\":{\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"merchant\":\"\",\"payroll\":\"\"}}}}}";
             var memoryJsonFile = new MemoryFileInfo("config.json", Encoding.UTF8.GetBytes(json), DateTimeOffset.Now);
             var memoryFileProvider = new MockFileProvider(memoryJsonFile);
 
@@ -52,24 +52,17 @@ namespace BitPayXUnitTest
             
             // Initialize the BitPay object to be used in the following tests
             // Initialize with IConfiguration object
-//            _bitpay = new BitPay(configuration);
+            _bitpay = new BitPay(configuration);
             
             // Initialize with separate variables
             _bitpay = new BitPay(
                 Env.Test,
                 "bitpay_private_test.key",
                 new Env.Tokens(){
-                    POS = "AvJdGrEqTW9HVsJit9zabAnrJabqaQDhWHRacHYgfgxK",
                     Merchant = "CE2WRSEEt9FgXvXboxNFA4YdQyyDJmgVAo752TGA7eUj",
                     Payout = "9pJ7fzW1GGeuDQfj32aNATCDnyY6YAacVMcDrs7HHUNo"
                 }
             );
-
-            // If the client doesn't have a POS token yet, fetch one.
-            // For the Merchant and Payroll Facades, see below, in their corresponding tests
-            if (!_bitpay.tokenExist(Facade.PointOfSale)) {
-                _bitpay.AuthorizeClient(PairingCode);
-            }
 
             // ledgers require the Merchant Facade
             if (!_bitpay.tokenExist(Facade.Merchant)) {
@@ -104,7 +97,7 @@ namespace BitPayXUnitTest
         public async Task TestShouldGetInvoiceId() 
         {
             // create an invoice and make sure we receive an id - which means it has been successfully submitted
-            var invoice = new Invoice(30.0, Currency.EUR);
+            var invoice = new Invoice(30.0, Currency.USD);
             var basicInvoice = await _bitpay.CreateInvoice(invoice);
             Assert.NotNull(basicInvoice.Id);
         }
@@ -154,15 +147,6 @@ namespace BitPayXUnitTest
             // create an invoice and make sure we receive a correct invoice status (new)
             var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, Currency.USD));
             Assert.Equal(InvoiceStatus.New, basicInvoice.Status);
-        }
-
-        [Fact]
-        public async Task TestShouldGetInvoiceBtcPrice() {
-            // create an invoice and make sure we receive values for the Bitcoin Cash and Bitcoin fields, respectively
-            var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, Currency.USD));
-            Assert.NotNull(basicInvoice.PaymentSubtotals.Btc);
-            Assert.NotNull(basicInvoice.PaymentSubtotals.Bch);
-            Assert.NotNull(basicInvoice.PaymentSubtotals.Eth);
         }
 
         [Fact]
