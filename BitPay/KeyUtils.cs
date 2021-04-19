@@ -47,13 +47,17 @@ namespace BitPaySDK
 
         public static async Task<EcKey> LoadEcKey()
         {
-            using (var fs = File.OpenRead(PrivateKeyFile))
-            {
-                var b = new byte[1024];
-                await fs.ReadAsync(b, 0, b.Length);
-                var key = EcKey.FromAsn1(b);
-                return key;
-            }
+            // using (var fs = File.OpenRead(PrivateKeyFile))
+            // {
+            //     var b = new byte[1024];
+            //     await fs.ReadAsync(b, 0, b.Length);
+            //     var key = EcKey.FromAsn1(b);
+            //     return key;
+            // }
+                
+            byte[] file = System.IO.File.ReadAllBytes(PrivateKeyFile);
+            var key = EcKey.FromAsn1(file);
+            return key;
         }
 
         public static string GetKeyStringFromFile(string filename)
