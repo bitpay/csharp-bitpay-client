@@ -330,6 +330,62 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
+        public async Task testShouldSubmitPayoutRecipients() {
+            List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
+            recipientsList.Add( new PayoutRecipient(
+                "sandbox+recipient1@bitpay.com",
+                "recipient1",
+                "https://hookb.in/wNDlQMV7WMFz88VDyGnJ"));
+            recipientsList.Add( new PayoutRecipient(
+                "sandbox+recipient2@bitpay.com",
+                "recipient2",
+                "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
+            recipientsList.Add( new PayoutRecipient(
+                "sandbox+recipient3@bitpay.com",
+                "recipient3",
+                "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
+
+            var recipientsObj = new PayoutRecipients(recipientsList);
+            List<PayoutRecipient> recipients = await _bitpay.SubmitPayoutRecipients(recipientsObj);
+
+            Assert.NotNull(recipients);
+            Assert.Equal(recipients[0].Email, "sandbox+recipient1@bitpay.com");
+        }
+
+        [Fact]
+        public async Task testShouldGetPayoutRecipientId() {
+            List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
+            recipientsList.Add( new PayoutRecipient(
+                "sandbox+recipient1@bitpay.com",
+                "recipient1",
+                "https://hookb.in/wNDlQMV7WMFz88VDyGnJ"));
+            recipientsList.Add( new PayoutRecipient(
+                "sandbox+recipient2@bitpay.com",
+                "recipient2",
+                "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
+            recipientsList.Add( new PayoutRecipient(
+                "sandbox+recipient3@bitpay.com",
+                "recipient3",
+                "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
+
+            PayoutRecipients recipientsObj = new PayoutRecipients(recipientsList);
+            var recipients = await _bitpay.SubmitPayoutRecipients(recipientsObj);
+            var firstRecipient = recipients.First();
+            var retrieved = await _bitpay.GetPayoutRecipient(firstRecipient.Id);
+
+            Assert.NotNull(firstRecipient);
+            Assert.NotNull(retrieved.Id);
+            Assert.Equal(firstRecipient.Id, retrieved.Id);
+            Assert.Equal(firstRecipient.Email, "sandbox+recipient1@bitpay.com");
+        }
+
+        [Fact]
+        public async Task testShouldGetPayoutRecipients() {
+            var recipients = await _bitpay.GetPayoutRecipients(null, 2);
+            Assert.Equal(2, recipients.Count);
+        }
+
+        [Fact]
         public async Task TestShouldSubmitPayoutBatch() {
 
             var date = DateTime.Now;
@@ -338,8 +394,8 @@ namespace BitPayXUnitTest
             var effectiveDate = threeDaysFromNow;
             var currency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u"),
-                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A")
+                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
+                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com")
             };
 
             var batch = new PayoutBatch(currency, effectiveDate, instructions);
@@ -358,8 +414,8 @@ namespace BitPayXUnitTest
             var effectiveDate = threeDaysFromNow;
             var currency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u"),
-                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A")
+                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
+                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com")
             };
 
             var batch0 = new PayoutBatch(currency, effectiveDate, instructions);

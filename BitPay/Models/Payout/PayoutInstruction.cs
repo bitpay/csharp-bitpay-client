@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using BitPaySDK.Exceptions;
 using Newtonsoft.Json;
 
 namespace BitPaySDK.Models.Payout
@@ -12,22 +14,50 @@ namespace BitPaySDK.Models.Payout
         {
         }
 
-        /// <summary>
-        ///     Constructor, create a PayoutInstruction object.
-        /// </summary>
-        /// <param name="amount">BTC amount.</param>
-        /// <param name="address">Bitcoin address.</param>
-        public PayoutInstruction(double amount, string address)
+        /**
+         * Constructor, create a PayoutInstruction object.
+         *
+         * @param amount      float amount (in currency of batch).
+         * @param method      int Method used to target the recipient.
+         * @param methodValue string value for the choosen target method.
+         * @throws PayoutCreationException BitPayException class
+         */
+        public PayoutInstruction(double amount, int method, string methodValue)
         {
-            Amount = amount;
-            Address = address;
+            try
+            {
+                Amount = amount;
+                switch (method) {
+                    case RecipientReferenceMethod.EMAIL:
+                        Email = methodValue;
+                        break;
+                    case RecipientReferenceMethod.RECIPIENT_ID:
+                        RecipientId = methodValue;
+                        break;
+                    case RecipientReferenceMethod.SHOPPER_ID:
+                        ShopperId = methodValue;
+                        break;
+                    default:
+                        throw new PayoutCreationException();
+                }
+            }
+            catch (Exception e)
+            {
+                throw new BitPayException(e);
+            }
         }
 
         [JsonProperty(PropertyName = "amount")]
         public double Amount { get; set; }
 
-        [JsonProperty(PropertyName = "address")]
-        public string Address { get; set; }
+        [JsonProperty(PropertyName = "email")]
+        public string Email { get; set; }
+
+        [JsonProperty(PropertyName = "recipientId")]
+        public string RecipientId { get; set; }
+
+        [JsonProperty(PropertyName = "shopperId")]
+        public string ShopperId { get; set; }
 
         [JsonProperty(PropertyName = "label")]
         public string Label { get; set; }
@@ -61,9 +91,19 @@ namespace BitPaySDK.Models.Payout
             return false;
         }
 
-        public bool ShouldSerializeAddress()
+        public bool ShouldSerializeEmail()
         {
-            return !string.IsNullOrEmpty(Address);
+            return !string.IsNullOrEmpty(Email);
+        }
+
+        public bool ShouldSerializeRecipientId()
+        {
+            return !string.IsNullOrEmpty(RecipientId);
+        }
+
+        public bool ShouldSerializeShopperId()
+        {
+            return !string.IsNullOrEmpty(ShopperId);
         }
 
         public bool ShouldSerializeTransactions()
