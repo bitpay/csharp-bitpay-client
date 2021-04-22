@@ -263,8 +263,8 @@ namespace BitPayUnitTest {
             var effectiveDate = threeDaysFromNow;
             var currency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u"),
-                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A")
+                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
+                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com")
             };
 
             var batch = new PayoutBatch(currency, effectiveDate, instructions);
@@ -283,8 +283,8 @@ namespace BitPayUnitTest {
             var effectiveDate = threeDaysFromNow;
             var currency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, "mtHDtQtkEkRRB5mgeWpLhALsSbga3iZV6u"),
-                new PayoutInstruction(200.0, "mvR4Xj7MYT7GJcL93xAQbSZ2p4eHJV5F7A")
+                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
+                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com")
             };
 
             var batch0 = new PayoutBatch(currency, effectiveDate, instructions);
