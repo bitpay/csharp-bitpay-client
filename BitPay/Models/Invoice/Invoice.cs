@@ -144,51 +144,6 @@ namespace BitPaySDK.Models.Invoice
 
         public RefundInfo RefundInfo { get; set; }
 
-        private PaymentCodes _paymentCodes = null; //TODO remove on version 4.0
-
-        [Obsolete("PaymentCodes will be deprecated on version 4.0", false)]
-        public PaymentCodes PaymentCodes
-        {
-            get => _paymentCodes;
-            set => _paymentCodes = null;
-        }
-
-        private PaymentTotal _paymentSubtotals = null; //TODO remove on version 4.0
-
-        [Obsolete("PaymentSubtotals will be deprecated on version 4.0", false)]
-        public PaymentTotal PaymentSubtotals
-        {
-            get => _paymentSubtotals;
-            set => _paymentSubtotals = null;
-        }
-
-        private PaymentTotal _paymentTotals = null; //TODO remove on version 4.0
-
-        [Obsolete("PaymentTotals will be deprecated on version 4.0", false)]
-        public PaymentTotal PaymentTotals
-        {
-            get => _paymentTotals;
-            set => _paymentTotals = null;
-        }
-
-        private PaymentTotal _paymentDisplayTotals = null; //TODO remove on version 4.0
-
-        [Obsolete("PaymentDisplayTotals will be deprecated on version 4.0", false)]
-        public PaymentTotal PaymentDisplayTotals
-        {
-            get => _paymentDisplayTotals;
-            set => _paymentDisplayTotals = null;
-        }
-
-        private PaymentTotal _paymentDisplaySubTotals = null; //TODO remove on version 4.0
-
-        [Obsolete("PaymentDisplaySubTotals will be deprecated on version 4.0", false)]
-        public PaymentTotal PaymentDisplaySubTotals
-        {
-            get => _paymentDisplaySubTotals;
-            set => _paymentDisplaySubTotals = null;
-        }
-
         public double AmountPaid { get; set; }
 
         public dynamic ExchangeRates
