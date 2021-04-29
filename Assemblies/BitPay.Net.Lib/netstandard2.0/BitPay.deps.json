@@ -1,16 +1,16 @@
 {
   "runtimeTarget": {
     "name": ".NETStandard,Version=v2.0/",
-    "signature": "44de46c3c430d0e1ec6587f80796d9950950cf43"
+    "signature": "58feca8a9e64932e6ea3da2afe50f5f8ebcc2c07"
   },
   "compilationOptions": {},
   "targets": {
     ".NETStandard,Version=v2.0": {},
     ".NETStandard,Version=v2.0/": {
-      "BitPay/3.2.2001": {
+      "BitPay/4.0.2104": {
         "dependencies": {
-          "BouncyCastle": "1.8.5",
-          "Microsoft.CSharp": "4.5.0",
+          "BouncyCastle": "1.8.9",
+          "Microsoft.CSharp": "4.7.0",
           "Microsoft.Extensions.Configuration": "2.2.0",
           "Microsoft.Extensions.Configuration.Json": "2.2.0",
           "NETStandard.Library": "2.0.3",
@@ -20,19 +20,19 @@
           "BitPay.dll": {}
         }
       },
-      "BouncyCastle/1.8.5": {
+      "BouncyCastle/1.8.9": {
         "runtime": {
           "lib/BouncyCastle.Crypto.dll": {
-            "assemblyVersion": "1.8.5.0",
-            "fileVersion": "1.8.19031.1"
+            "assemblyVersion": "1.8.9.0",
+            "fileVersion": "1.8.20343.1"
           }
         }
       },
-      "Microsoft.CSharp/4.5.0": {
+      "Microsoft.CSharp/4.7.0": {
         "runtime": {
           "lib/netstandard2.0/Microsoft.CSharp.dll": {
-            "assemblyVersion": "4.0.4.0",
-            "fileVersion": "4.6.26515.6"
+            "assemblyVersion": "4.0.5.0",
+            "fileVersion": "4.700.19.56404"
           }
         }
       },
@@ -180,24 +180,24 @@
     }
   },
   "libraries": {
-    "BitPay/3.2.2001": {
+    "BitPay/4.0.2104": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
     },
-    "BouncyCastle/1.8.5": {
+    "BouncyCastle/1.8.9": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-SvTtEA1DksJBu5Ucps4BSUrTseISTvIRcIvCUwicv+eTqkFHTq1hlcdWeYcwJsnmRvfQhODEUVsqLlYi4Umw2g==",
-      "path": "bouncycastle/1.8.5",
-      "hashPath": "bouncycastle.1.8.5.nupkg.sha512"
+      "sha512": "sha512-axnBgvdD5n+FnEG6efk/tfKuMFru7R/EoISH9zjh319yb3HD24TEHSAbNN/lTRT2ulOGRxDgOsCjkuk08iwWPg==",
+      "path": "bouncycastle/1.8.9",
+      "hashPath": "bouncycastle.1.8.9.nupkg.sha512"
     },
-    "Microsoft.CSharp/4.5.0": {
+    "Microsoft.CSharp/4.7.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-kaj6Wb4qoMuH3HySFJhxwQfe8R/sJsNJnANrvv8WdFPMoNbKY5htfNscv+LHCu5ipz+49m2e+WQXpLXr9XYemQ==",
-      "path": "microsoft.csharp/4.5.0",
-      "hashPath": "microsoft.csharp.4.5.0.nupkg.sha512"
+      "sha512": "sha512-pTj+D3uJWyN3My70i2Hqo+OXixq3Os2D1nJ2x92FFo6sk8fYS1m1WLNTs0Dc1uPaViH0YvEEwvzddQ7y4rhXmA==",
+      "path": "microsoft.csharp/4.7.0",
+      "hashPath": "microsoft.csharp.4.7.0.nupkg.sha512"
     },
     "Microsoft.Extensions.Configuration/2.2.0": {
       "type": "package",
