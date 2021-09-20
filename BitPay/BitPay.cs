@@ -1118,7 +1118,7 @@ namespace BitPaySDK
         {
             try
             {
-                _baseUrl = _env == Env.Test ? Env.TestUrl : Env.ProdUrl;
+                _baseUrl = _configuration.GetSection("BitPayConfiguration:EnvConfig:" + _env + ":ApiUrl").Value;
                 _httpClient = new HttpClient {BaseAddress = new Uri(_baseUrl)};
                 DeriveIdentity();
                 await LoadAccessTokens();
