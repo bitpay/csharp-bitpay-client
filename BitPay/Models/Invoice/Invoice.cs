@@ -74,6 +74,15 @@ namespace BitPaySDK.Models.Invoice
         [JsonProperty(PropertyName = "fullNotifications")]
         public bool FullNotifications { get; set; }
 
+        [JsonProperty(PropertyName = "autoRedirect")]
+        public bool AutoRedirect { get; set; }
+
+        [JsonProperty(PropertyName = "nonPayProPaymentReceived")]
+        public bool NonPayProPaymentReceived { get; set; }
+
+        [JsonProperty(PropertyName = "jsonPayProRequired")]
+        public bool JsonPayProRequired { get; set; }
+
         [JsonProperty(PropertyName = "extendedNotifications")]
         public bool ExtendedNotifications { get; set; }
 
@@ -116,6 +125,10 @@ namespace BitPaySDK.Models.Invoice
 
         public int TargetConfirmations { get; set; }
 
+        public int UnderpaidAmount { get; set; }
+
+        public int OverpaidAmount { get; set; }
+
         public List<InvoiceTransaction> Transactions { get; set; }
 
         public string ExceptionStatus { get; set; }
@@ -145,6 +158,10 @@ namespace BitPaySDK.Models.Invoice
         public RefundInfo RefundInfo { get; set; }
 
         public double AmountPaid { get; set; }
+
+        public string DisplayAmountPaid { get; set; }
+
+        public string CloseURL { get; set; }
 
         public dynamic ExchangeRates
         {
@@ -185,6 +202,11 @@ namespace BitPaySDK.Models.Invoice
         public bool ShouldSerializeFullNotifications()
         {
             return FullNotifications;
+        }
+
+        public bool ShouldSerializeAutoRedirect()
+        {
+            return AutoRedirect;
         }
 
         public bool ShouldSerializeExtendedNotifications()
@@ -267,6 +289,7 @@ namespace BitPaySDK.Models.Invoice
             return false;
         }
 
+
         public bool ShouldSerializePaymentTotals()
         {
             return false;
@@ -332,6 +355,16 @@ namespace BitPaySDK.Models.Invoice
             return false;
         }
 
+        public bool ShouldSerializeUnderpaidAmount()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeOverpaidAmount()
+        {
+            return false;
+        }
+
         public bool ShouldSerializeTransactions()
         {
             return false;
@@ -343,6 +376,16 @@ namespace BitPaySDK.Models.Invoice
         }
 
         public bool ShouldSerializeRefundAddresses()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeNonPayProPaymentReceived()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeJsonPayProRequired()
         {
             return false;
         }
@@ -361,5 +404,15 @@ namespace BitPaySDK.Models.Invoice
         {
             return false;
         }
+
+        public bool ShouldSerializeDisplayAmountPaid()
+        {
+            return !string.IsNullOrEmpty(DisplayAmountPaid);
+        }
+
+        public bool ShouldSerializeCloseURL()
+        {
+            return !string.IsNullOrEmpty(CloseURL);
+        }
     }
-}
+} 
