@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace BitPaySDK.Models.Invoice
 {
@@ -9,6 +11,18 @@ namespace BitPaySDK.Models.Invoice
 
         // Request fields
         //
+
+        [JsonProperty(PropertyName = "invoiceId")]
+        public string InvoiceId { get; set; }
+
+        [JsonProperty(PropertyName = "preview")]
+        public bool Preview { get; set; }
+
+        [JsonProperty(PropertyName = "immediate")]
+        public bool Immediate { get; set; }
+
+        [JsonProperty(PropertyName = "buyerPaysRefundFee")]
+        public bool BuyerPaysRefundFee { get; set; }
 
         [JsonProperty(PropertyName = "guid")]
         public string Guid { get; set; }
@@ -28,6 +42,15 @@ namespace BitPaySDK.Models.Invoice
         // Response fields
         //
 
+        [JsonProperty(PropertyName = "refundFee")]
+        public double RefundFee { get; set; }
+
+        [JsonProperty(PropertyName = "lastRefundNotification")]
+        public DateTime LastRefundNotification { get; set; }
+
+        [JsonProperty(PropertyName = "invoice")]
+        public string Invoice { get; set; }
+
         [JsonProperty(PropertyName = "id")]
         public string Id { get; set; }
 
@@ -45,6 +68,11 @@ namespace BitPaySDK.Models.Invoice
             return (Id != null);
         }
 
+        public bool ShouldSerializeInvoiceId()
+        {
+            return (InvoiceId != null);
+        }
+
         public bool ShouldSerializeRequestDate()
         {
             return (RequestDate != null);
@@ -55,9 +83,29 @@ namespace BitPaySDK.Models.Invoice
             return (Status != null);
         }
 
+        public bool ShouldSerializeInvoice()
+        {
+            return (Invoice != null);
+        }
+
         public bool ShouldSerializePaymentUrls()
         {
             return (PaymentUrls != null);
+        }
+
+        public bool ShouldSerializePreview()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeImmediate()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeBuyerPaysRefundFee()
+        {
+            return false;
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace BitPaySDK.Exceptions
 {
-    public class RefundCreationException : BitPayException
+    public class RefundCreationException : RefundException
     {
         private const string BitPayCode = "BITPAY-REFUND-CREATE";
         private const string BitPayMessage = "Failed to create refund";

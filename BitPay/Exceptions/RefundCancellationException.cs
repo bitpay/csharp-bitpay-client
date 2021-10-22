@@ -2,7 +2,7 @@
 
 namespace BitPaySDK.Exceptions
 {
-    public class RefundCancellationException : BitPayException
+    public class RefundCancellationException : RefundException
     {
         private const string BitPayCode = "BITPAY-REFUND-CANCELLATION";
         private const string BitPayMessage = "Failed to cancel refund";
