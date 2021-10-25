@@ -10,6 +10,7 @@ using BitPaySDK.Models;
 using BitPaySDK.Models.Bill;
 using BitPaySDK.Models.Invoice;
 using BitPaySDK.Models.Payout;
+using BitPaySDK.Models.Wallet;
 using Microsoft.Extensions.Configuration;
 using Buyer = BitPaySDK.Models.Invoice.Buyer;
 using InvoiceStatus = BitPaySDK.Models.Invoice.Status;
@@ -527,5 +528,33 @@ namespace BitPayUnitTest {
             var bills = await _bitpay.GetBills(BillStatus.Sent);
             Assert.IsTrue(bills.Count > 0, "No bills retrieved");
         }
+        [TestMethod]
+        public async Task testShouldCreateGetCancelRefundRequestNew()
+        {
+
+            var date = DateTime.Now;
+            var today = date;
+            var sevenDaysAgo = date.AddDays(-95);
+            var invoices = await _bitpay.GetInvoices(sevenDaysAgo, today, InvoiceStatus.Complete);
+            Invoice firstInvoice = invoices[0];
+            Assert.IsNotNull(firstInvoice);
+            Refund createdRefund = await _bitpay.CreateRefund(firstInvoice.Id, firstInvoice.Price, firstInvoice.Currency, true, false, false);
+            List<Refund> retrievedRefunds = await _bitpay.GetRefunds(firstInvoice.Id);
+            Refund firstRefund = retrievedRefunds.Last();
+            Refund updatedRefund = await _bitpay.UpdateRefund(firstRefund.Id, "created");
+            Refund retrievedRefund = await _bitpay.GetRefund(firstRefund.Id);
+            Boolean sentStatus = await _bitpay.SendRefundNotification(firstRefund.Id);
+            Refund cancelRefund = await _bitpay.CancelRefund(firstRefund.Id);
+            List<Wallet> supportedWallets = await _bitpay.GetSupportedWallets();
+
+            Assert.IsNotNull(invoices);
+            Assert.IsNotNull(retrievedRefunds);
+            Assert.AreEqual("created", updatedRefund.Status);
+            Assert.AreEqual(firstRefund.Id, retrievedRefund.Id);
+            Assert.IsTrue(sentStatus);
+            Assert.AreEqual("canceled", cancelRefund.Status);
+            Assert.IsNotNull(supportedWallets);
+        }
+
     }
 }

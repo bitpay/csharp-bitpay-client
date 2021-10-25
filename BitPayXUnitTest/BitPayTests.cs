@@ -10,6 +10,7 @@ using BitPaySDK.Models;
 using BitPaySDK.Models.Bill;
 using BitPaySDK.Models.Invoice;
 using BitPaySDK.Models.Payout;
+using BitPaySDK.Models.Wallet;
 using Microsoft.Extensions.Configuration;
 using Buyer = BitPaySDK.Models.Invoice.Buyer;
 using InvoiceStatus = BitPaySDK.Models.Invoice.Status;
@@ -282,7 +283,7 @@ namespace BitPayXUnitTest
             var sevenDaysAgo = date.AddDays(-95);
             var invoices = await _bitpay.GetInvoices(sevenDaysAgo, today, InvoiceStatus.Complete);
             Invoice firstInvoice = invoices.First();
-                
+
             Assert.NotNull(firstInvoice);
             string refundEmail = "";
 
@@ -297,6 +298,32 @@ namespace BitPayXUnitTest
             Assert.NotNull(firstRefund);
             Assert.NotNull(retrievedRefund);
             Assert.True(cancelled);
+        }
+        [Fact]
+        public async Task testShouldCreateGetCancelRefundRequestNew() {
+
+            var date = DateTime.Now;
+            var today = date;
+            var sevenDaysAgo = date.AddDays(-95);
+            var invoices = await _bitpay.GetInvoices(sevenDaysAgo, today, InvoiceStatus.Complete);
+            Invoice firstInvoice = invoices[0];
+            Assert.NotNull(firstInvoice);
+            Refund createdRefund = await _bitpay.CreateRefund(firstInvoice.Id, firstInvoice.Price, firstInvoice.Currency, true, false, false);
+            List<Refund> retrievedRefunds = await _bitpay.GetRefunds(firstInvoice.Id);
+            Refund firstRefund = retrievedRefunds.Last();
+            Refund updatedRefund = await _bitpay.UpdateRefund(firstRefund.Id, "created");
+            Refund retrievedRefund = await _bitpay.GetRefund(firstRefund.Id);
+            Boolean sentStatus = await _bitpay.SendRefundNotification(firstRefund.Id);
+            Refund cancelRefund = await _bitpay.CancelRefund(firstRefund.Id);
+            List<Wallet> supportedWallets = await _bitpay.GetSupportedWallets();
+
+            Assert.NotNull(invoices);
+            Assert.NotNull(retrievedRefunds);
+            Assert.Equal("created", updatedRefund.Status);
+            Assert.Equal(firstRefund.Id, retrievedRefund.Id);
+            Assert.True(sentStatus);
+            Assert.Equal("canceled", cancelRefund.Status);
+            Assert.NotNull(supportedWallets);
         }
 
         [Fact]
