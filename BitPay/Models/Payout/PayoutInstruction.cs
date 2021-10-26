@@ -53,6 +53,9 @@ namespace BitPaySDK.Models.Payout
         [JsonProperty(PropertyName = "email")]
         public string Email { get; set; }
 
+        [JsonProperty(PropertyName = "address")]
+        public string Address { get; set; }
+
         [JsonProperty(PropertyName = "recipientId")]
         public string RecipientId { get; set; }
 

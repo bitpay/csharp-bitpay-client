@@ -481,10 +481,10 @@ namespace BitPayUnitTest {
             retrievedBill.Items.Add(new Item(){Price = 60.0, Quantity = 7, Description = "product-added"});
                 
             var updatedBill = await _bitpay.UpdateBill(retrievedBill, retrievedBill.Id);
-            Assert.Equals(basicBill.Id, retrievedBill.Id);
-            Assert.Equals(retrievedBill.Id, updatedBill.Id);
-            Assert.Equals(updatedBill.Currency, Currency.EUR);
-            Assert.Equals(updatedBill.Name, "updatedBill");
+            Assert.AreEqual(basicBill.Id, retrievedBill.Id);
+            Assert.AreEqual(retrievedBill.Id, updatedBill.Id);
+            Assert.AreEqual(updatedBill.Currency, Currency.EUR);
+            Assert.AreEqual(updatedBill.Name, "updatedBill");
         }
 
         [TestMethod]
