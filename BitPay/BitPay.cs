@@ -39,10 +39,12 @@ namespace BitPaySDK
         private EcKey _ecKey;
 
         private HttpClient _httpClient;
+        public BitPay()
+        { }
 
         /// <summary>
         ///     Return the identity of this client (i.e. the public key).
-        /// </summary>
+        /// </summary>UpdatePayoutRecipient
         public string Identity { get; private set; }
 
         /// <summary>
@@ -54,7 +56,7 @@ namespace BitPaySDK
         public BitPay(string environment, string privateKeyPath, Env.Tokens tokens)
         {
             _env = environment;
-            BuildConfig(privateKeyPath, tokens);
+            BuildConfig("C:\\\\Dotnet\\\\csharp-bitpay-client\\\\bitpay_private_test.key", tokens);
             InitKeys().Wait();
             Init().Wait();
         }
@@ -715,14 +717,12 @@ namespace BitPaySDK
             }
         }
 
-        /**
-         * Submit BitPay Payout Recipients.
-         *
-         * @param recipients PayoutRecipients A PayoutRecipients object with request parameters defined.
-         * @return array A list of BitPay PayoutRecipients objects..
-         * @throws BitPayException BitPayException class
-         * @throws PayoutCreationException PayoutCreationException class
-         */
+        /// <summary>
+        ///     Submit BitPay Payout Recipients.
+        /// </summary>
+        /// <param name="recipients">A PayoutRecipients object with request parameters defined.</param>
+        /// <returns>A list of BitPay PayoutRecipients objects.</returns>
+        /// <throws>PayoutCreationException PayoutCreationException class</throws>
         public async Task<List<PayoutRecipient>> SubmitPayoutRecipients(PayoutRecipients recipients)
         {
             try
@@ -748,15 +748,52 @@ namespace BitPaySDK
             }
         }
 
-        /**
-         * Retrieve a collection of BitPay Payout Recipients.
-         *
-         * @param $status    string|null The recipient status you want to query on.
-         * @param $limit     int|null Maximum results that the query will return (useful for paging results).
-         *                   result).
-         * @return array     A list of BitPayRecipient objects.
-         * @throws BitPayException BitPayException class
-         */
+        /// <summary>
+        ///     Retrieve a BitPay payout recipient by recipient id using.  The client must have been previously authorized for the
+        ///     payroll facade.
+        /// </summary>
+        /// <param name="recipientId">The id of the recipient to retrieve.</param>
+        /// <returns>A BitPay PayoutRecipient object.</returns>
+        /// <throws>PayoutQueryException PayoutQueryException class</throws>
+        public async Task<PayoutRecipient> GetPayoutRecipient(string recipientId)
+        {
+            try
+            {
+                Dictionary<string, string> parameters;
+                try
+                {
+                    parameters = new Dictionary<string, string> { { "token", GetAccessToken(Facade.Payroll) } };
+                }
+                catch (BitPayException)
+                {
+                    // No token for batch.
+                    parameters = null;
+                }
+
+                var response = await Get("recipients/" + recipientId, parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<PayoutRecipient>(responseString,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new PayoutQueryException(ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Retrieve a collection of BitPay Payout Recipients.
+        /// </summary>
+        /// <param name="status">The recipient status you want to query on.</param>
+        /// <param name="limit">Maximum results that the query will return (useful for paging results).</param>
+        /// <returns>A list of BitPayRecipient objects.</returns>
+        /// <throws>PayoutQueryException PayoutQueryException class</throws>
         public async Task<List<PayoutRecipient>> GetPayoutRecipients(string status = null, int limit = 100)
         {
             try
@@ -786,18 +823,49 @@ namespace BitPaySDK
             }
         }
 
-        /**
-         * Retrieve a BitPay payout recipient by batch id using.  The client must have been previously authorized for the
-         * payroll facade.
-         *
-         * @param $recipientId string The id of the recipient to retrieve.
-         * @return PayoutRecipient A BitPay PayoutRecipient object.
-         * @throws PayoutQueryException BitPayException class
-         */
-        public async Task<PayoutRecipient> GetPayoutRecipient(string batchId)
+        /// <summary>
+        ///     Update a Payout Recipient.
+        /// </summary>
+        /// <param name="recipientId">The recipient id for the recipient to be updated.</param>
+        /// <param name="recipient">A PayoutRecipient object with updated parameters defined.</param>
+        /// <returns>The updated recipient object.</returns>
+        /// <throws>PayoutUpdateException PayoutUpdateException class</throws>
+        public async Task<PayoutRecipient> UpdatePayoutRecipient(string recipientId, PayoutRecipient recipient)
         {
             try
             {
+                recipient.Token = GetAccessToken(Facade.Payroll);
+                var json = JsonConvert.SerializeObject(recipient);
+                var response = await Put("recipients/" + recipientId, json).ConfigureAwait(false);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<PayoutRecipient>(responseString,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new PayoutUpdateException(ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Cancel a BitPay Payout recipient.
+        /// </summary>
+        /// <param name="recipientId">The id of the recipient to cancel.</param>
+        /// <returns>A BitPay generated PayoutRecipient object.</returns>
+        /// <throws>PayoutCancellationException PayoutCancellationException class</throws>
+        public async Task<bool> DeletePayoutRecipient(string recipientId)
+        {
+            try
+            {
+                bool result;
+                var b = await GetPayoutRecipient(recipientId);
+
                 Dictionary<string, string> parameters;
                 try
                 {
@@ -809,9 +877,99 @@ namespace BitPaySDK
                     parameters = null;
                 }
 
-                var response = await Get("recipients/" + batchId, parameters);
+                var response = await Delete("recipients/" + recipientId, parameters);
                 var responseString = await ResponseToJsonString(response);
-                return JsonConvert.DeserializeObject<PayoutRecipient>(responseString,
+                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
+                bool.TryParse(responseObject.GetValue("success").ToString(), out result);
+                
+                return result;
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new PayoutCancellationException();
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Notify BitPay Payout Recipients.
+        /// </summary>
+        /// <param name="recipientId">The id of the recipient to notify.</param>
+        /// <returns>True if the notification was successfully sent, false otherwise.</returns>
+        /// <throws>PayoutCreationException PayoutCreationException class</throws>
+        public async Task<bool> NotifyPayoutRecipient(string recipientId)
+        {
+           try
+           {
+                bool result;
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Payroll));
+
+                var json = JsonConvert.SerializeObject(parameters);
+                var response = await Post("recipients/" + recipientId + "/notifications", json);
+                var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
+                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
+                bool.TryParse(responseObject.GetValue("success").ToString(), out result);
+                return result;
+           }
+           catch (Exception ex)
+           {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new NotifyPayoutRecipientException(ex);
+
+                throw;
+           }
+        }
+
+        /// <summary>
+        ///     Submit a BitPay Payout.
+        /// </summary>
+        /// <param name="payout ">A PayoutBatch object with request parameters defined.</param>
+        /// <returns>A PayoutBatch BitPay generated PayoutBatch object.</returns>
+        /// <throws>PayoutCreationException PayoutCreationException class</throws>
+        public async Task<PayoutBatch> SubmitPayout(PayoutBatch payout)
+        {
+            try
+            {
+                payout.Token = GetAccessToken(Facade.Payroll);
+                payout.Guid = Guid.NewGuid().ToString();
+                var json = JsonConvert.SerializeObject(payout);
+                var response = await Post("payouts", json);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<PayoutBatch>(responseString,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new PayoutCreationException();
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Retrieve a BitPay payout by payout id using.  The client must have been previously authorized for the 
+        ///     payroll facade.
+        /// </summary>
+        /// <param name="payoutId">The id of the batch to retrieve.</param>
+        /// <returns>A BitPay generated PayoutBatch object.</returns>
+        /// <throws>PayoutQueryException PayoutQueryException class</throws>
+        public async Task<PayoutBatch> GetPayout(string payoutId)
+        {
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Payroll));
+
+                var response = await Get("payouts/" + payoutId, parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<PayoutBatch>(responseString,
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
@@ -826,42 +984,104 @@ namespace BitPaySDK
             }
         }
 
-        /**
-         * Cancel a BitPay Payout recipient.
-         *
-         * @param $recipientId string The id of the recipient to cancel.
-         * @return PayoutRecipient A BitPay generated PayoutRecipient object.
-         * @throws PayoutCancellationException BitPayException class
-         */
-        public async Task<bool> DeletePayoutRecipient(string batchId)
+        /// <summary>
+        ///     Cancel a BitPay Payout.
+        /// </summary>
+        /// <param name="payoutId">The id of the batch to cancel.</param>
+        /// <returns>A BitPay generated PayoutBatch object.</returns>
+        /// <throws>PayoutCancellationException PayoutCancellationException class</throws>
+        public async Task<PayoutBatch> CancelPayout(string payoutId)
         {
             try
             {
-                bool result;
-                var b = await GetPayoutRecipient(batchId);
-
-                Dictionary<string, string> parameters;
-                try
-                {
-                    parameters = new Dictionary<string, string> {{"token", GetAccessToken(Facade.Payroll)}};
-                }
-                catch (BitPayException)
-                {
-                    // No token for batch.
-                    parameters = null;
-                }
-
-                var response = await Delete("recipients/" + batchId, parameters);
+                var parameters = InitParams();
+                var payout = GetPayoutBatch(payoutId);
+                parameters.Add("token", payout.Result.Token);
+                Console.WriteLine(payout.Result.Token);
+                Console.Read();
+                var response = await Delete("payouts/" + payoutId, parameters);
                 var responseString = await ResponseToJsonString(response);
-                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
-                bool.TryParse(responseObject.GetValue("success").ToString(), out result);
-                
-                return result;
+                return JsonConvert.DeserializeObject<PayoutBatch>(responseString,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
             }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new PayoutCancellationException();
+                    throw new PayoutCancellationException(ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Retrieve a collection of BitPay payouts.
+        /// </summary>
+        /// <param name="startDate">The start date for the query.</param>
+        /// <param name="endDate">The end date for the query.</param>
+        /// <param name="status">The status to filter (optional).</param>
+        /// <param name="reference">The optional reference specified at payout request creation.</param>
+        /// <param name="limit">Maximum number of settlements to retrieve.</param>
+        /// <param name="offset">Offset for paging</param>       
+        /// <returns>A list of BitPay PayoutBatch objects.</returns>
+        /// <throws>PayoutQueryException PayoutQueryException class</throws>
+        public async Task<List<PayoutBatch>> GetPayouts(DateTime startDate, DateTime endDate,
+            string reference, string status = null, int limit = 100, int offset = 0)
+        {
+            try
+            {
+                var parameters = new Dictionary<string, string>
+                {
+                    {"token", GetAccessToken(Facade.Payroll)},
+                    {"startDate", $"{startDate.ToString("yyyy-MM-dd")}"},
+                    {"endDate", $"{endDate.ToString("yyyy-MM-dd")}"},
+                    {"reference", reference},
+                    {"status", status},
+                    {"limit", $"{limit}"},
+                    {"offset", $"{offset}"}
+                };
+
+                var response = await Get("payouts", parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<List<PayoutBatch>>(responseString,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new PayoutQueryException(ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Notify BitPay Payout.    
+        /// </summary>
+        /// <param name="payoutId">The id of the batch to notify.</param>
+        /// <returns>True if the notification was successfully sent, false otherwise.</returns>
+        /// <throws>PayoutCreationException PayoutCreationException class</throws>
+        public async Task<bool> NotifyPayout(string payoutId)
+        {
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Payroll));
+                var json = JsonConvert.SerializeObject(parameters);
+                var response = await Post("payouts/" + payoutId + "/notifications", json);
+                var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
+                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
+                return responseObject.GetValue("status").ToString() == "success";
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new NotifyPayoutException(ex);
 
                 throw;
             }
@@ -879,7 +1099,7 @@ namespace BitPaySDK
                 batch.Token = GetAccessToken(Facade.Payroll);
                 batch.Guid = Guid.NewGuid().ToString();
                 var json = JsonConvert.SerializeObject(batch);
-                var response = await Post("payouts", json, true);
+                var response = await Post("payoutBatches", json, true);
 
                 var responseString = await ResponseToJsonString(response);
                 JsonConvert.PopulateObject(responseString, batch, new JsonSerializerSettings
@@ -903,52 +1123,19 @@ namespace BitPaySDK
         }
 
         /// <summary>
-        ///     Retrieve a collection of BitPay payout batches.
-        /// </summary>
-        /// <param name="status">The status to filter (optional).</param>
-        /// <returns>A list of BitPay PayoutBatch objects.</returns>
-        public async Task<List<PayoutBatch>> GetPayoutBatches(string status = null)
-        {
-            try
-            {
-                var parameters = InitParams();
-                if (!string.IsNullOrEmpty(status))
-                {
-                    parameters.Add("status", status);
-                }
-
-                parameters.Add("token", GetAccessToken(Facade.Payroll));
-                var response = await Get("payouts", parameters);
-                var responseString = await ResponseToJsonString(response);
-                return JsonConvert.DeserializeObject<List<PayoutBatch>>(responseString,
-                    new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore
-                    });
-            }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new PayoutQueryException();
-
-                throw;
-            }
-        }
-
-        /// <summary>
         ///     Retrieve a BitPay payout batch by batch id using.  The client must have been previously authorized for the payroll
         ///     facade.
         /// </summary>
-        /// <param name="batchId">The id of the batch to retrieve.</param>
+        /// <param name="payoutBatchId">The id of the payout to retrieve.</param>
         /// <returns>A BitPay PayoutBatch object.</returns>
-        public async Task<PayoutBatch> GetPayoutBatch(string batchId)
+        public async Task<PayoutBatch> GetPayoutBatch(string payoutBatchId)
         {
             try
             {
                 Dictionary<string, string> parameters;
                 try
                 {
-                    parameters = new Dictionary<string, string> {{"token", GetAccessToken(Facade.Payroll)}};
+                    parameters = new Dictionary<string, string> { { "token", GetAccessToken(Facade.Payroll) } };
                 }
                 catch (BitPayException)
                 {
@@ -956,7 +1143,7 @@ namespace BitPaySDK
                     parameters = null;
                 }
 
-                var response = await Get("payouts/" + batchId, parameters);
+                var response = await Get("payoutBatches/" + payoutBatchId, parameters);
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<PayoutBatch>(responseString,
                     new JsonSerializerSettings
@@ -976,18 +1163,18 @@ namespace BitPaySDK
         /// <summary>
         ///     Cancel a BitPay Payout batch.
         /// </summary>
-        /// <param name="batchId">The id of the batch to cancel.</param>
+        /// <param name="payoutBatchId">The id of the payout to cancel.</param>
         /// <returns> A BitPay generated PayoutBatch object.</returns>
-        public async Task<PayoutBatch> CancelPayoutBatch(string batchId)
+        public async Task<PayoutBatch> CancelPayoutBatch(string payoutBatchId)
         {
             try
             {
-                var b = await GetPayoutBatch(batchId);
+                var b = await GetPayoutBatch(payoutBatchId);
 
                 Dictionary<string, string> parameters;
                 try
                 {
-                    parameters = new Dictionary<string, string> {{"token", b.Token}};
+                    parameters = new Dictionary<string, string> { { "token", b.Token } };
                 }
                 catch (BitPayException)
                 {
@@ -995,7 +1182,7 @@ namespace BitPaySDK
                     parameters = null;
                 }
 
-                var response = await Delete("payouts/" + batchId, parameters);
+                var response = await Delete("payoutBatches/" + payoutBatchId, parameters);
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<PayoutBatch>(responseString,
                     new JsonSerializerSettings
@@ -1007,6 +1194,109 @@ namespace BitPaySDK
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
                     throw new PayoutCancellationException();
+
+                throw;
+            }
+        }
+
+        ///     TODO to be deprecated in version ?
+        /// <summary>
+        ///     Retrieve a collection of BitPay payout batches.
+        /// </summary>
+        /// <param name="status">The status to filter (optional).</param>
+        /// <returns>A list of BitPay PayoutBatch objects.</returns>
+        public async Task<List<PayoutBatch>> GetPayoutBatches(string status = null)
+        {
+            try
+            {
+                var parameters = InitParams();
+                if (!string.IsNullOrEmpty(status))
+                {
+                    parameters.Add("status", status);
+                }
+
+                parameters.Add("token", GetAccessToken(Facade.Payroll));
+                var response = await Get("payoutBatches", parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<List<PayoutBatch>>(responseString,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new PayoutQueryException();
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Retrieve a collection of BitPay payout batches.
+        /// </summary>
+        /// <param name="startDate">The start date for the query.</param>
+        /// <param name="endDate">The end date for the query.</param>
+        /// <param name="status">The status to filter (optional).</param>
+        /// <param name="limit">Maximum number of settlements to retrieve.</param>
+        /// <param name="offset">Offset for paging</param>
+        /// <returns>A list of BitPay PayoutBatch objects.</returns>
+        public async Task<List<PayoutBatch>> GetPayoutBatches(DateTime startDate, DateTime endDate,string status = null,
+            int limit = 100, int offset = 0)
+        {
+            try
+            {
+                var parameters = new Dictionary<string, string>
+                {
+                    {"token", GetAccessToken(Facade.Payroll)},
+                    {"startDate", $"{startDate.ToString("yyyy-MM-dd")}"},
+                    {"endDate", $"{endDate.ToString("yyyy-MM-dd")}"},
+                    {"status", status},
+                    {"limit", $"{limit}"},
+                    {"offset", $"{offset}"}
+                };
+
+                parameters.Add("token", GetAccessToken(Facade.Payroll));
+                var response = await Get("payoutBatches", parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<List<PayoutBatch>>(responseString,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new PayoutQueryException();
+
+                throw;
+            }
+        }
+        /// <summary>
+        ///      Notify BitPay PayoutBatch.
+        /// </summary>
+        /// <param name="payoutBatchId ">The id of the payout to notify.</param>
+        /// <returns>True if the notification was successfully sent, false otherwise.</returns>
+        /// <throws>PayoutCreationException PayoutCreationException class</throws>
+        public async Task<bool> NotifyPayoutBatch(string payoutBatchId) 
+        {
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Payroll));
+
+                var json = JsonConvert.SerializeObject(parameters);
+                var response = await Post("payoutBatches/" + payoutBatchId + "/notifications", json);
+                var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
+                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
+                return responseObject.GetValue("status").ToString() == "success";
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new NotifyPayoutBatchException(ex);
 
                 throw;
             }
@@ -1329,7 +1619,7 @@ namespace BitPaySDK
             }
         }
 
-        private async Task<HttpResponseMessage> Post(string uri, string json, bool signatureRequired = false)
+        private async Task<HttpResponseMessage> Post(string uri, string json, bool signatureRequired = true)
         {
             try
             {
@@ -1501,5 +1791,10 @@ namespace BitPaySDK
                 throw new ConfigNotFoundException(ex);
             }
         }
+
+        //public string function GetCurrencyInfo()
+        //{
+        //    foreach (var currenciesInfo in )
+       // }
     }
 }

@@ -12,6 +12,7 @@ namespace BitPaySDK.Models.Payout
         public const string MethodVwap24 = "vwap_24hr";
 
         private string _currency = "";
+        private string _ledgerCurrency = "";
 
         /// <summary>
         ///     Constructor, create an empty PayoutBatch object.
@@ -35,11 +36,12 @@ namespace BitPaySDK.Models.Payout
         ///     processed on the same day.
         /// </param>
         /// <param name="instructions">Payout instructions.</param>
-        public PayoutBatch(string currency, DateTime effectiveDate, List<PayoutInstruction> instructions) : this()
+        public PayoutBatch(string currency, DateTime effectiveDate, List<PayoutInstruction> instructions,string ledgerCurrency) : this()
         {
             Currency = currency;
             EffectiveDate = effectiveDate;
             Instructions = instructions;
+            LedgerCurrency = ledgerCurrency;
             _computeAndSetAmount();
         }
 
@@ -66,6 +68,19 @@ namespace BitPaySDK.Models.Payout
                     throw new BitPayException("Error: currency code must be a type of BitPayAPI.Models.Currency");
 
                 _currency = value;
+            }
+        }
+
+        [JsonProperty(PropertyName = "ledgerCurrency")]
+        public string LedgerCurrency
+        {
+            get => _ledgerCurrency;
+            set
+            {
+                if (!Models.Currency.isValid(value))
+                    throw new BitPayException("Error: currency code must be a type of BitPayAPI.Models.Currency");
+
+                _ledgerCurrency = value;
             }
         }
 

@@ -2,7 +2,7 @@
 
 namespace BitPaySDK.Exceptions
 {
-    public class PayoutCancellationException : BitPayException
+    public class PayoutCancellationException : PayoutException
     {
         private const string BitPayCode = "BITPAY-PAYOUT-DELETE";
         private const string BitPayMessage = "Failed to create payout batch";

@@ -2,7 +2,7 @@
 
 namespace BitPaySDK.Exceptions
 {
-    public class PayoutQueryException : BitPayException
+    public class PayoutQueryException : PayoutException
     {
         private const string BitPayCode = "BITPAY-PAYOUT-GET";
         private const string BitPayMessage = "Failed to create payout batch";
