@@ -44,7 +44,7 @@ namespace BitPaySDK
 
         /// <summary>
         ///     Return the identity of this client (i.e. the public key).
-        /// </summary>UpdatePayoutRecipient
+        /// </summary>
         public string Identity { get; private set; }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace BitPaySDK
             bool signRequest = true)
         {
             try
-            {
+            { 
                 invoice.Token = GetAccessToken(facade);
                 invoice.Guid = Guid.NewGuid().ToString();
                 var json = JsonConvert.SerializeObject(invoice);
@@ -830,15 +830,17 @@ namespace BitPaySDK
         /// <param name="recipient">A PayoutRecipient object with updated parameters defined.</param>
         /// <returns>The updated recipient object.</returns>
         /// <throws>PayoutUpdateException PayoutUpdateException class</throws>
-        public async Task<PayoutRecipient> UpdatePayoutRecipient(string recipientId, PayoutRecipient recipient)
+        public async Task<List<PayoutRecipient>> UpdatePayoutRecipient(string recipientId, PayoutRecipient recipient)
         {
             try
             {
+
                 recipient.Token = GetAccessToken(Facade.Payroll);
+
                 var json = JsonConvert.SerializeObject(recipient);
-                var response = await Put("recipients/" + recipientId, json).ConfigureAwait(false);
+                var response = await Put("recipients", json).ConfigureAwait(false);
                 var responseString = await ResponseToJsonString(response);
-                return JsonConvert.DeserializeObject<PayoutRecipient>(responseString,
+                return JsonConvert.DeserializeObject<List<PayoutRecipient>>(responseString,
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
@@ -898,7 +900,7 @@ namespace BitPaySDK
         /// </summary>
         /// <param name="recipientId">The id of the recipient to notify.</param>
         /// <returns>True if the notification was successfully sent, false otherwise.</returns>
-        /// <throws>PayoutCreationException PayoutCreationException class</throws>
+        /// <throws>NotifyPayoutRecipientException NotifyPayoutRecipientException class</throws>
         public async Task<bool> NotifyPayoutRecipient(string recipientId)
         {
            try
@@ -997,8 +999,7 @@ namespace BitPaySDK
                 var parameters = InitParams();
                 var payout = GetPayoutBatch(payoutId);
                 parameters.Add("token", payout.Result.Token);
-                Console.WriteLine(payout.Result.Token);
-                Console.Read();
+
                 var response = await Delete("payouts/" + payoutId, parameters);
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<PayoutBatch>(responseString,
@@ -1043,7 +1044,7 @@ namespace BitPaySDK
                     {"offset", $"{offset}"}
                 };
 
-                var response = await Get("payouts", parameters);
+                var response = await Get("payouts/", parameters);
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<List<PayoutBatch>>(responseString,
                     new JsonSerializerSettings
@@ -1072,6 +1073,7 @@ namespace BitPaySDK
             {
                 var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(Facade.Payroll));
+
                 var json = JsonConvert.SerializeObject(parameters);
                 var response = await Post("payouts/" + payoutId + "/notifications", json);
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
@@ -1098,9 +1100,9 @@ namespace BitPaySDK
             {
                 batch.Token = GetAccessToken(Facade.Payroll);
                 batch.Guid = Guid.NewGuid().ToString();
-                var json = JsonConvert.SerializeObject(batch);
-                var response = await Post("payoutBatches", json, true);
 
+                var json = JsonConvert.SerializeObject(batch);
+                var response = await Post("payouts", json, true);
                 var responseString = await ResponseToJsonString(response);
                 JsonConvert.PopulateObject(responseString, batch, new JsonSerializerSettings
                 {
@@ -1288,7 +1290,7 @@ namespace BitPaySDK
                 parameters.Add("token", GetAccessToken(Facade.Payroll));
 
                 var json = JsonConvert.SerializeObject(parameters);
-                var response = await Post("payoutBatches/" + payoutBatchId + "/notifications", json);
+                var response = await Post("payout/" + payoutBatchId + "/notifications", json);
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
                 return responseObject.GetValue("status").ToString() == "success";
@@ -1619,7 +1621,7 @@ namespace BitPaySDK
             }
         }
 
-        private async Task<HttpResponseMessage> Post(string uri, string json, bool signatureRequired = true)
+        private async Task<HttpResponseMessage> Post(string uri, string json, bool signatureRequired = false)
         {
             try
             {
