@@ -201,6 +201,40 @@ namespace BitPaySDK
         }
 
         /// <summary>
+        ///     Update a BitPay invoice.
+        /// </summary>
+        /// <param name="invoiceId">The id of the invoice to updated.</param>
+        /// <param name="buyerEmail">The buyer's email address.</param>
+        /// <param name="buyerSms">The buyer's cell number.</param>
+        /// <param name="smsCode">The buyer's received verification code.</param>
+        /// <returns>A BitPay updated Invoice object.</returns>
+        /// <throws>InvoiceUpdateException InvoiceUpdateException class</throws>
+        public async Task<Invoice> UpdateInvoice(string invoiceId, string buyerEmail, string buyerSms, string smsCode)
+        {
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Merchant));
+                parameters.Add("buyerEmail", buyerEmail);
+                parameters.Add("buyerSms", buyerSms);
+                parameters.Add("smsCode", smsCode);
+                var json = JsonConvert.SerializeObject(parameters);
+                var response = await Put("invoices/" + invoiceId, json).ConfigureAwait(false);
+                var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
+                return JsonConvert.DeserializeObject<Invoice>(responseString);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new InvoiceUpdateException(ex);
+                 
+                throw;
+            }
+
+        }
+
+
+        /// <summary>
         ///     Retrieve an invoice by id and token.
         /// </summary>
         /// <param name="invoiceId">The id of the requested invoice.</param>
@@ -295,6 +329,32 @@ namespace BitPaySDK
                 throw;
             }
         }
+
+        /// <summary>
+        ///     Cancel a BitPay invoice.
+        /// </summary>
+        /// <param name="invoiceId">The id of the invoice to cancel.</param>
+        /// <returns>Cancelled invoice object.</returns>
+        /// <throws>InvoiceCancellationException InvoiceCancellationException class</throws>
+        public async Task<Invoice> CancelInvoice(string invoiceId)
+        {
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Merchant));
+                var response = await Delete("invoices/" + invoiceId, parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<Invoice>(responseString);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new InvoiceCancellationException(ex);
+
+                throw;
+            }
+        }
+
 
         ///     TODO to be deprecated in version 7.0
         /// <summary>

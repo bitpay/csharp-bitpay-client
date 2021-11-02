@@ -270,6 +270,22 @@ namespace BitPayXUnitTest
             Assert.True(invoices.Count > 0, "No invoices retrieved");
         }
 
+        [Fact]
+        public async Task TestShouldCreateUpdateAndDeleteInvoice()
+        {
+            // update and delete invoice  by id
+            var basicInvoice = await _bitpay.CreateInvoice(new Invoice(1.0, Currency.USD), Facade.Merchant);
+            var retreivedInvoice = await _bitpay.GetInvoice(basicInvoice.Id);
+            var updatedInvoice = await _bitpay.UpdateInvoice(retreivedInvoice.Id, "sandbox@bitpay.com", "", "");
+            var cancelledInvoice = await _bitpay.CancelInvoice(updatedInvoice.Id);
+            var retreivedCancelledInvoice = await _bitpay.GetInvoice(cancelledInvoice.Id);
+            Assert.NotNull(basicInvoice);
+            Assert.NotNull(retreivedInvoice);
+            Assert.NotNull(updatedInvoice);
+            Assert.NotNull(cancelledInvoice);
+            Assert.NotNull(retreivedCancelledInvoice);
+        }
+
         /*
         To use this test:
 	    You must have a paid/completed invoice in your account (list of invoices). The test looks for the first invoice in the "complete"
