@@ -4,7 +4,7 @@ namespace BitPaySDK.Exceptions
 {
     public class PayoutException : BitPayException
     {
-        private const string BitPayMessage = "An unexpected error occured while trying to manage the payout batch";
+        private const string BitPayMessage = "An unexpected error occured while trying to manage the payout.";
         private readonly string _bitpayCode = "BITPAY-PAYOUT-GENERIC";
 
         public PayoutException() : base(BitPayMessage)
