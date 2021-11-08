@@ -920,6 +920,7 @@ namespace BitPaySDK
             {
                 payout.Token = GetAccessToken(Facade.Payroll);
                 payout.Guid = Guid.NewGuid().ToString();
+
                 var json = JsonConvert.SerializeObject(payout);
                 var response = await Post("payouts", json, true);
                 var responseString = await ResponseToJsonString(response);
@@ -1018,8 +1019,8 @@ namespace BitPaySDK
             {
                 var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(Facade.Payroll));
-                parameters.Add("startDate", startDate.ToString("yyyy-MM-dd"));
-                parameters.Add("endDate", endDate.ToString("yyyy-MM-dd"));
+                parameters.Add("startDate", startDate.ToString("YYYY-MM-DD"));
+                parameters.Add("endDate", endDate.ToString("YYYY-MM-DD"));
                 if (!string.IsNullOrEmpty(reference))
                 {
                     parameters.Add("reference", reference);
@@ -1028,8 +1029,8 @@ namespace BitPaySDK
                 {
                     parameters.Add("status", status);
                 }
-                parameters.Add("limit", limit.ToString());
-                parameters.Add("offset", offset.ToString());
+                //parameters.Add("limit", limit.ToString());
+                //parameters.Add("offset", offset.ToString());
 
                 var response = await Get("payouts", parameters).ConfigureAwait(false); 
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false); 
@@ -1194,14 +1195,14 @@ namespace BitPaySDK
             {
                 var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(Facade.Payroll));
-                parameters.Add("startDate", startDate.ToString("yyyy-MM-dd"));
-                parameters.Add("endDate", endDate.ToString("yyyy-MM-dd"));
+                parameters.Add("startDate", startDate.ToString("YYYY-MM-DD"));
+                parameters.Add("endDate", endDate.ToString("YYYY-MM-DD"));
                 if (!string.IsNullOrEmpty(status))
                 {
                     parameters.Add("status", status);
                 }
-                parameters.Add("limit", limit.ToString());
-                parameters.Add("offset", offset.ToString());
+                //parameters.Add("limit", limit.ToString());
+                //parameters.Add("offset", offset.ToString());
 
                 /// TODO to be replace 'payouts' by 'payoutBatches'
                 var response = await Get("payouts", parameters);
