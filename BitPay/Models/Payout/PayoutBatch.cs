@@ -13,6 +13,7 @@ namespace BitPaySDK.Models.Payout
 
         private string _currency = "";
         private string _ledgerCurrency = "";
+        private dynamic _exchangeRates;
 
         /// <summary>
         ///     Constructor, create an empty PayoutBatch object.
@@ -133,6 +134,12 @@ namespace BitPaySDK.Models.Payout
         [JsonConverter(typeof(Converters.DateStringConverter))]
         public DateTime DateExecuted { get; set; }
 
+        public dynamic ExchangeRates
+        {
+            get => _exchangeRates;
+            set => _exchangeRates = JsonConvert.DeserializeObject(value.ToString(Formatting.None));
+        }
+
         // Private methods
         //
 
@@ -169,6 +176,11 @@ namespace BitPaySDK.Models.Payout
         }
 
         public bool ShouldSerializeId()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeExchangeRates()
         {
             return false;
         }
