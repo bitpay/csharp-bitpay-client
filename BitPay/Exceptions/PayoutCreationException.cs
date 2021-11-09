@@ -5,7 +5,7 @@ namespace BitPaySDK.Exceptions
     public class PayoutCreationException : PayoutException
     {
         private const string BitPayCode = "BITPAY-PAYOUT-CREATE";
-        private const string BitPayMessage = "Failed to create payout batch";
+        private const string BitPayMessage = "Failed to create payout.";
 
         public PayoutCreationException() : base(BitPayCode, BitPayMessage)
         {

@@ -1490,16 +1490,6 @@ namespace BitPaySDK
         }
 
         /// <summary>
-        ///     Just empty and dynamic parameters dictionary
-        /// </summary>
-        /// <returns></returns>
-        private Dictionary<string, dynamic> InitDynamicParams()
-        {
-            var parameters = new Dictionary<string, dynamic>();
-            return parameters;
-        }
-
-        /// <summary>
         ///     Make a GET request
         /// </summary>
         /// <param name="uri">The URI to query</param>

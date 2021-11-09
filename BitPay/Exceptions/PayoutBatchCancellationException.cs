@@ -4,8 +4,8 @@ namespace BitPaySDK.Exceptions
 {
     public class PayoutBatchCancellationException : PayoutBatchException
     {
-        private const string BitPayCode = "BITPAY-PAYOUT-CANCELLATION-BATCH";
-        private const string BitPayMessage = "Failed to cancel payout batch";
+        private const string BitPayCode = "BITPAY-PAYOUT-BATCH-CANCELLATION";
+        private const string BitPayMessage = "Failed to cancel payout batch.";
 
         public PayoutBatchCancellationException() : base(BitPayCode, BitPayMessage)
         {

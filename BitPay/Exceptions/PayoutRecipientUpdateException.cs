@@ -4,7 +4,7 @@ namespace BitPaySDK.Exceptions
 {
     public class PayoutRecipientUpdateException : PayoutRecipientException
     {
-        private const string BitPayCode = "BITPAY-PAYOUT-UPDATE-RECIPIENT";
+        private const string BitPayCode = "BITPAY-PAYOUT-RECIPIENT-UPDATE";
         private const string BitPayMessage = "Failed to update payout recipient.";
 
         public PayoutRecipientUpdateException() : base(BitPayCode, BitPayMessage)

@@ -36,7 +36,7 @@ namespace BitPaySDK.Models.Payout
         ///     processed on the same day.
         /// </param>
         /// <param name="instructions">Payout instructions.</param>
-        public PayoutBatch(string currency, DateTime effectiveDate, List<PayoutInstruction> instructions,string ledgerCurrency) : this()
+        public PayoutBatch(string currency, DateTime effectiveDate, List<PayoutInstruction> instructions, string ledgerCurrency) : this()
         {
             Currency = currency;
             EffectiveDate = effectiveDate;

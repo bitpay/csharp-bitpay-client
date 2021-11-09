@@ -4,5 +4,6 @@ namespace BitPaySDK
     {
         public const string Merchant = "merchant";
         public const string Payroll = "payroll";
+        public const string Payout = "payout";
     }
 }

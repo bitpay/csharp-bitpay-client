@@ -5,7 +5,7 @@ namespace BitPaySDK.Exceptions
     public class PayoutUpdateException : PayoutException
     {
         private const string BitPayCode = "BITPAY-PAYOUT-UPDATE";
-        private const string BitPayMessage = "Failed to update payout batch";
+        private const string BitPayMessage = "Failed to update payout.";
 
         public PayoutUpdateException() : base(BitPayCode, BitPayMessage)
         {
