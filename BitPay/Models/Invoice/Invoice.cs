@@ -155,7 +155,7 @@ namespace BitPaySDK.Models.Invoice
 
         public string BillId { get; set; }
 
-        public RefundInfo RefundInfo { get; set; }
+        public List<RefundInfo> RefundInfo { get; set; }
 
         public double AmountPaid { get; set; }
 
