@@ -14,6 +14,7 @@ namespace BitPaySDK
         {
             public string Merchant { get; set; }
             public string Payout { get; set; }
+            public string Payroll { get; set; }
         }
     }
 }

@@ -328,6 +328,29 @@ namespace BitPaySetup
                 }
             }
 
+            if (facade == Facade.Payout)
+            {
+                SetNotification(
+                    " In order to get access to the Payout facade, you need to contact Support at support@bitpay.com",
+                    3);
+                Console.Clear();
+                DrawTitle();
+                Console.WriteLine(" Did you contact and receive confirmation yet? [yes|no] (default: yes)");
+                Console.WriteLine(
+                    " If 'no', a new file will be generated in the entered location with the given name.");
+                Console.WriteLine();
+                Console.Write(" > ");
+                answer = Console.ReadLine();
+                while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
+                    answer = Console.ReadLine();
+
+                if (answer.ToLower() == "no")
+                {
+                    GetPairingCodeAndToken();
+                    return;
+                }
+            }
+
             var apiTokens = new ApiTokens();
             if (env == Env.Test) apiTokens = appConfig.BitPayConfiguration.EnvConfig.Test.ApiTokens;
             if (env == Env.Prod) apiTokens = appConfig.BitPayConfiguration.EnvConfig.Prod.ApiTokens;
@@ -353,7 +376,7 @@ namespace BitPaySetup
             {
                 try
                 {
-                    var bitpay = new BitPay(confFilePath);
+                    var bitpay = new BitPaySDK.BitPay(confFilePath);
 
                     pairingCode = bitpay.RequestClientAuthorization(facade).Result;
 
@@ -376,6 +399,9 @@ namespace BitPaySetup
                         break;
                     case Facade.Payroll:
                         apiTokens.payroll = newToken;
+                        break;
+                    case Facade.Payout:
+                        apiTokens.payout = newToken;
                         break;
                 }
 
@@ -462,7 +488,7 @@ namespace BitPaySetup
 
         private static void SetFacade()
         {
-            var maxMenuItems = 2;
+            var maxMenuItems = 3;
             var selector = 0;
             var valid = false;
             while (selector != maxMenuItems)
@@ -473,6 +499,7 @@ namespace BitPaySetup
                     " Select a facade for which you want to generate a new token pair (Press Enter to skip)");
                 Console.WriteLine(" 1. Merchant");
                 Console.WriteLine(" 2. Payroll");
+                Console.WriteLine(" 3. Payout");
                 Console.WriteLine();
                 Console.Write(" Select an option: ");
 
@@ -495,6 +522,9 @@ namespace BitPaySetup
                         case '2':
                             facade = Facade.Payroll;
                             return;
+                        case '3':
+                            facade = Facade.Payout;
+                            return;
                         default:
                             facade = null;
                             return;
@@ -515,21 +545,28 @@ namespace BitPaySetup
                 case Facade.Payroll:
                     if (string.IsNullOrEmpty(apiTokens.payroll)) tokenExists = false;
                     break;
+                case Facade.Payout:
+                    if (string.IsNullOrEmpty(apiTokens.payout)) tokenExists = false;
+                    break;
             }
 
             return tokenExists;
         }
-
+        
         private static bool TestTokenSuccess(string facade)
         {
             try
             {
-                var bitpay = new BitPay(confFilePath);
+                var bitpay = new BitPaySDK.BitPay(confFilePath);
                 if (facade == Facade.Merchant)
                 {
                     var response = bitpay.GetInvoice("1", facade).Result;
                 }
                 else if (facade == Facade.Payroll)
+                {
+                    var response = bitpay.GetPayoutBatch("1").Result;
+                }
+                else if (facade == Facade.Payout)
                 {
                     var response = bitpay.GetPayoutBatch("1").Result;
                 }

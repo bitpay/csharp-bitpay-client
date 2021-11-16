@@ -42,7 +42,7 @@ namespace BitPaySDK.Models.Payout
 
         public string ShopperId { get; set; }
 
-        public string Token { get; set; }
+        [JsonProperty(PropertyName = "token")] public string Token { get; set; }
 
         public bool ShouldSerializeEmail()
         {
@@ -74,9 +74,5 @@ namespace BitPaySDK.Models.Payout
             return false;
         }
 
-        public bool ShouldSerializeToken()
-        {
-            return false;
-        }
     }
 }
