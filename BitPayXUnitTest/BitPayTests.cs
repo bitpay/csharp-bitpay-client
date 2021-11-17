@@ -474,7 +474,7 @@ namespace BitPayXUnitTest
         public async Task testShouldGetPayoutsByStatus()
         {
             var endDate = DateTime.Now;
-            var startDate = endDate.AddDays(-50)
+            var startDate = endDate.AddDays(-50);
             var batches = await _bitpay.GetPayouts(startDate, endDate, PayoutStatus.New, "");
             Assert.True(batches.Count > 0);
         }

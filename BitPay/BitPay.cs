@@ -975,8 +975,7 @@ namespace BitPaySDK
             {
                 bool result;
                 var parameters = InitParams();
-                var payout = GetPayout(payoutId);
-                parameters.Add("token", payout.Result.Token);
+                parameters.Add("token", GetAccessToken(Facade.Payout));
 
                 var response = await Delete("payouts/" + payoutId, parameters);
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
@@ -1148,8 +1147,7 @@ namespace BitPaySDK
             {
                 bool result;
                 var parameters = InitParams();
-                var payout = GetPayoutBatch(payoutBatchId);
-                parameters.Add("token", payout.Result.Token);
+                parameters.Add("token", GetAccessToken(Facade.Payout));
 
                 var response = await Delete("payoutBatches/" + payoutBatchId, parameters);
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);

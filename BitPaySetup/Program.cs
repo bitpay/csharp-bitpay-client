@@ -376,7 +376,7 @@ namespace BitPaySetup
             {
                 try
                 {
-                    var bitpay = new BitPaySDK.BitPay(confFilePath);
+                    var bitpay = new BitPay(confFilePath);
 
                     pairingCode = bitpay.RequestClientAuthorization(facade).Result;
 
@@ -557,7 +557,7 @@ namespace BitPaySetup
         {
             try
             {
-                var bitpay = new BitPaySDK.BitPay(confFilePath);
+                var bitpay = new BitPay(confFilePath);
                 if (facade == Facade.Merchant)
                 {
                     var response = bitpay.GetInvoice("1", facade).Result;

@@ -40,6 +40,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="BitPay, Version=4.0.2104.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\BitPay.4.0.2104\lib\net472\BitPay.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="BouncyCastle.Crypto, Version=1.8.9.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
       <HintPath>..\packages\BouncyCastle.1.8.9\lib\BouncyCastle.Crypto.dll</HintPath>
       <Private>True</Private>
@@ -136,12 +140,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BitPay\BitPay.csproj">
-      <Project>{d88a49c3-0280-4320-b120-ae519b2db219}</Project>
-      <Name>BitPay</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
