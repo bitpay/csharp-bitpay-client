@@ -118,6 +118,10 @@ namespace BitPaySDK.Models.Payout
 
         public string Status { get; set; }
 
+        public string Email { get; set; }
+
+        public string Label { get; set; }
+
         public double PercentFee { get; set; }
 
         public double Fee { get; set; }

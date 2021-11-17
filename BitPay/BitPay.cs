@@ -39,8 +39,6 @@ namespace BitPaySDK
         private EcKey _ecKey;
 
         private HttpClient _httpClient;
-        public BitPay()
-        { }
 
         /// <summary>
         ///     Return the identity of this client (i.e. the public key).
@@ -56,7 +54,7 @@ namespace BitPaySDK
         public BitPay(string environment, string privateKeyPath, Env.Tokens tokens)
         {
             _env = environment;
-            BuildConfig("C:\\Dotnet\\Release\\Release\\output\\bitpay_private_test.key", tokens);
+            BuildConfig(privateKeyPath, tokens);
             InitKeys().Wait();
             Init().Wait();
         }
@@ -907,7 +905,7 @@ namespace BitPaySDK
         /// <summary>
         ///     Submit a BitPay Payout.
         /// </summary>
-        /// <param name="payout ">A PayoutBatch object with request parameters defined.</param>
+        /// <param name="payout ">A Payout object with request parameters defined.</param>
         /// <returns>A BitPay generated Payout object.</returns>
         /// <throws>PayoutCreationException PayoutCreationException class</throws>
         public async Task<Payout> SubmitPayout(Payout payout)
@@ -938,7 +936,7 @@ namespace BitPaySDK
         ///     Retrieve a BitPay payout by payout id using.  The client must have been previously authorized for the 
         ///     payout facade.
         /// </summary>
-        /// <param name="payoutId">The id of the batch to retrieve.</param>
+        /// <param name="payoutId">The id of the payout to retrieve.</param>
         /// <returns>A BitPay generated Payout object.</returns>
         /// <throws>PayoutQueryException PayoutQueryException class</throws>
         public async Task<Payout> GetPayout(string payoutId)
@@ -968,7 +966,7 @@ namespace BitPaySDK
         /// <summary>
         ///     Cancel a BitPay Payout.
         /// </summary>
-        /// <param name="payoutId">The id of the batch to cancel.</param>
+        /// <param name="payoutId">The id of the payout to cancel.</param>
         /// <returns>True if payout was successfully canceled, false otherwise.</returns>
         /// <throws>PayoutCancellationException PayoutCancellationException class</throws>
         public async Task<bool> CancelPayout(string payoutId)
@@ -1002,12 +1000,12 @@ namespace BitPaySDK
         /// <param name="endDate">The end date for the query.</param>
         /// <param name="status">The status to filter (optional).</param>
         /// <param name="reference">The optional reference specified at payout request creation.</param>
-        /// <param name="limit">Maximum number of settlements to retrieve.</param>
+        /// <param name="limit">Maximum results that the query will return (useful for paging results).</param>
         /// <param name="offset">Offset for paging</param>       
         /// <returns>A list of BitPay Payout objects.</returns>
         /// <throws>PayoutQueryException PayoutQueryException class</throws>
         public async Task<List<Payout>> GetPayouts(DateTime? startDate = null, DateTime? endDate = null,
-            string reference = null, string status = null, int limit = 100, int offset = 0)
+            string status = null, string reference = null,  int limit = 100, int offset = 0)
         {
             try
             {
@@ -1046,7 +1044,7 @@ namespace BitPaySDK
         /// <summary>
         ///     Send a payout notification    
         /// </summary>
-        /// <param name="payoutId">The id of the batch to notify.</param>
+        /// <param name="payoutId">The id of the payout to notify.</param>
         /// <returns>True if the notification was successfully sent, false otherwise.</returns>
         /// <throws>PayoutNotificationException PayoutNotificationException class</throws>
         public async Task<bool> SendPayoutNotification(string payoutId)
@@ -1085,7 +1083,6 @@ namespace BitPaySDK
                 batch.Guid = Guid.NewGuid().ToString();
 
                 var json = JsonConvert.SerializeObject(batch);
-
                 var response = await Post("payoutBatches", json, true);
                 var responseString = await ResponseToJsonString(response);
                 JsonConvert.PopulateObject(responseString, batch, new JsonSerializerSettings
@@ -1175,7 +1172,7 @@ namespace BitPaySDK
         /// <param name="startDate">The start date for the query.</param>
         /// <param name="endDate">The end date for the query.</param>
         /// <param name="status">The status to filter (optional).</param>
-        /// <param name="limit">Maximum number of settlements to retrieve.</param>
+        /// <param name="limit">Maximum results that the query will return (useful for paging results).</param>
         /// <param name="offset">Offset for paging</param>
         /// <returns>A list of BitPay PayoutBatch objects.</returns>
         /// <throws>PayoutBatchQueryException PayoutBatchQueryException class</throws>
@@ -1223,6 +1220,7 @@ namespace BitPaySDK
             {
                 var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(Facade.Payout));
+                
                 var json = JsonConvert.SerializeObject(parameters);
                 var response = await Post("payoutBatches/" + payoutBatchId + "/notifications", json, true);
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);

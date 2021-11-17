@@ -42,7 +42,7 @@ namespace BitPayXUnitTest
         {
             // JSON minified with the BitPay configuration as in the required configuration file
             // and parsed into a IConfiguration object
-            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"PrivateKeyPath\":\"bitpay_private_test.key\",\"ApiTokens\":{\"merchant\":\"A4qqz5JXoK5TMi3hD8EfKNHJB2ybLgdYRkbZwZ5M9ZgT\",\"payroll\":\"7MfwkTZ2W36DREk3cgRyBBRGgAvUuv1kSi2nnJBcMKPd\"}},\"Prod\":{\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"merchant\":\"\",\"payroll\":\"\"}}}}}";
+            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"PrivateKeyPath\":\"bitpay_private_test.key\",\"ApiTokens\":{\"merchant\":\"A4qqz5JXoK5TMi3hD8EfKNHJB2ybLgdYRkbZwZ5M9ZgT\",\"payout\":\"G4pfTiUU7967YJs7Z7n8e2SuQPa2abDTgFrjFB5ZFZsT\",\"payroll\":\"7MfwkTZ2W36DREk3cgRyBBRGgAvUuv1kSi2nnJBcMKPd\"}},\"Prod\":{\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"merchant\":\"\",\"payroll\":\"\"}}}}}";
             var memoryJsonFile = new MemoryFileInfo("config.json", Encoding.UTF8.GetBytes(json), DateTimeOffset.Now);
             var memoryFileProvider = new MockFileProvider(memoryJsonFile);
 
@@ -60,7 +60,8 @@ namespace BitPayXUnitTest
                 "bitpay_private_test.key",
                 new Env.Tokens(){
                     Merchant = "A4qqz5JXoK5TMi3hD8EfKNHJB2ybLgdYRkbZwZ5M9ZgT",
-                    Payout = "7MfwkTZ2W36DREk3cgRyBBRGgAvUuv1kSi2nnJBcMKPd"
+                    Payroll = "7MfwkTZ2W36DREk3cgRyBBRGgAvUuv1kSi2nnJBcMKPd",
+                    Payout = "G4pfTiUU7967YJs7Z7n8e2SuQPa2abDTgFrjFB5ZFZsT"
                 }
             );
 
@@ -82,6 +83,21 @@ namespace BitPayXUnitTest
             if (!_bitpay.tokenExist(Facade.Payroll)) {
                 // get a pairing code for the merchant facade for this client
                 var pcode = _bitpay.RequestClientAuthorization(Facade.Payroll).Result;
+                /* We can't continue. Please make sure you write down this pairing code, then goto
+                    your BitPay account in the API Tokens section 
+                    https://test.bitpay.com/dashboard/merchant/api-tokens    
+                    and paste it into the search field.
+                    It should get you to a page to approve it. After you approve it, run the tests
+                    again and they should pass.
+                 */
+                throw new BitPayException("Please approve the pairing code " + pcode + " in your account.");
+            }
+
+            // payouts require the Payout Facade
+            if (!_bitpay.tokenExist(Facade.Payout))
+            {
+                // get a pairing code for the payout facade for this client
+                var pcode = _bitpay.RequestClientAuthorization(Facade.Payout).Result;
                 /* We can't continue. Please make sure you write down this pairing code, then goto
                     your BitPay account in the API Tokens section 
                     https://test.bitpay.com/dashboard/merchant/api-tokens    
@@ -380,9 +396,132 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
+        public async Task testShouldSubmitGetAndDeletePayoutRecipient() {
+            List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient17@bitpay.com",
+               "recipient1",
+               "https://hookb.in/wNDlQMV7WMFz88VDyGnJ"));
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient28@bitpay.com",
+                "recipient2",
+               "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient30@bitpay.com",
+                "recipient3",
+                "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
+            var recipientsObj = new PayoutRecipients(recipientsList);
+
+            var basicRecipients = await _bitpay.SubmitPayoutRecipients(recipientsObj);
+            var basicRecipient = basicRecipients[0];
+            var retrieveRecipient = await _bitpay.GetPayoutRecipient(basicRecipient.Id);
+            var retrieveRecipients = await _bitpay.GetPayoutRecipients();
+            retrieveRecipient.Label = "Updated Label";
+            //var updateRecipient = await _bitpay.UpdatePayoutRecipient(retrieveRecipient.Id, retrieveRecipient);
+            var deleteRecipient = await _bitpay.DeletePayoutRecipient(retrieveRecipient.Id);
+
+            Assert.NotNull(basicRecipient);
+            Assert.NotNull(retrieveRecipient.Id);
+            Assert.NotNull(retrieveRecipients);
+            Assert.Equal(basicRecipient.Id, retrieveRecipient.Id);
+            Assert.Equal(retrieveRecipient.Status,RecipientStatus.INVITED);
+            //Assert.Equal(updateRecipient.Label,"Updated label");
+            Assert.True(deleteRecipient);
+        }
+
+        [Fact]
+        public async Task testShouldNotifyPayoutRecipientId() {
+            List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient1@bitpay.com",
+                "recipient1",
+                "https://hookb.in/wNDlQMV7WMFz88VDyGnJ"));
+            PayoutRecipients recipientsObj = new PayoutRecipients(recipientsList);
+            var recipients = await _bitpay.SubmitPayoutRecipients(recipientsObj);
+            var basicRecipient = recipients[0];
+            var result = await _bitpay.SendPayoutRecipientNotification(basicRecipient.Id);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task testShouldSubmitPayout() {
+            var date = DateTime.Now;
+            var threeDaysFromNow = date.AddDays(3);
+            var effectiveDate = threeDaysFromNow;
+            var ledgerCurrency = Currency.ETH;
+            var currency = Currency.USD;
+            var payout = new Payout(5.0, currency, effectiveDate, ledgerCurrency);
+            var recipients = await _bitpay.GetPayoutRecipients("active", 1);
+            payout.RecipientId = recipients.First().Id;
+            payout.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
+            var createpayout = await _bitpay.SubmitPayout(payout);
+            var cancelledpayout = await _bitpay.CancelPayout(createpayout.Id);
+
+            Assert.NotNull(createpayout.Id);
+            Assert.True(cancelledpayout);
+        }
+
+        [Fact]
+        public async Task testShouldGetPayouts() {
+            var endDate = DateTime.Now;
+            var startDate = endDate.AddDays(-50);
+            var batches = await _bitpay.GetPayouts(startDate, endDate);
+            Assert.True(batches.Count > 0);
+        }
+
+        [Fact]
+        public async Task testShouldGetPayoutsByStatus()
+        {
+            var endDate = DateTime.Now;
+            var startDate = endDate.AddDays(-50)
+            var batches = await _bitpay.GetPayouts(startDate, endDate, PayoutStatus.New, "");
+            Assert.True(batches.Count > 0);
+        }
+
+        [Fact]
+        public async Task testShouldSubmitGetAndDeletePayout() {
+            var date = DateTime.Now;
+            var threeDaysFromNow = date.AddDays(3);
+            var effectiveDate = threeDaysFromNow;
+            var ledgerCurrency = Currency.ETH;
+            var currency = Currency.USD;
+            var batch = new Payout(5.0, currency, effectiveDate, ledgerCurrency);
+            var recipients = await _bitpay.GetPayoutRecipients("active", 1);
+            batch.RecipientId = recipients.First().Id;
+            batch.NotificationUrl = "https://hookb.in/QJOPBdMgRkukpp2WO60o";
+            var batch0 = await _bitpay.SubmitPayout(batch);
+            var batchRetrieved = await _bitpay.GetPayout(batch0.Id);
+            var batchCancelled = await _bitpay.CancelPayout(batchRetrieved.Id);
+
+            Assert.NotNull(batch0.Id);
+            Assert.NotNull(batchRetrieved.Id);
+            Assert.Equal(batch0.Id, batchRetrieved.Id);
+            Assert.Equal(batchRetrieved.Status, PayoutStatus.New);
+            Assert.True(batchCancelled);
+        }
+
+        [Fact]
+        public async Task testShouldNotifyPayoutId() {
+            var date = DateTime.Now;
+            var threeDaysFromNow = date.AddDays(3);
+            var effectiveDate = threeDaysFromNow;
+            var ledgerCurrency = Currency.ETH;
+            var currency = Currency.USD;
+            var batch = new Payout(5.0, currency, effectiveDate, ledgerCurrency);
+            var recipients = await _bitpay.GetPayoutRecipients("active", 1);
+            batch.RecipientId = recipients.First().Id;
+            batch.NotificationUrl = "https://hookb.in/QJOPBdMgRkukpp2WO60o";
+            var basicRecipient = await _bitpay.SubmitPayout(batch);
+            var result = await _bitpay.SendPayoutNotification(basicRecipient.Id);
+
+            Assert.True(result);
+        }
+
+        [Fact]
         public async Task testShouldGetPayoutRecipients() {
-            var recipients = await _bitpay.GetPayoutRecipients(null, 2);
-            Assert.Equal(2, recipients.Count);
+            var recipients = await _bitpay.GetPayoutRecipients("active", 1);
+            Assert.Equal(1, recipients.Count);
         }
 
         [Fact]
@@ -393,13 +532,15 @@ namespace BitPayXUnitTest
 
             var effectiveDate = threeDaysFromNow;
             var currency = Currency.USD;
+            var ledgerCurrency = Currency.ETH;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
-                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com")
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")
             };
-
-            var batch = new PayoutBatch(currency, effectiveDate, instructions);
+            var batch = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
+            batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
             batch = await _bitpay.SubmitPayoutBatch(batch);
+
 
             Assert.NotNull(batch.Id);
             Assert.True(batch.Instructions.Count == 2);
@@ -407,18 +548,20 @@ namespace BitPayXUnitTest
 
         [Fact]
         public async Task TestShouldSubmitGetAndDeletePayoutBatch() {
-            
+
             var date = DateTime.Now;
             var threeDaysFromNow = date.AddDays(3);
 
             var effectiveDate = threeDaysFromNow;
             var currency = Currency.USD;
+            var ledgerCurrency = Currency.ETH;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
-                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com")
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")
             };
 
-            var batch0 = new PayoutBatch(currency, effectiveDate, instructions);
+            var batch0 = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
+            batch0.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
             batch0 = await _bitpay.SubmitPayoutBatch(batch0);
 
             Assert.NotNull(batch0.Id);
@@ -434,16 +577,37 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
+        public async Task testShouldNotifyPayoutBatchId() {
+            var date = DateTime.Now;
+            var ledgerCurrency = Currency.ETH;
+            var threeDaysFromNow = date.AddDays(3);
+            var currency = Currency.USD;
+            var effectiveDate = threeDaysFromNow;
+            var instructions = new List<PayoutInstruction>() {
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")
+            };
+            var batch = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
+            batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
+            batch = await _bitpay.SubmitPayoutBatch(batch);
+            var result = await _bitpay.SendPayoutBatchNotification(batch.Id);
+
+            Assert.True(result);
+        }
+
+        [Fact]
         public async Task TestShouldGetPayoutBatches() {
-            
-            var batches = await _bitpay.GetPayoutBatches();
+            var endDate = DateTime.Now;
+            var startDate = endDate.AddDays(-50);
+            var batches = await _bitpay.GetPayoutBatches(startDate, endDate);
             Assert.True(batches.Count > 0, "No batches retrieved");
         }
 
         [Fact]
-        public async Task TestShouldGetPayoutBatchesByStatus() {
-            
-            var batches = await _bitpay.GetPayoutBatches(PayoutStatus.New);
+         public async Task TestShouldGetPayoutBatchesByStatus() {
+            var endDate = DateTime.Now;
+            var startDate = endDate.AddDays(-50);
+            var batches = await _bitpay.GetPayoutBatches(startDate, endDate, PayoutStatus.New);
             Assert.True(batches.Count > 0, "No batches retrieved");
         }
 
