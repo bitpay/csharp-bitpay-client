@@ -49,11 +49,11 @@ namespace BitPayXUnitTest
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile(memoryFileProvider, "config.json", false, false)
                 .Build();
-            
+
             // Initialize the BitPay object to be used in the following tests
             // Initialize with IConfiguration object
             // _bitpay = new BitPay(configuration);
-            
+
             // Initialize with separate variables
             _bitpay = new BitPay(
                 Env.Test,
@@ -260,6 +260,19 @@ namespace BitPayXUnitTest
             var invoice = await _bitpay.CreateInvoice(new Invoice(1.0, Currency.USD), Facade.Merchant);
             invoice = await _bitpay.GetInvoice(invoice.Id);
             Assert.NotNull(invoice.Id);
+        }
+
+        [Fact]
+        public async Task TestShouldCreateUpdateAndDeleteInvoice() {
+            // update and delete invoice  by id
+            var basicInvoice = await _bitpay.CreateInvoice(new Invoice(1.0, Currency.USD), Facade.Merchant);
+            var retreivedInvoice = await _bitpay.GetInvoice(basicInvoice.Id);
+            var cancelledInvoice = await _bitpay.CancelInvoice(retreivedInvoice.Id);
+            var retreivedCancelledInvoice = await _bitpay.GetInvoice(cancelledInvoice.Id);
+            Assert.NotNull(basicInvoice);
+            Assert.NotNull(retreivedInvoice);
+            Assert.NotNull(cancelledInvoice);
+            Assert.NotNull(retreivedCancelledInvoice);
         }
 
         [Fact]
