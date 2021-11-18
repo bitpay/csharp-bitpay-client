@@ -227,6 +227,19 @@ namespace BitPayUnitTest {
         }
 
         [TestMethod]
+        public async Task TestShouldCreateUpdateAndDeleteInvoice() {
+            // update and delete invoice  by id
+            var basicInvoice = await _bitpay.CreateInvoice(new Invoice(1.0, Currency.USD), Facade.Merchant);
+            var retreivedInvoice = await _bitpay.GetInvoice(basicInvoice.Id);
+            var cancelledInvoice = await _bitpay.CancelInvoice(retreivedInvoice.Id);
+            var retreivedCancelledInvoice = await _bitpay.GetInvoice(cancelledInvoice.Id);
+            Assert.IsNotNull(basicInvoice);
+            Assert.IsNotNull(retreivedInvoice);
+            Assert.IsNotNull(cancelledInvoice);
+            Assert.IsNotNull(retreivedCancelledInvoice);
+        }
+
+        [TestMethod]
         public async Task TestShouldGetBtcLedger() {
 
             // make sure we get a ledger with a not null Entries property

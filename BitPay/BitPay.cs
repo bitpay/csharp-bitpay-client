@@ -296,6 +296,31 @@ namespace BitPaySDK
         }
 
         /// <summary>
+        ///     Cancel a BitPay invoice.
+        /// </summary>
+        /// <param name="invoiceId">The id of the invoice to cancel.</param>
+        /// <returns>Cancelled invoice object.</returns>
+        /// <throws>InvoiceCancellationException InvoiceCancellationException class</throws>
+        public async Task<Invoice> CancelInvoice(string invoiceId)
+        {
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Merchant));
+                var response = await Delete("invoices/" + invoiceId, parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<Invoice>(responseString);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new InvoiceCancellationException(ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
         ///     Create a refund for a BitPay invoice.
         /// </summary>
         /// <param name="invoice">A BitPay invoice object for which a refund request should be made. Must have been obtained using the merchant facade.</param>
