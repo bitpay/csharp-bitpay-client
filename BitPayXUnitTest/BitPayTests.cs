@@ -263,7 +263,7 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldCreateUpdateAndDeleteInvoice() {
+        public async Task TestShouldCreateAndDeleteInvoice() {
             // update and delete invoice  by id
             var basicInvoice = await _bitpay.CreateInvoice(new Invoice(1.0, Currency.USD), Facade.Merchant);
             var retreivedInvoice = await _bitpay.GetInvoice(basicInvoice.Id);
