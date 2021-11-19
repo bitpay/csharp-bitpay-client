@@ -49,11 +49,11 @@ namespace BitPayXUnitTest
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile(memoryFileProvider, "config.json", false, false)
                 .Build();
-            
+
             // Initialize the BitPay object to be used in the following tests
             // Initialize with IConfiguration object
             // _bitpay = new BitPay(configuration);
-            
+
             // Initialize with separate variables
             _bitpay = new BitPay(
                 Env.Test,
@@ -446,12 +446,9 @@ namespace BitPayXUnitTest
 
         [Fact]
         public async Task testShouldSubmitPayout() {
-            var date = DateTime.Now;
-            var threeDaysFromNow = date.AddDays(3);
-            var effectiveDate = threeDaysFromNow;
             var ledgerCurrency = Currency.ETH;
             var currency = Currency.USD;
-            var payout = new Payout(5.0, currency, effectiveDate, ledgerCurrency);
+            var payout = new Payout(5.0, currency, ledgerCurrency);
             var recipients = await _bitpay.GetPayoutRecipients("active", 1);
             payout.RecipientId = recipients.First().Id;
             payout.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
@@ -481,12 +478,9 @@ namespace BitPayXUnitTest
 
         [Fact]
         public async Task testShouldSubmitGetAndDeletePayout() {
-            var date = DateTime.Now;
-            var threeDaysFromNow = date.AddDays(3);
-            var effectiveDate = threeDaysFromNow;
             var ledgerCurrency = Currency.ETH;
             var currency = Currency.USD;
-            var batch = new Payout(5.0, currency, effectiveDate, ledgerCurrency);
+            var batch = new Payout(5.0, currency, ledgerCurrency);
             var recipients = await _bitpay.GetPayoutRecipients("active", 1);
             batch.RecipientId = recipients.First().Id;
             batch.NotificationUrl = "https://hookb.in/QJOPBdMgRkukpp2WO60o";
@@ -503,12 +497,9 @@ namespace BitPayXUnitTest
 
         [Fact]
         public async Task testShouldNotifyPayoutId() {
-            var date = DateTime.Now;
-            var threeDaysFromNow = date.AddDays(3);
-            var effectiveDate = threeDaysFromNow;
             var ledgerCurrency = Currency.ETH;
             var currency = Currency.USD;
-            var batch = new Payout(5.0, currency, effectiveDate, ledgerCurrency);
+            var batch = new Payout(5.0, currency, ledgerCurrency);
             var recipients = await _bitpay.GetPayoutRecipients("active", 1);
             batch.RecipientId = recipients.First().Id;
             batch.NotificationUrl = "https://hookb.in/QJOPBdMgRkukpp2WO60o";

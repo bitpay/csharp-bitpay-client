@@ -55,7 +55,7 @@ namespace BitPaySDK
         {
             _env = environment;
             BuildConfig(privateKeyPath, tokens);
-            InitKeys().Wait();
+            InitKeys().Wait(); 
             Init().Wait();
         }
 
@@ -973,15 +973,13 @@ namespace BitPaySDK
         {
             try
             {
-                bool result;
                 var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(Facade.Payout));
 
                 var response = await Delete("payouts/" + payoutId, parameters);
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
-                bool.TryParse(responseObject.GetValue("success").ToString(), out result);
-                return result;
+                return responseObject.GetValue("status").ToString() == "success";
             }
             catch (Exception ex)
             {
@@ -1004,14 +1002,21 @@ namespace BitPaySDK
         /// <returns>A list of BitPay Payout objects.</returns>
         /// <throws>PayoutQueryException PayoutQueryException class</throws>
         public async Task<List<Payout>> GetPayouts(DateTime? startDate = null, DateTime? endDate = null,
-            string status = null, string reference = null,  int limit = 100, int offset = 0)
+            string status = null, string reference = null,  int? limit = null, int? offset = null)
         {
             try
             {
                 var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(Facade.Payout));
-                parameters.Add("startDate", startDate?.ToString("yyyy-MM-dd"));
-                parameters.Add("endDate", endDate?.ToString("yyyy-MM-dd"));
+                
+                if (!string.IsNullOrEmpty(startDate.ToString()))
+                {
+                    parameters.Add("startDate", startDate?.ToString("yyyy-MM-dd"));
+                }
+                if (!string.IsNullOrEmpty(endDate.ToString()))
+                {
+                    parameters.Add("endDate", endDate?.ToString("yyyy-MM-dd"));
+                }
                 if (!string.IsNullOrEmpty(reference))
                 {
                     parameters.Add("reference", reference);
@@ -1020,8 +1025,15 @@ namespace BitPaySDK
                 {
                     parameters.Add("status", status);
                 }
-                //parameters.Add("limit", limit.ToString());
-                //parameters.Add("offset", offset.ToString());
+                if (!string.IsNullOrEmpty(limit.ToString()))
+                {
+                    parameters.Add("limit", limit.ToString());
+                }
+                if (!string.IsNullOrEmpty(offset.ToString()))
+                {
+                    parameters.Add("offset", offset.ToString());
+                }
+                
 
                 var response = await Get("payouts", parameters).ConfigureAwait(false); 
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false); 
@@ -1145,15 +1157,13 @@ namespace BitPaySDK
         {
             try
             {
-                bool result;
                 var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(Facade.Payout));
 
                 var response = await Delete("payoutBatches/" + payoutBatchId, parameters);
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
-                bool.TryParse(responseObject.GetValue("success").ToString(), out result);
-                return result;
+                return responseObject.GetValue("status").ToString() == "success";
             }
             catch (Exception ex)
             {
@@ -1175,20 +1185,32 @@ namespace BitPaySDK
         /// <returns>A list of BitPay PayoutBatch objects.</returns>
         /// <throws>PayoutBatchQueryException PayoutBatchQueryException class</throws>
         public async Task<List<PayoutBatch>> GetPayoutBatches(DateTime? startDate = null, DateTime? endDate = null, string status = null,
-            int limit = 100, int offset = 0)
+            int? limit = null, int? offset = null)
         {
             try
             {
                 var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(Facade.Payout));
-                parameters.Add("startDate", startDate?.ToString("yyyy-MM-dd"));
-                parameters.Add("endDate", endDate?.ToString("yyyy-MM-dd"));
+                if (!string.IsNullOrEmpty(startDate.ToString()))
+                {
+                    parameters.Add("startDate", startDate?.ToString("yyyy-MM-dd"));
+                }
+                if (!string.IsNullOrEmpty(endDate.ToString()))
+                {
+                    parameters.Add("endDate", endDate?.ToString("yyyy-MM-dd"));
+                }
                 if (!string.IsNullOrEmpty(status))
                 {
                     parameters.Add("status", status);
                 }
-                parameters.Add("limit", limit.ToString());
-                parameters.Add("offset", offset.ToString());
+                if (!string.IsNullOrEmpty(limit.ToString()))
+                {
+                    parameters.Add("limit", limit.ToString());
+                }
+                if (!string.IsNullOrEmpty(offset.ToString()))
+                {
+                    parameters.Add("offset", offset.ToString());
+                }
 
                 var response = await Get("payoutBatches", parameters);
                 var responseString = await ResponseToJsonString(response);

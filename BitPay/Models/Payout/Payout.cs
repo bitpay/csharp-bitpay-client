@@ -35,11 +35,10 @@ namespace BitPaySDK.Models.Payout
         ///     processed on the same day.
         /// </param>
 
-        public Payout(double amount, string currency, DateTime effectiveDate, string ledgerCurrency) : this()
+        public Payout(double amount, string currency, string ledgerCurrency) : this()
         {
             Amount = amount;
             Currency = currency;
-            EffectiveDate = effectiveDate;
             LedgerCurrency = ledgerCurrency;
         }
 
@@ -84,7 +83,7 @@ namespace BitPaySDK.Models.Payout
 
         [JsonProperty(PropertyName = "effectiveDate")]
         [JsonConverter(typeof(BitPaySDK.Converters.DateStringConverter))]
-        public DateTime EffectiveDate { get; set; }
+        public DateTime? EffectiveDate { get; set; }
 
         [JsonProperty(PropertyName = "transactions")]
         public List<PayoutInstructionTransaction> Transactions { get; set; }
