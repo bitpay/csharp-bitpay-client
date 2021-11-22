@@ -15,7 +15,7 @@ namespace BitPaySDK.Models.Payout
         private dynamic _exchangeRates;
 
         /// <summary>
-        ///     Constructor, create an empty PayoutBatch object.
+        ///     Constructor, create an empty Payout object.
         /// </summary>
         public Payout()
         {
@@ -26,13 +26,22 @@ namespace BitPaySDK.Models.Payout
         }
 
         /// <summary>
-        ///     Constructor, create an instruction-full request PayoutBatch object.
+        ///     Constructor, create an instruction-full request Payout object.
         /// </summary>
         /// <param name="currency">Currency to use on payout.</param>
-        /// <param name="effectiveDate">
-        ///     Date when request is effective. Note that the time of day will automatically be set to
-        ///     09:00:00.000 UTC time for the given day. Only requests submitted before 09:00:00.000 UTC are guaranteed to be
-        ///     processed on the same day.
+        /// <param name="amount">
+        ///     The payout request amount in the requested currency. The
+        ///     minimum amount per instruction is $5 USD equivalent.
+        /// </param>
+        /// <param name="ledgerCurrency">
+        ///     Ledger currency code set for the payout request (ISO 4217
+        ///     3-character currency code), it indicates on which ledger the
+        ///     payout request will be recorded.If not provided in the request,
+        ///     this parameter will be set by default to the active ledger
+        ///     currency on your account, e.g.your settlement currency.
+        ///     Supported ledger currency codes for payout requests are EUR,
+        ///     USD, GBP, CAD, NZD, AUD, ZAR, JPY, BTC, BCH, GUSD, USDC,
+        ///     PAX, XRP, BUSD, DOGE, ETH, WBTC, DAI.
         /// </param>
 
         public Payout(double amount, string currency, string ledgerCurrency) : this()

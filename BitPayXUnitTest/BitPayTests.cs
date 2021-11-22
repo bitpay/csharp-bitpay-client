@@ -439,7 +439,7 @@ namespace BitPayXUnitTest
             PayoutRecipients recipientsObj = new PayoutRecipients(recipientsList);
             var recipients = await _bitpay.SubmitPayoutRecipients(recipientsObj);
             var basicRecipient = recipients[0];
-            var result = await _bitpay.SendPayoutRecipientNotification(basicRecipient.Id);
+            var result = await _bitpay.requestPayoutRecipientNotification(basicRecipient.Id);
 
             Assert.True(result);
         }
@@ -504,7 +504,7 @@ namespace BitPayXUnitTest
             batch.RecipientId = recipients.First().Id;
             batch.NotificationUrl = "https://hookb.in/QJOPBdMgRkukpp2WO60o";
             var basicRecipient = await _bitpay.SubmitPayout(batch);
-            var result = await _bitpay.SendPayoutNotification(basicRecipient.Id);
+            var result = await _bitpay.requestPayoutNotification(basicRecipient.Id);
 
             Assert.True(result);
         }
@@ -581,7 +581,7 @@ namespace BitPayXUnitTest
             var batch = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
             batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
             batch = await _bitpay.SubmitPayoutBatch(batch);
-            var result = await _bitpay.SendPayoutBatchNotification(batch.Id);
+            var result = await _bitpay.requestPayoutBatchNotification(batch.Id);
 
             Assert.True(result);
         }
