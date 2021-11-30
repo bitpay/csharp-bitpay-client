@@ -1742,7 +1742,6 @@ namespace BitPaySDK
                     {"BitPayConfiguration:Environment", _env},
                     {"BitPayConfiguration:EnvConfig:" + _env + ":PrivateKeyPath", privateKeyPath},
                     {"BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:merchant", tokens.Merchant},
-                    {"BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:payroll", tokens.Payroll},
                     {"BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:payout", tokens.Payout}
                 };
 

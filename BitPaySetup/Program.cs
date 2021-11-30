@@ -305,29 +305,6 @@ namespace BitPaySetup
                 return;
             }
 
-            if (facade == Facade.Payroll)
-            {
-                SetNotification(
-                    " In order to get access to the Payroll facade, you need to contact Support at support@bitpay.com",
-                    3);
-                Console.Clear();
-                DrawTitle();
-                Console.WriteLine(" Did you contact and receive confirmation yet? [yes|no] (default: yes)");
-                Console.WriteLine(
-                    " If 'no', a new file will be generated in the entered location with the given name.");
-                Console.WriteLine();
-                Console.Write(" > ");
-                answer = Console.ReadLine();
-                while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
-                    answer = Console.ReadLine();
-
-                if (answer.ToLower() == "no")
-                {
-                    GetPairingCodeAndToken();
-                    return;
-                }
-            }
-
             if (facade == Facade.Payout)
             {
                 SetNotification(
@@ -396,9 +373,6 @@ namespace BitPaySetup
                 {
                     case Facade.Merchant:
                         apiTokens.merchant = newToken;
-                        break;
-                    case Facade.Payroll:
-                        apiTokens.payroll = newToken;
                         break;
                     case Facade.Payout:
                         apiTokens.payout = newToken;
@@ -488,7 +462,7 @@ namespace BitPaySetup
 
         private static void SetFacade()
         {
-            var maxMenuItems = 3;
+            var maxMenuItems = 2;
             var selector = 0;
             var valid = false;
             while (selector != maxMenuItems)
@@ -498,8 +472,7 @@ namespace BitPaySetup
                 Console.WriteLine(
                     " Select a facade for which you want to generate a new token pair (Press Enter to skip)");
                 Console.WriteLine(" 1. Merchant");
-                Console.WriteLine(" 2. Payroll");
-                Console.WriteLine(" 3. Payout");
+                Console.WriteLine(" 2. Payout");
                 Console.WriteLine();
                 Console.Write(" Select an option: ");
 
@@ -520,9 +493,6 @@ namespace BitPaySetup
                             facade = Facade.Merchant;
                             return;
                         case '2':
-                            facade = Facade.Payroll;
-                            return;
-                        case '3':
                             facade = Facade.Payout;
                             return;
                         default:
@@ -542,9 +512,6 @@ namespace BitPaySetup
                 case Facade.Merchant:
                     if (string.IsNullOrEmpty(apiTokens.merchant)) tokenExists = false;
                     break;
-                case Facade.Payroll:
-                    if (string.IsNullOrEmpty(apiTokens.payroll)) tokenExists = false;
-                    break;
                 case Facade.Payout:
                     if (string.IsNullOrEmpty(apiTokens.payout)) tokenExists = false;
                     break;
@@ -561,10 +528,6 @@ namespace BitPaySetup
                 if (facade == Facade.Merchant)
                 {
                     var response = bitpay.GetInvoice("1", facade).Result;
-                }
-                else if (facade == Facade.Payroll)
-                {
-                    var response = bitpay.GetPayoutBatch("1").Result;
                 }
                 else if (facade == Facade.Payout)
                 {
