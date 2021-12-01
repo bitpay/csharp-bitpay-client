@@ -388,11 +388,11 @@ namespace BitPayUnitTest
             var recipients = await _bitpay.GetPayoutRecipients("active", 1);
             payout.RecipientId = recipients.First().Id;
             payout.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
-            var createpayout = await _bitpay.SubmitPayout(payout);
-            var cancelledpayout = await _bitpay.CancelPayout(createpayout.Id);
+            var createPayout = await _bitpay.SubmitPayout(payout);
+            var cancelledPayout = await _bitpay.CancelPayout(createPayout.Id);
 
-            Assert.IsNotNull(createpayout.Id);
-            Assert.IsTrue(cancelledpayout);
+            Assert.IsNotNull(createPayout.Id);
+            Assert.IsTrue(cancelledPayout);
         }
 
         [TestMethod]
@@ -444,10 +444,12 @@ namespace BitPayUnitTest
             var recipients = await _bitpay.GetPayoutRecipients("active", 1);
             batch.RecipientId = recipients.First().Id;
             batch.NotificationUrl = "https://hookb.in/QJOPBdMgRkukpp2WO60o";
-            var basicRecipient = await _bitpay.SubmitPayout(batch);
-            var result = await _bitpay.requestPayoutNotification(basicRecipient.Id);
+            var createPayout = await _bitpay.SubmitPayout(batch);
+            var result = await _bitpay.requestPayoutNotification(createPayout.Id);
+            var cancelledPayout = await _bitpay.CancelPayout(createPayout.Id);
 
             Assert.IsTrue(result);
+            Assert.IsTrue(cancelledPayout);
         }
 
         [TestMethod]
@@ -478,6 +480,8 @@ namespace BitPayUnitTest
 
             Assert.IsNotNull(batch.Id, "Batch created with id=NULL");
             Assert.IsTrue(batch.Instructions.Count == 2);
+
+            await _bitpay.CancelPayoutBatch(batch.Id);
         }
 
         [TestMethod]
@@ -528,8 +532,10 @@ namespace BitPayUnitTest
             batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
             batch = await _bitpay.SubmitPayoutBatch(batch);
             var result = await _bitpay.requestPayoutBatchNotification(batch.Id);
+            var cancelledPayoutBatch = await _bitpay.CancelPayoutBatch(batch.Id);
 
             Assert.IsTrue(result);
+            Assert.IsTrue(cancelledPayoutBatch);
         }
 
         [TestMethod]

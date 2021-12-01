@@ -461,11 +461,11 @@ namespace BitPayXUnitTest
             var recipients = await _bitpay.GetPayoutRecipients("active", 1);
             payout.RecipientId = recipients.First().Id;
             payout.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
-            var createpayout = await _bitpay.SubmitPayout(payout);
-            var cancelledpayout = await _bitpay.CancelPayout(createpayout.Id);
+            var createPayout = await _bitpay.SubmitPayout(payout);
+            var cancelledPayout = await _bitpay.CancelPayout(createPayout.Id);
 
-            Assert.NotNull(createpayout.Id);
-            Assert.True(cancelledpayout);
+            Assert.NotNull(createPayout.Id);
+            Assert.True(cancelledPayout);
         }
 
         [Fact]
@@ -515,10 +515,12 @@ namespace BitPayXUnitTest
             var recipients = await _bitpay.GetPayoutRecipients("active", 1);
             batch.RecipientId = recipients.First().Id;
             batch.NotificationUrl = "https://hookb.in/QJOPBdMgRkukpp2WO60o";
-            var basicRecipient = await _bitpay.SubmitPayout(batch);
-            var result = await _bitpay.requestPayoutNotification(basicRecipient.Id);
+            var createPayout = await _bitpay.SubmitPayout(batch);
+            var result = await _bitpay.requestPayoutNotification(createPayout.Id);
+            var cancelledPayout = await _bitpay.CancelPayout(createPayout.Id);
 
             Assert.True(result);
+            Assert.True(cancelledPayout);
         }
 
         [Fact]
@@ -546,9 +548,10 @@ namespace BitPayXUnitTest
             batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
             batch = await _bitpay.SubmitPayoutBatch(batch);
 
-
             Assert.NotNull(batch.Id);
             Assert.True(batch.Instructions.Count == 2);
+            
+            await _bitpay.CancelPayoutBatch(batch.Id);
         }
 
         [Fact]
@@ -579,7 +582,6 @@ namespace BitPayXUnitTest
             Assert.True(batch1.Instructions.Count == 2);
 
             await _bitpay.CancelPayoutBatch(batch0.Id);
-
         }
 
         [Fact]
@@ -598,8 +600,10 @@ namespace BitPayXUnitTest
             batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
             batch = await _bitpay.SubmitPayoutBatch(batch);
             var result = await _bitpay.requestPayoutBatchNotification(batch.Id);
+            var cancelledPayoutBatch = await _bitpay.CancelPayoutBatch(batch.Id);
 
             Assert.True(result);
+            Assert.True(cancelledPayoutBatch);
         }
 
         [Fact]
