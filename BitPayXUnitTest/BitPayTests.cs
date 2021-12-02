@@ -437,7 +437,7 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task testShouldNotifyPayoutRecipientId()
+        public async Task testShouldRequestPayoutRecipientNotification()
         {
             List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
             recipientsList.Add(new PayoutRecipient(
@@ -507,7 +507,7 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task testShouldNotifyPayoutId()
+        public async Task testShouldRequestPayoutNotification()
         {
             var ledgerCurrency = Currency.ETH;
             var currency = Currency.USD;
@@ -585,7 +585,7 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task testShouldNotifyPayoutBatchId()
+        public async Task testShouldRequestPayoutBatchNotification()
         {
             var date = DateTime.Now;
             var ledgerCurrency = Currency.ETH;
