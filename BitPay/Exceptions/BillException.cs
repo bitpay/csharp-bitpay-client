@@ -6,6 +6,7 @@ namespace BitPaySDK.Exceptions
     {
         private const string BitPayMessage = "An unexpected error occured while trying to manage the bill";
         private readonly string _bitpayCode = "BITPAY-BILL-GENERIC";
+        protected string ApiCode;
 
         public BillException() : base(BitPayMessage)
         {
@@ -21,8 +22,14 @@ namespace BitPaySDK.Exceptions
         {
         }
 
-        public BillException(string bitpayCode, string message, Exception cause) : base(bitpayCode, message, cause)
+        public BillException(string bitpayCode, string message, Exception cause, string apiCode = "000000") : base(bitpayCode, message, cause, apiCode)
         {
+            ApiCode = apiCode;
+        }
+
+        public String GetApiCode()
+        {
+            return ApiCode;
         }
     }
 }
