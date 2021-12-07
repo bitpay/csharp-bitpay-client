@@ -6,50 +6,55 @@ using Newtonsoft.Json;
 
 namespace BitPaySDK.Models.Payout
 {
-    public class PayoutBatch
+    public class Payout
     {
         public const string MethodManual2 = "manual_2";
-        public const string MethodVwap24 = "vwap_24hr";
 
         private string _currency = "";
         private string _ledgerCurrency = "";
         private dynamic _exchangeRates;
 
         /// <summary>
-        ///     Constructor, create an empty PayoutBatch object.
+        ///     Constructor, create an empty Payout object.
         /// </summary>
-        public PayoutBatch()
+        public Payout()
         {
             Amount = 0.0;
             Currency = "USD";
             NotificationEmail = "";
             NotificationUrl = "";
-            PricingMethod = MethodVwap24;
         }
 
         /// <summary>
-        ///     Constructor, create an instruction-full request PayoutBatch object.
+        ///     Constructor, create an instruction-full request Payout object.
         /// </summary>
         /// <param name="currency">Currency to use on payout.</param>
-        /// <param name="effectiveDate">
-        ///     Date when request is effective. Note that the time of day will automatically be set to
-        ///     09:00:00.000 UTC time for the given day. Only requests submitted before 09:00:00.000 UTC are guaranteed to be
-        ///     processed on the same day.
+        /// <param name="amount">
+        ///     The payout request amount in the requested currency. The
+        ///     minimum amount per instruction is $5 USD equivalent.
         /// </param>
-        /// <param name="instructions">Payout instructions.</param>
-        public PayoutBatch(string currency, DateTime effectiveDate, List<PayoutInstruction> instructions, string ledgerCurrency) : this()
+        /// <param name="ledgerCurrency">
+        ///     Ledger currency code set for the payout request (ISO 4217
+        ///     3-character currency code), it indicates on which ledger the
+        ///     payout request will be recorded.If not provided in the request,
+        ///     this parameter will be set by default to the active ledger
+        ///     currency on your account, e.g.your settlement currency.
+        ///     Supported ledger currency codes for payout requests are EUR,
+        ///     USD, GBP, CAD, NZD, AUD, ZAR, JPY, BTC, BCH, GUSD, USDC,
+        ///     PAX, XRP, BUSD, DOGE, ETH, WBTC, DAI.
+        /// </param>
+
+        public Payout(double amount, string currency, string ledgerCurrency) : this()
         {
+            Amount = amount;
             Currency = currency;
-            EffectiveDate = effectiveDate;
-            Instructions = instructions;
             LedgerCurrency = ledgerCurrency;
-            _computeAndSetAmount();
         }
 
         // API fields
         //
 
-        [JsonProperty(PropertyName = "guid")] public string Guid { get; set; }
+        //[JsonProperty(PropertyName = "guid")] public string Guid { get; set; }
 
         [JsonProperty(PropertyName = "token")] public string Token { get; set; }
 
@@ -86,11 +91,11 @@ namespace BitPaySDK.Models.Payout
         }
 
         [JsonProperty(PropertyName = "effectiveDate")]
-        [JsonConverter(typeof(Converters.DateStringConverter))]
-        public DateTime EffectiveDate { get; set; }
+        [JsonConverter(typeof(BitPaySDK.Converters.DateStringConverter))]
+        public DateTime? EffectiveDate { get; set; }
 
-        [JsonProperty(PropertyName = "instructions")]
-        public List<PayoutInstruction> Instructions { get; set; }
+        [JsonProperty(PropertyName = "transactions")]
+        public List<PayoutInstructionTransaction> Transactions { get; set; }
 
         // Optional fields
         //
@@ -104,19 +109,26 @@ namespace BitPaySDK.Models.Payout
         [JsonProperty(PropertyName = "notificationURL")]
         public string NotificationUrl { get; set; }
 
-        [JsonProperty(PropertyName = "pricingMethod")]
-        public string PricingMethod { get; set; }
-
         // Response fields
         //
 
         public string Id { get; set; }
+
+        [JsonProperty(PropertyName = "recipientId")]
+        public string RecipientId { get; set; }
+
+        [JsonProperty(PropertyName = "shopperId")]
+        public string ShopperId { get; set; }
 
         public string Account { get; set; }
 
         public string SupportPhone { get; set; }
 
         public string Status { get; set; }
+
+        public string Email { get; set; }
+
+        public string Label { get; set; }
 
         public double PercentFee { get; set; }
 
@@ -128,12 +140,13 @@ namespace BitPaySDK.Models.Payout
 
         public double Btc { get; set; }
 
+        [JsonProperty(PropertyName = "message")]
         public string Message { get; set; }
 
-        [JsonConverter(typeof(Converters.DateStringConverter))]
+        [JsonConverter(typeof(BitPaySDK.Converters.DateStringConverter))]
         public DateTime RequestDate { get; set; }
 
-        [JsonConverter(typeof(Converters.DateStringConverter))]
+        [JsonConverter(typeof(BitPaySDK.Converters.DateStringConverter))]
         public DateTime DateExecuted { get; set; }
 
         public dynamic ExchangeRates
@@ -143,28 +156,9 @@ namespace BitPaySDK.Models.Payout
         }
 
         // Private methods
-        //
-
-        private void _computeAndSetAmount()
-        {
-            var amount = 0.0;
-            amount += Instructions.Select(i => i.Amount).Sum();
-            Amount = amount;
-        }
-
-        public bool ShouldSerializeInstructions()
-        {
-            return Instructions != null && Instructions.Count > 0;
-        }
-
         public bool ShouldSerializeAmount()
         {
             return true;
-        }
-
-        public bool ShouldSerializePricingMethod()
-        {
-            return !string.IsNullOrEmpty(PricingMethod);
         }
 
         public bool ShouldSerializeNotificationEmail()

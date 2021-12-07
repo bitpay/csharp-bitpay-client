@@ -15,11 +15,11 @@
         public ApiTokens()
         {
             merchant = "";
-            payroll = "";
+            payout = "";
         }
 
         public string merchant { get; set; }
-        public string payroll { get; set; }
+        public string payout { get; set; }
     }
 
     public class Test

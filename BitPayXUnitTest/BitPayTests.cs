@@ -29,7 +29,7 @@ namespace BitPayXUnitTest
 
         // Your favourite client name
         private static readonly string ClientName = "BitPay .Net Client v2.2.1907 Tester on " + Environment.MachineName;
-        
+
         // Define the date range for fetching results during the test
         private static DateTime today = DateTime.Now;
         private static DateTime tomorrow = today.AddDays(1);
@@ -37,12 +37,12 @@ namespace BitPayXUnitTest
 
         // Will store one of the generated invoices during the test
         // so it can be paid manually in order to pass the ledger tests
-        
+
         public Tests()
         {
             // JSON minified with the BitPay configuration as in the required configuration file
             // and parsed into a IConfiguration object
-            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"PrivateKeyPath\":\"bitpay_private_test.key\",\"ApiTokens\":{\"merchant\":\"A4qqz5JXoK5TMi3hD8EfKNHJB2ybLgdYRkbZwZ5M9ZgT\",\"payroll\":\"7MfwkTZ2W36DREk3cgRyBBRGgAvUuv1kSi2nnJBcMKPd\"}},\"Prod\":{\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"merchant\":\"\",\"payroll\":\"\"}}}}}";
+            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"PrivateKeyPath\":\"bitpay_private_test.key\",\"ApiTokens\":{\"merchant\":\"A4qqz5JXoK5TMi3hD8EfKNHJB2ybLgdYRkbZwZ5M9ZgT\",\"payout\":\"G4pfTiUU7967YJs7Z7n8e2SuQPa2abDTgFrjFB5ZFZsT\"}},\"Prod\":{\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"merchant\":\"\"}}}}}";
             var memoryJsonFile = new MemoryFileInfo("config.json", Encoding.UTF8.GetBytes(json), DateTimeOffset.Now);
             var memoryFileProvider = new MockFileProvider(memoryJsonFile);
 
@@ -60,12 +60,13 @@ namespace BitPayXUnitTest
                 "bitpay_private_test.key",
                 new Env.Tokens(){
                     Merchant = "A4qqz5JXoK5TMi3hD8EfKNHJB2ybLgdYRkbZwZ5M9ZgT",
-                    Payout = "7MfwkTZ2W36DREk3cgRyBBRGgAvUuv1kSi2nnJBcMKPd"
+                    Payout = "G4pfTiUU7967YJs7Z7n8e2SuQPa2abDTgFrjFB5ZFZsT"
                 }
             );
 
             // ledgers require the Merchant Facade
-            if (!_bitpay.tokenExist(Facade.Merchant)) {
+            if (!_bitpay.tokenExist(Facade.Merchant))
+            {
                 // get a pairing code for the merchant facade for this client
                 var pcode = _bitpay.RequestClientAuthorization(Facade.Merchant).Result;
                 /* We can't continue. Please make sure you write down this pairing code, then goto
@@ -78,10 +79,11 @@ namespace BitPayXUnitTest
                 throw new BitPayException("Please approve the pairing code " + pcode + " in your account.");
             }
 
-            // ledgers require the Payroll Facade
-            if (!_bitpay.tokenExist(Facade.Payroll)) {
-                // get a pairing code for the merchant facade for this client
-                var pcode = _bitpay.RequestClientAuthorization(Facade.Payroll).Result;
+            // payouts require the Payout Facade
+            if (!_bitpay.tokenExist(Facade.Payout))
+            {
+                // get a pairing code for the payout facade for this client
+                var pcode = _bitpay.RequestClientAuthorization(Facade.Payout).Result;
                 /* We can't continue. Please make sure you write down this pairing code, then goto
                     your BitPay account in the API Tokens section 
                     https://test.bitpay.com/dashboard/merchant/api-tokens    
@@ -92,18 +94,18 @@ namespace BitPayXUnitTest
                 throw new BitPayException("Please approve the pairing code " + pcode + " in your account.");
             }
         }
-        
+
         [Fact]
-        public async Task TestShouldGetInvoiceId() 
+        public async Task TestShouldGetInvoiceId()
         {
             // create an invoice and make sure we receive an id - which means it has been successfully submitted
             var invoice = new Invoice(30.0, Currency.USD);
             var basicInvoice = await _bitpay.CreateInvoice(invoice);
             Assert.NotNull(basicInvoice.Id);
         }
-        
+
         [Fact]
-        public async Task testShouldCreateInvoiceBTC() 
+        public async Task testShouldCreateInvoiceBTC()
         {
             // create an invoice and make sure we receive an id - which means it has been successfully submitted
             var invoice = new Invoice(30.0, Currency.USD);
@@ -112,9 +114,9 @@ namespace BitPayXUnitTest
             var basicInvoice = await _bitpay.CreateInvoice(invoice);
             Assert.NotNull(basicInvoice.Id);
         }
-        
+
         [Fact]
-        public async Task testShouldCreateInvoiceBCH() 
+        public async Task testShouldCreateInvoiceBCH()
         {
             // create an invoice and make sure we receive an id - which means it has been successfully submitted
             var invoice = new Invoice(30.0, Currency.USD);
@@ -123,9 +125,9 @@ namespace BitPayXUnitTest
             var basicInvoice = await _bitpay.CreateInvoice(invoice);
             Assert.NotNull(basicInvoice.Id);
         }
-        
+
         [Fact]
-        public async Task testShouldCreateInvoiceETH() 
+        public async Task testShouldCreateInvoiceETH()
         {
             // create an invoice and make sure we receive an id - which means it has been successfully submitted
             var invoice = new Invoice(30.0, Currency.USD);
@@ -136,42 +138,48 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldGetInvoiceUrl() {
+        public async Task TestShouldGetInvoiceUrl()
+        {
             // create an invoice and make sure we receive an invoice url - which means we can check it online
             var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, Currency.USD));
             Assert.NotNull(basicInvoice.Url);
         }
 
         [Fact]
-        public async Task TestShouldGetInvoiceStatus() {
+        public async Task TestShouldGetInvoiceStatus()
+        {
             // create an invoice and make sure we receive a correct invoice status (new)
             var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, Currency.USD));
             Assert.Equal(InvoiceStatus.New, basicInvoice.Status);
         }
 
         [Fact]
-        public async Task TestShouldCreateInvoiceOneTenthBtc() {
+        public async Task TestShouldCreateInvoiceOneTenthBtc()
+        {
             // create an invoice and make sure we receive the correct price value back (under 1 BTC)
             var invoice = await _bitpay.CreateInvoice(new Invoice(0.1, Currency.BTC));
             Assert.Equal(0.1, invoice.Price);
         }
 
         [Fact]
-        public async Task TestShouldCreateInvoice100Usd() {
+        public async Task TestShouldCreateInvoice100Usd()
+        {
             // create an invoice and make sure we receive the correct price value back (USD)
             var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, Currency.USD));
             Assert.Equal(100.0, invoice.Price);
         }
 
         [Fact]
-        public async Task TestShouldCreateInvoice100Eur() {
+        public async Task TestShouldCreateInvoice100Eur()
+        {
             // create an invoice and make sure we receive the correct price value back (EUR)
             var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, Currency.EUR));
             Assert.Equal(100.0, invoice.Price);
         }
 
         [Fact]
-        public async Task TestShouldGetInvoice() {
+        public async Task TestShouldGetInvoice()
+        {
             // create an invoice then retrieve it through the get method - they should match
             // var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, Currency.EUR));
             var retrievedInvoice = await _bitpay.GetInvoice("6q9QTcrg8DdQSj8WiAZHPD");
@@ -179,7 +187,8 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldCreateInvoiceWithAdditionalParams() {
+        public async Task TestShouldCreateInvoiceWithAdditionalParams()
+        {
             // create an invoice and make sure we receive the correct fields values back
             var buyerData = new Buyer();
             buyerData.Name = "Satoshi";
@@ -189,10 +198,10 @@ namespace BitPayXUnitTest
             buyerData.Region = "District of Columbia";
             buyerData.PostalCode = "20000";
             buyerData.Country = "USA";
-//            buyerData.Email = "";
-//            buyerData.Phone = "";
+            //            buyerData.Email = "";
+            //            buyerData.Phone = "";
             buyerData.Notify = true;
-            
+
             var invoice = new Invoice(100.0, Currency.USD)
             {
                 Buyer = buyerData,
@@ -203,11 +212,11 @@ namespace BitPayXUnitTest
                 },
                 AcceptanceWindow = 480000,
                 FullNotifications = true,
-//                NotificationEmail = "",
+                //                NotificationEmail = "",
                 NotificationUrl = "https://hookb.in/03EBRQJrzasGmGkNPNw9",
                 OrderId = "1234",
                 Physical = true,
-//                RedirectUrl = "",
+                //                RedirectUrl = "",
                 TransactionSpeed = "high",
                 ItemCode = "bitcoindonation",
                 ItemDesc = "dhdhdfgh"
@@ -219,35 +228,40 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldGetExchangeRates() {
+        public async Task TestShouldGetExchangeRates()
+        {
             // get the exchange rates
             var rates = await _bitpay.GetRates();
             Assert.NotNull(rates.GetRates());
         }
 
         [Fact]
-        public async Task TestShouldGetUsdExchangeRate() {
+        public async Task TestShouldGetUsdExchangeRate()
+        {
             // get the exchange rates and check the USD value
             var rates = await _bitpay.GetRates();
             Assert.True(rates.GetRate(Currency.USD) != 0, "Exchange rate not retrieved: USD");
         }
 
         [Fact]
-        public async Task TestShouldGetEurExchangeRate() {
+        public async Task TestShouldGetEurExchangeRate()
+        {
             // get the exchange rates and check the EUR value
             var rates = await _bitpay.GetRates();
             Assert.True(rates.GetRate(Currency.EUR) != 0, "Exchange rate not retrieved: EUR");
         }
 
         [Fact]
-        public async Task TestShouldGetCnyExchangeRate() {
+        public async Task TestShouldGetCnyExchangeRate()
+        {
             // get the exchange rates and check the CNY value
             var rates = await _bitpay.GetRates();
             Assert.True(rates.GetRate(Currency.CNY) != 0, "Exchange rate not retrieved: CNY");
         }
 
         [Fact]
-        public async Task TestShouldUpdateExchangeRates() {
+        public async Task TestShouldUpdateExchangeRates()
+        {
             // check the exchange rates after update
             var rates = await _bitpay.GetRates();
             await rates.Update();
@@ -255,7 +269,8 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldGetInvoiceIdOne() {
+        public async Task TestShouldGetInvoiceIdOne()
+        {
             // create an invoice and get it by its id
             var invoice = await _bitpay.CreateInvoice(new Invoice(1.0, Currency.USD), Facade.Merchant);
             invoice = await _bitpay.GetInvoice(invoice.Id);
@@ -288,14 +303,15 @@ namespace BitPayXUnitTest
 	    state and authorises a refund. The actual refund will not be executed until the email receiver enters his bitcoin refund address.
         */
         [Fact]
-        public async Task testShouldCreateGetCancelRefundRequest() {
+        public async Task testShouldCreateGetCancelRefundRequest()
+        {
             //check within the last few days
             var date = DateTime.Now;
             var today = date;
             var sevenDaysAgo = date.AddDays(-95);
             var invoices = await _bitpay.GetInvoices(sevenDaysAgo, today, InvoiceStatus.Complete);
             Invoice firstInvoice = invoices.First();
-                
+
             Assert.NotNull(firstInvoice);
             string refundEmail = "";
 
@@ -313,8 +329,9 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldGetLedgerBtc() {
-            
+        public async Task TestShouldGetLedgerBtc()
+        {
+
             // make sure we get a ledger with a not null Entries property
             var ledger = await _bitpay.GetLedger(Currency.BTC, yesterday.AddMonths(-1).AddDays(3), tomorrow);
             Assert.NotNull(ledger);
@@ -323,7 +340,8 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldGetLedgerUsd() {
+        public async Task TestShouldGetLedgerUsd()
+        {
             // Please see the comments from the GetBtcLedger concerning the Merchant facade
 
             // make sure we get a ledger with a not null Entries property
@@ -334,8 +352,9 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldGetLedgers() {
-            
+        public async Task TestShouldGetLedgers()
+        {
+
             var ledgers = await _bitpay.GetLedgers();
             Assert.NotNull(ledgers);
             Assert.True(ledgers.Count > 0, "No ledgers retrieved");
@@ -343,17 +362,18 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task testShouldSubmitPayoutRecipients() {
+        public async Task testShouldSubmitPayoutRecipients()
+        {
             List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
-            recipientsList.Add( new PayoutRecipient(
+            recipientsList.Add(new PayoutRecipient(
                 "sandbox+recipient1@bitpay.com",
                 "recipient1",
                 "https://hookb.in/wNDlQMV7WMFz88VDyGnJ"));
-            recipientsList.Add( new PayoutRecipient(
+            recipientsList.Add(new PayoutRecipient(
                 "sandbox+recipient2@bitpay.com",
                 "recipient2",
                 "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
-            recipientsList.Add( new PayoutRecipient(
+            recipientsList.Add(new PayoutRecipient(
                 "sandbox+recipient3@bitpay.com",
                 "recipient3",
                 "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
@@ -366,17 +386,18 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task testShouldGetPayoutRecipientId() {
+        public async Task testShouldGetPayoutRecipientId()
+        {
             List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
-            recipientsList.Add( new PayoutRecipient(
+            recipientsList.Add(new PayoutRecipient(
                 "sandbox+recipient1@bitpay.com",
                 "recipient1",
                 "https://hookb.in/wNDlQMV7WMFz88VDyGnJ"));
-            recipientsList.Add( new PayoutRecipient(
+            recipientsList.Add(new PayoutRecipient(
                 "sandbox+recipient2@bitpay.com",
                 "recipient2",
                 "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
-            recipientsList.Add( new PayoutRecipient(
+            recipientsList.Add(new PayoutRecipient(
                 "sandbox+recipient3@bitpay.com",
                 "recipient3",
                 "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
@@ -393,45 +414,175 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task testShouldGetPayoutRecipients() {
-            var recipients = await _bitpay.GetPayoutRecipients(null, 2);
-            Assert.Equal(2, recipients.Count);
+        public async Task testShouldSubmitGetAndDeletePayoutRecipient()
+        {
+            List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient17@bitpay.com",
+               "recipient1",
+               "https://hookb.in/wNDlQMV7WMFz88VDyGnJ"));
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient28@bitpay.com",
+                "recipient2",
+               "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient30@bitpay.com",
+                "recipient3",
+                "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
+            var recipientsObj = new PayoutRecipients(recipientsList);
+
+            var basicRecipients = await _bitpay.SubmitPayoutRecipients(recipientsObj);
+            var basicRecipient = basicRecipients[0];
+            var retrieveRecipient = await _bitpay.GetPayoutRecipient(basicRecipient.Id);
+            var retrieveRecipients = await _bitpay.GetPayoutRecipients();
+            retrieveRecipient.Label = "Updated Label";
+            var updateRecipient = await _bitpay.UpdatePayoutRecipient(retrieveRecipient.Id, retrieveRecipient);
+            var deleteRecipient = await _bitpay.DeletePayoutRecipient(retrieveRecipient.Id);
+
+            Assert.NotNull(basicRecipient);
+            Assert.NotNull(retrieveRecipient.Id);
+            Assert.NotNull(retrieveRecipients);
+            Assert.Equal(basicRecipient.Id, retrieveRecipient.Id);
+            Assert.Equal(retrieveRecipient.Status, RecipientStatus.INVITED);
+            Assert.Equal(updateRecipient.Label,"Updated Label");
+            Assert.True(deleteRecipient);
         }
 
         [Fact]
-        public async Task TestShouldSubmitPayoutBatch() {
+        public async Task testShouldRequestPayoutRecipientNotification()
+        {
+            List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient1@bitpay.com",
+                "recipient1",
+                "https://hookb.in/wNDlQMV7WMFz88VDyGnJ"));
+            PayoutRecipients recipientsObj = new PayoutRecipients(recipientsList);
+            var recipients = await _bitpay.SubmitPayoutRecipients(recipientsObj);
+            var basicRecipient = recipients[0];
+            var result = await _bitpay.requestPayoutRecipientNotification(basicRecipient.Id);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task testShouldSubmitPayout()
+        {
+            var ledgerCurrency = Currency.ETH;
+            var currency = Currency.USD;
+            var payout = new Payout(5.0, currency, ledgerCurrency);
+            var recipients = await _bitpay.GetPayoutRecipients("active", 1);
+            payout.RecipientId = recipients.First().Id;
+            payout.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
+            var createPayout = await _bitpay.SubmitPayout(payout);
+            var cancelledPayout = await _bitpay.CancelPayout(createPayout.Id);
+
+            Assert.NotNull(createPayout.Id);
+            Assert.True(cancelledPayout);
+        }
+
+        [Fact]
+        public async Task testShouldGetPayouts()
+        {
+            var endDate = DateTime.Now;
+            var startDate = endDate.AddDays(-50);
+            var batches = await _bitpay.GetPayouts(startDate, endDate);
+            Assert.True(batches.Count > 0);
+        }
+
+        [Fact]
+        public async Task testShouldGetPayoutsByStatus()
+        {
+            var endDate = DateTime.Now;
+            var startDate = endDate.AddDays(-50);
+            var batches = await _bitpay.GetPayouts(startDate, endDate, PayoutStatus.New, "");
+            Assert.True(batches.Count > 0);
+        }
+
+        [Fact]
+        public async Task testShouldSubmitGetAndDeletePayout()
+        {
+            var ledgerCurrency = Currency.ETH;
+            var currency = Currency.USD;
+            var batch = new Payout(5.0, currency, ledgerCurrency);
+            var recipients = await _bitpay.GetPayoutRecipients("active", 1);
+            batch.RecipientId = recipients.First().Id;
+            batch.NotificationUrl = "https://hookb.in/QJOPBdMgRkukpp2WO60o";
+            var batch0 = await _bitpay.SubmitPayout(batch);
+            var batchRetrieved = await _bitpay.GetPayout(batch0.Id);
+            var batchCancelled = await _bitpay.CancelPayout(batchRetrieved.Id);
+
+            Assert.NotNull(batch0.Id);
+            Assert.NotNull(batchRetrieved.Id);
+            Assert.Equal(batch0.Id, batchRetrieved.Id);
+            Assert.Equal(batchRetrieved.Status, PayoutStatus.New);
+            Assert.True(batchCancelled);
+        }
+
+        [Fact]
+        public async Task testShouldRequestPayoutNotification()
+        {
+            var ledgerCurrency = Currency.ETH;
+            var currency = Currency.USD;
+            var batch = new Payout(5.0, currency, ledgerCurrency);
+            var recipients = await _bitpay.GetPayoutRecipients("active", 1);
+            batch.RecipientId = recipients.First().Id;
+            batch.NotificationUrl = "https://hookb.in/QJOPBdMgRkukpp2WO60o";
+            var createPayout = await _bitpay.SubmitPayout(batch);
+            var result = await _bitpay.requestPayoutNotification(createPayout.Id);
+            var cancelledPayout = await _bitpay.CancelPayout(createPayout.Id);
+
+            Assert.True(result);
+            Assert.True(cancelledPayout);
+        }
+
+        [Fact]
+        public async Task testShouldGetPayoutRecipients()
+        {
+            var recipients = await _bitpay.GetPayoutRecipients("active", 1);
+            Assert.Equal(1, recipients.Count);
+        }
+
+        [Fact]
+        public async Task TestShouldSubmitPayoutBatch()
+        {
 
             var date = DateTime.Now;
             var threeDaysFromNow = date.AddDays(3);
 
             var effectiveDate = threeDaysFromNow;
             var currency = Currency.USD;
+            var ledgerCurrency = Currency.ETH;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
-                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com")
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")
             };
-
-            var batch = new PayoutBatch(currency, effectiveDate, instructions);
+            var batch = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
+            batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
             batch = await _bitpay.SubmitPayoutBatch(batch);
 
             Assert.NotNull(batch.Id);
             Assert.True(batch.Instructions.Count == 2);
+            
+            await _bitpay.CancelPayoutBatch(batch.Id);
         }
 
         [Fact]
-        public async Task TestShouldSubmitGetAndDeletePayoutBatch() {
-            
+        public async Task TestShouldSubmitGetAndDeletePayoutBatch()
+        {
+
             var date = DateTime.Now;
             var threeDaysFromNow = date.AddDays(3);
 
             var effectiveDate = threeDaysFromNow;
             var currency = Currency.USD;
+            var ledgerCurrency = Currency.ETH;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
-                new PayoutInstruction(100.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com")
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")
             };
 
-            var batch0 = new PayoutBatch(currency, effectiveDate, instructions);
+            var batch0 = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
+            batch0.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
             batch0 = await _bitpay.SubmitPayoutBatch(batch0);
 
             Assert.NotNull(batch0.Id);
@@ -443,26 +594,52 @@ namespace BitPayXUnitTest
             Assert.True(batch1.Instructions.Count == 2);
 
             await _bitpay.CancelPayoutBatch(batch0.Id);
-
         }
 
         [Fact]
-        public async Task TestShouldGetPayoutBatches() {
-            
-            var batches = await _bitpay.GetPayoutBatches();
+        public async Task testShouldRequestPayoutBatchNotification()
+        {
+            var date = DateTime.Now;
+            var ledgerCurrency = Currency.ETH;
+            var threeDaysFromNow = date.AddDays(3);
+            var currency = Currency.USD;
+            var effectiveDate = threeDaysFromNow;
+            var instructions = new List<PayoutInstruction>() {
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")
+            };
+            var batch = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
+            batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
+            batch = await _bitpay.SubmitPayoutBatch(batch);
+            var result = await _bitpay.requestPayoutBatchNotification(batch.Id);
+            var cancelledPayoutBatch = await _bitpay.CancelPayoutBatch(batch.Id);
+
+            Assert.True(result);
+            Assert.True(cancelledPayoutBatch);
+        }
+
+        [Fact]
+        public async Task TestShouldGetPayoutBatches()
+        {
+            var endDate = DateTime.Now;
+            var startDate = endDate.AddDays(-50);
+            var batches = await _bitpay.GetPayoutBatches(startDate, endDate);
             Assert.True(batches.Count > 0, "No batches retrieved");
         }
 
         [Fact]
-        public async Task TestShouldGetPayoutBatchesByStatus() {
-            
-            var batches = await _bitpay.GetPayoutBatches(PayoutStatus.New);
+        public async Task TestShouldGetPayoutBatchesByStatus()
+        {
+            var endDate = DateTime.Now;
+            var startDate = endDate.AddDays(-50);
+            var batches = await _bitpay.GetPayoutBatches(startDate, endDate, PayoutStatus.New);
             Assert.True(batches.Count > 0, "No batches retrieved");
         }
 
         [Fact]
-        public async Task TestGetSettlements() {
-            
+        public async Task TestGetSettlements()
+        {
+
             // make sure we get a ledger with a not null Entries property
             var settlements = await _bitpay.GetSettlements(Currency.EUR, yesterday.AddMonths(-1).AddDays(3), tomorrow);
             Assert.NotNull(settlements);
@@ -470,8 +647,9 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestGetSettlement() {
-            
+        public async Task TestGetSettlement()
+        {
+
             // make sure we get a ledger with a not null Entries property
             var settlements = await _bitpay.GetSettlements(Currency.EUR, yesterday.AddMonths(-1).AddDays(3), tomorrow);
             var firstSettlement = settlements[0];
@@ -479,20 +657,20 @@ namespace BitPayXUnitTest
             Assert.NotNull(settlement.Id);
             Assert.Equal(firstSettlement.Id, settlement.Id);
         }
-        
+
         [Fact]
-        public async Task TestShouldCreateBillUSD() 
+        public async Task TestShouldCreateBillUSD()
         {
             List<Item> items = new List<Item>();
-            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
-            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
-            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
-            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
-            
+            items.Add(new Item() { Price = 30.0, Quantity = 9, Description = "product-a" });
+            items.Add(new Item() { Price = 14.0, Quantity = 16, Description = "product-b" });
+            items.Add(new Item() { Price = 3.90, Quantity = 42, Description = "product-c" });
+            items.Add(new Item() { Price = 6.99, Quantity = 12, Description = "product-d" });
+
             // create a bill and make sure we receive an id - which means it has been successfully submitted
             var bill = new Bill()
             {
-                Number = "1", 
+                Number = "1",
                 Currency = Currency.USD,
                 Email = "", //email address mandatory
                 Items = items
@@ -502,17 +680,18 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldCreateBillEur() {
+        public async Task TestShouldCreateBillEur()
+        {
             List<Item> items = new List<Item>();
-            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
-            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
-            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
-            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+            items.Add(new Item() { Price = 30.0, Quantity = 9, Description = "product-a" });
+            items.Add(new Item() { Price = 14.0, Quantity = 16, Description = "product-b" });
+            items.Add(new Item() { Price = 3.90, Quantity = 42, Description = "product-c" });
+            items.Add(new Item() { Price = 6.99, Quantity = 12, Description = "product-d" });
 
             // create a bill and make sure we receive an id - which means it has been successfully submitted
             var bill = new Bill()
             {
-                Number = "2", 
+                Number = "2",
                 Currency = Currency.EUR,
                 Email = "", //email address mandatory
                 Items = items
@@ -522,17 +701,18 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldGetBillUrl() {
+        public async Task TestShouldGetBillUrl()
+        {
             List<Item> items = new List<Item>();
-            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
-            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
-            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
-            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+            items.Add(new Item() { Price = 30.0, Quantity = 9, Description = "product-a" });
+            items.Add(new Item() { Price = 14.0, Quantity = 16, Description = "product-b" });
+            items.Add(new Item() { Price = 3.90, Quantity = 42, Description = "product-c" });
+            items.Add(new Item() { Price = 6.99, Quantity = 12, Description = "product-d" });
 
             // create a bill and make sure we receive a bill url - which means we can check it online
             var bill = new Bill()
             {
-                Number = "3", 
+                Number = "3",
                 Currency = Currency.USD,
                 Email = "", //email address mandatory
                 Items = items
@@ -542,17 +722,18 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldGetBillStatus() {
+        public async Task TestShouldGetBillStatus()
+        {
             List<Item> items = new List<Item>();
-            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
-            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
-            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
-            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+            items.Add(new Item() { Price = 30.0, Quantity = 9, Description = "product-a" });
+            items.Add(new Item() { Price = 14.0, Quantity = 16, Description = "product-b" });
+            items.Add(new Item() { Price = 3.90, Quantity = 42, Description = "product-c" });
+            items.Add(new Item() { Price = 6.99, Quantity = 12, Description = "product-d" });
 
             // create a bill and make sure we receive a correct bill status (draft)
             var bill = new Bill()
             {
-                Number = "4", 
+                Number = "4",
                 Currency = Currency.USD,
                 Email = "", //email address mandatory
                 Items = items
@@ -562,17 +743,18 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldGetBillTotals() {
+        public async Task TestShouldGetBillTotals()
+        {
             List<Item> items = new List<Item>();
-            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
-            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
-            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
-            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+            items.Add(new Item() { Price = 30.0, Quantity = 9, Description = "product-a" });
+            items.Add(new Item() { Price = 14.0, Quantity = 16, Description = "product-b" });
+            items.Add(new Item() { Price = 3.90, Quantity = 42, Description = "product-c" });
+            items.Add(new Item() { Price = 6.99, Quantity = 12, Description = "product-d" });
 
             // create a bill and make sure we receive the same items sum as it was sent
             var bill = new Bill()
             {
-                Number = "5", 
+                Number = "5",
                 Currency = Currency.USD,
                 Email = "", //email address mandatory
                 Items = items
@@ -582,17 +764,18 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldGetBill() {
+        public async Task TestShouldGetBill()
+        {
             List<Item> items = new List<Item>();
-            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
-            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
-            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
-            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+            items.Add(new Item() { Price = 30.0, Quantity = 9, Description = "product-a" });
+            items.Add(new Item() { Price = 14.0, Quantity = 16, Description = "product-b" });
+            items.Add(new Item() { Price = 3.90, Quantity = 42, Description = "product-c" });
+            items.Add(new Item() { Price = 6.99, Quantity = 12, Description = "product-d" });
 
             // create a bill then retrieve it through the get method - they should match
             var bill = new Bill()
             {
-                Number = "6", 
+                Number = "6",
                 Currency = Currency.USD,
                 Email = "", //email address mandatory
                 Items = items
@@ -603,16 +786,17 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldGetAndUpdateBill() {
+        public async Task TestShouldGetAndUpdateBill()
+        {
             List<Item> items = new List<Item>();
-            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
-            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
-            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
-            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+            items.Add(new Item() { Price = 30.0, Quantity = 9, Description = "product-a" });
+            items.Add(new Item() { Price = 14.0, Quantity = 16, Description = "product-b" });
+            items.Add(new Item() { Price = 3.90, Quantity = 42, Description = "product-c" });
+            items.Add(new Item() { Price = 6.99, Quantity = 12, Description = "product-d" });
 
             var bill = new Bill()
             {
-                Number = "6", 
+                Number = "6",
                 Currency = Currency.USD,
                 Email = "", //email address mandatory
                 Items = items,
@@ -622,8 +806,8 @@ namespace BitPayXUnitTest
             var retrievedBill = await _bitpay.GetBill(basicBill.Id);
             retrievedBill.Currency = Currency.EUR;
             retrievedBill.Name = "updatedBill";
-            retrievedBill.Items.Add(new Item(){Price = 60.0, Quantity = 7, Description = "product-added"});
-                
+            retrievedBill.Items.Add(new Item() { Price = 60.0, Quantity = 7, Description = "product-added" });
+
             var updatedBill = await _bitpay.UpdateBill(retrievedBill, retrievedBill.Id);
             Assert.Equal(basicBill.Id, retrievedBill.Id);
             Assert.Equal(retrievedBill.Id, updatedBill.Id);
@@ -635,15 +819,15 @@ namespace BitPayXUnitTest
         public async Task TestShouldDeliverBill()
         {
             List<Item> items = new List<Item>();
-            items.Add(new Item(){Price = 30.0, Quantity = 9, Description = "product-a"});
-            items.Add(new Item(){Price = 14.0, Quantity = 16, Description = "product-b"});
-            items.Add(new Item(){Price = 3.90, Quantity = 42, Description = "product-c"});
-            items.Add(new Item(){Price = 6.99, Quantity = 12, Description = "product-d"});
+            items.Add(new Item() { Price = 30.0, Quantity = 9, Description = "product-a" });
+            items.Add(new Item() { Price = 14.0, Quantity = 16, Description = "product-b" });
+            items.Add(new Item() { Price = 3.90, Quantity = 42, Description = "product-c" });
+            items.Add(new Item() { Price = 6.99, Quantity = 12, Description = "product-d" });
 
             // create a bill then retrieve it through the get method - they should match
             var bill = new Bill()
             {
-                Number = "7", 
+                Number = "7",
                 Currency = Currency.USD,
                 Email = "", //email address mandatory
                 Items = items
@@ -659,15 +843,17 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldGetBills() {
-            
+        public async Task TestShouldGetBills()
+        {
+
             var bills = await _bitpay.GetBills();
             Assert.True(bills.Count > 0, "No bills retrieved");
         }
 
         [Fact]
-        public async Task TestShouldGetBillsByStatus() {
-            
+        public async Task TestShouldGetBillsByStatus()
+        {
+
             var bills = await _bitpay.GetBills(BillStatus.Sent);
             Assert.True(bills.Count > 0, "No bills retrieved");
         }

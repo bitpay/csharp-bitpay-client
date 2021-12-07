@@ -12,6 +12,10 @@
         public const string USDC = "USDC";
         public const string GUSD = "GUSD";
         public const string PAX = "PAX";
+        public const string XRP = "XRP";
+        public const string BUSD = "BUSD";
+        public const string DOGE = "DOGE";
+        public const string LTC = "LTC";
         
         // FIAT
         public const string AED = "AED";
