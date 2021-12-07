@@ -278,8 +278,20 @@ namespace BitPayXUnitTest
         }
 
         [Fact]
-        public async Task TestShouldGetInvoices()
-        {
+        public async Task TestShouldCreateAndDeleteInvoice() {
+            // update and delete invoice  by id
+            var basicInvoice = await _bitpay.CreateInvoice(new Invoice(1.0, Currency.USD), Facade.Merchant);
+            var retreivedInvoice = await _bitpay.GetInvoice(basicInvoice.Id);
+            var cancelledInvoice = await _bitpay.CancelInvoice(retreivedInvoice.Id);
+            var retreivedCancelledInvoice = await _bitpay.GetInvoice(cancelledInvoice.Id);
+            Assert.NotNull(basicInvoice);
+            Assert.NotNull(retreivedInvoice);
+            Assert.NotNull(cancelledInvoice);
+            Assert.NotNull(retreivedCancelledInvoice);
+        }
+
+        [Fact]
+        public async Task TestShouldGetInvoices() {
             // get invoices between two dates
             var invoices = await _bitpay.GetInvoices(yesterday, tomorrow);
             Assert.True(invoices.Count > 0, "No invoices retrieved");
