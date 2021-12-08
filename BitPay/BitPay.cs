@@ -101,6 +101,10 @@ namespace BitPaySDK
                 var tokens = JsonConvert.DeserializeObject<List<Token>>(responseString);
                 foreach (var t in tokens) CacheToken(t.Facade, t.Value);
             }
+            catch (BitPayException ex)
+            {
+                throw new ClientAuthorizationException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
@@ -334,6 +338,10 @@ namespace BitPaySDK
                 var response = await Delete("invoices/" + invoiceId, parameters);
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<Invoice>(responseString);
+            }
+            catch (BitPayException ex)
+            {
+                throw new InvoiceQueryException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -1123,7 +1131,7 @@ namespace BitPaySDK
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new PayoutRecipientUpdateException(ex);
+                    throw new PayoutQueryException(ex);
 
                 throw;
             }
