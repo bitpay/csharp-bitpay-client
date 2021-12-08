@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v2.0": {
-      "BitPay/4.0.2104": {
+      "BitPay/4.2.2111": {
         "dependencies": {
           "BouncyCastle": "1.8.9",
           "Microsoft.CSharp": "4.7.0",
@@ -147,7 +147,7 @@
     }
   },
   "libraries": {
-    "BitPay/4.0.2104": {
+    "BitPay/4.2.2111": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

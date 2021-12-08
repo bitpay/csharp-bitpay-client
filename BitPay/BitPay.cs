@@ -21,8 +21,8 @@ using Microsoft.Extensions.Configuration;
 
 /**
  * @author Antonio Buedo
- * @date 19.04.2021
- * @version 4.0.2104
+ * @date 18.11.2021
+ * @version 4.2.2111
  *
  * See bitpay.com/api for more information.
  */
@@ -314,6 +314,31 @@ namespace BitPaySDK
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
                     throw new InvoiceQueryException(ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Cancel a BitPay invoice.
+        /// </summary>
+        /// <param name="invoiceId">The id of the invoice to cancel.</param>
+        /// <returns>Cancelled invoice object.</returns>
+        /// <throws>InvoiceCancellationException InvoiceCancellationException class</throws>
+        public async Task<Invoice> CancelInvoice(string invoiceId)
+        {
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Merchant));
+                var response = await Delete("invoices/" + invoiceId, parameters);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<Invoice>(responseString);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new InvoiceCancellationException(ex);
 
                 throw;
             }
@@ -1098,7 +1123,7 @@ namespace BitPaySDK
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new PayoutQueryException(ex);
+                    throw new PayoutRecipientUpdateException(ex);
 
                 throw;
             }
