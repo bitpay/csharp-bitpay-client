@@ -101,6 +101,10 @@ namespace BitPaySDK
                 var tokens = JsonConvert.DeserializeObject<List<Token>>(responseString);
                 foreach (var t in tokens) CacheToken(t.Facade, t.Value);
             }
+            catch (BitPayException ex)
+            {
+                throw new ClientAuthorizationException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
@@ -115,6 +119,8 @@ namespace BitPaySDK
         /// </summary>
         /// <param name="facade">The facade for which authorization is requested.</param>
         /// <returns>A pairing code for this client. This code must be used to authorize this client at BitPay.com/api-tokens.</returns>
+        /// <throws>ClientAuthorizationException ClientAuthorizationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<string> RequestClientAuthorization(string facade)
         {
             try
@@ -132,6 +138,10 @@ namespace BitPaySDK
                 CacheToken(tokens[0].Facade, tokens[0].Value);
 
                 return tokens[0].PairingCode;
+            }
+            catch (BitPayException ex)
+            {
+                throw new ClientAuthorizationException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -173,6 +183,8 @@ namespace BitPaySDK
         /// <param name="facade">The facade to create the invoice against</param>
         /// <param name="signRequest">Allow unsigned request</param>
         /// <returns>A new invoice object returned from the server.</returns>
+        /// <throws>InvoiceCreationException InvoiceCreationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<Invoice> CreateInvoice(Invoice invoice, string facade = Facade.Merchant,
             bool signRequest = true)
         {
@@ -184,6 +196,10 @@ namespace BitPaySDK
                 var response = await Post("invoices", json, signRequest).ConfigureAwait(false);
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
                 JsonConvert.PopulateObject(responseString, invoice);
+            }
+            catch (BitPayException ex)
+            {
+                throw new InvoiceCreationException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -205,6 +221,8 @@ namespace BitPaySDK
         /// <param name="invoiceId">The id of the requested invoice.</param>
         /// <param name="facade">The facade to get the invoice from</param>
         /// <returns>The invoice object retrieved from the server.</returns>
+        /// <throws>InvoiceQueryException InvoiceQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<Invoice> GetInvoice(string invoiceId, string facade = Facade.Merchant,
             bool signRequest = true)
         {
@@ -233,6 +251,10 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<Invoice>(responseString);
             }
+            catch (BitPayException ex)
+            {
+                throw new InvoiceQueryException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
@@ -252,6 +274,8 @@ namespace BitPaySDK
         /// <param name="limit">Maximum results that the query will return (useful for paging results)</param>
         /// <param name="offset">Number of results to offset (ex. skip 10 will give you results starting with the 11th.</param>
         /// <returns>A list of invoice objects retrieved from the server.</returns>
+        /// <throws>InvoiceQueryException InvoiceQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<Invoice>> GetInvoices(DateTime dateStart, DateTime dateEnd, string status = null,
             string orderId = null, int limit = -1, int offset = -1)
         {
@@ -286,6 +310,10 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<List<Invoice>>(responseString);
             }
+            catch (BitPayException ex)
+            {
+                throw new InvoiceQueryException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
@@ -311,6 +339,10 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<Invoice>(responseString);
             }
+            catch (BitPayException ex)
+            {
+                throw new InvoiceQueryException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
@@ -329,7 +361,8 @@ namespace BitPaySDK
         /// <param name="currency">The three digit currency code specifying the exchange rate to use when calculating the refund bitcoin amount. If this value is "BTC" then no exchange rate calculation is performed.</param>
         /// <returns>ATrue if the refund was successfully created, false otherwise.</returns>
         /// <throws>RefundCreationException RefundCreationException class</throws>
-        ///
+        /// <throws>RefundCreationException RefundCreationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<bool> CreateRefund(Invoice invoice, string refundEmail, double amount, string currency)
         {
             try
@@ -349,6 +382,10 @@ namespace BitPaySDK
 
                 return result;
             }
+            catch (BitPayException ex)
+            {
+                throw new RefundCreationException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
@@ -364,7 +401,7 @@ namespace BitPaySDK
         /// <param name="invoice">The BitPay invoice object having the associated refunds.</param>
         /// <returns>A BitPay invoice object with the associated Refund objects updated.</returns>
         /// <throws>RefundQueryException RefundQueryException class</throws>
-        ///
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<Refund>> GetRefunds(Invoice invoice)
         {
             try
@@ -376,6 +413,10 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response);
 
                 return JsonConvert.DeserializeObject<List<Refund>>(responseString);
+            }
+            catch (BitPayException ex)
+            {
+                throw new RefundQueryException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -393,6 +434,7 @@ namespace BitPaySDK
         /// <param name="refundId">The refund id for the refund to be updated with new status.</param>
         /// <returns>TA BitPay invoice object with the associated Refund object updated.</returns>
         /// <throws>RefundQueryException RefundQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<Refund> GetRefund(Invoice invoice, string refundId)
         {
             try
@@ -404,6 +446,10 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response);
 
                 return JsonConvert.DeserializeObject<Refund>(responseString);
+            }
+            catch (BitPayException ex)
+            {
+                throw new RefundQueryException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -421,6 +467,7 @@ namespace BitPaySDK
         /// <param name="refundId">The refund Id for the refund to be canceled.</param>
         /// <returns> ATrue if the refund was successfully canceled, false otherwise.</returns>
         /// <throws>RefundCancellationException RefundCancellationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<bool> CancelRefund(string invoiceId, string refundId)
         {
             try
@@ -428,6 +475,10 @@ namespace BitPaySDK
                 var invoice = await GetInvoice(invoiceId);
 
                 return await CancelRefund(invoice, refundId);
+            }
+            catch (BitPayException ex)
+            {
+                throw new RefundCancellationException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -445,6 +496,7 @@ namespace BitPaySDK
         /// <param name="refundId">The refund objhect for the refund to be canceled.</param>
         /// <returns> ATrue if the refund was successfully canceled, false otherwise.</returns>
         /// <throws>RefundCancellationException RefundCancellationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<bool> CancelRefund(Invoice invoice, string refundId)
         {
             try
@@ -452,6 +504,10 @@ namespace BitPaySDK
                 var refund = await GetRefund(invoice, refundId);
 
                 return await CancelRefund(invoice.Id, refund);
+            }
+            catch (BitPayException ex)
+            {
+                throw new RefundCancellationException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -469,6 +525,7 @@ namespace BitPaySDK
         /// <param name="refund">The BitPay refund for the refund to be canceled.</param>
         /// <returns> ATrue if the refund was successfully canceled, false otherwise.</returns>
         /// <throws>RefundCancellationException RefundCancellationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<bool> CancelRefund(string invoiceId, Refund refund)
         {
             try
@@ -479,6 +536,10 @@ namespace BitPaySDK
                 var response = await Delete("invoices/" + invoiceId + "/refunds/" + refund.Id, parameters);
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
                 return responseString.Replace("\"", "").Equals("Success");
+            }
+            catch (BitPayException ex)
+            {
+                throw new RefundCancellationException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -495,7 +556,9 @@ namespace BitPaySDK
         /// <param name="bill">An invoice request object.</param>
         /// <param name="facade">The facade to create the invoice against</param>
         /// <param name="signRequest">Allow unsigned request</param>
-        /// <returns>A new bill object returned from the server.</returns>
+        /// <returns>A new bill object returned from the server.</returns
+        /// <throws>BillCreationException BillCreationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<Bill> CreateBill(Bill bill, string facade = Facade.Merchant, bool signRequest = true)
         {
             try
@@ -507,6 +570,10 @@ namespace BitPaySDK
                 var serializerSettings = new JsonSerializerSettings
                     {ObjectCreationHandling = ObjectCreationHandling.Replace};
                 JsonConvert.PopulateObject(responseString, bill, serializerSettings);
+            }
+            catch (BitPayException ex)
+            {
+                throw new BillCreationException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -526,6 +593,8 @@ namespace BitPaySDK
         /// <param name="facade">The facade to get the bill from</param>
         /// <param name="signRequest">Allow unsigned request</param>
         /// <returns>The bill object retrieved from the server.</returns>
+        /// <throws>BillQueryException BillQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<Bill> GetBill(string billId, string facade = Facade.Merchant, bool signRequest = true)
         {
             Dictionary<string, string> parameters = null;
@@ -553,6 +622,10 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<Bill>(responseString);
             }
+            catch (BitPayException ex)
+            {
+                throw new BillQueryException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
@@ -568,6 +641,8 @@ namespace BitPaySDK
         /// <param name="bill">An invoice object containing the update.</param>
         /// <param name="billId">The id of the bill to update.</param>
         /// <returns>A new bill object returned from the server.</returns>
+        /// <throws>BillUpdateException BillUpdateException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<Bill> UpdateBill(Bill bill, string billId)
         {
             try
@@ -578,6 +653,10 @@ namespace BitPaySDK
                 var serializerSettings = new JsonSerializerSettings
                     {ObjectCreationHandling = ObjectCreationHandling.Replace};
                 JsonConvert.PopulateObject(responseString, bill, serializerSettings);
+            }
+            catch (BitPayException ex)
+            {
+                throw new BillUpdateException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -595,6 +674,8 @@ namespace BitPaySDK
         /// </summary>
         /// <param name="status">The status to filter the bills.</param>
         /// <returns>A list of bill objects.</returns>
+        /// <throws>BillQueryException BillQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<Bill>> GetBills(string status = null)
         {
             Dictionary<string, string> parameters = null;
@@ -621,6 +702,10 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<List<Bill>>(responseString);
             }
+            catch (BitPayException ex)
+            {
+                throw new BillQueryException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
@@ -637,6 +722,8 @@ namespace BitPaySDK
         /// <param name="billToken">The token of the requested bill.</param>
         /// <param name="signRequest">Allow unsigned request</param>
         /// <returns>A response status returned from the API.</returns>
+        /// <throws>BillDeliveryException BillDeliveryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<string> DeliverBill(string billId, string billToken, bool signRequest = true)
         {
             var responseString = "";
@@ -645,6 +732,10 @@ namespace BitPaySDK
                 var json = JsonConvert.SerializeObject(new Dictionary<string, string> {{"token", billToken}});
                 var response = await Post("bills/" + billId + "/deliveries", json, signRequest).ConfigureAwait(false);
                 responseString = await ResponseToJsonString(response).ConfigureAwait(false);
+            }
+            catch (BitPayException ex)
+            {
+                throw new BillDeliveryException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -661,6 +752,8 @@ namespace BitPaySDK
         ///     Retrieve the exchange rate table using the public facade.
         /// </summary>
         /// <returns>The rate table as an object retrieved from the server.</returns>
+        /// <throws>RatesQueryException RatesQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<Rates> GetRates()
         {
             try
@@ -669,6 +762,10 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response);
                 var rates = JsonConvert.DeserializeObject<List<Rate>>(responseString);
                 return new Rates(rates, this);
+            }
+            catch (BitPayException ex)
+            {
+                throw new RatesQueryException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -686,6 +783,8 @@ namespace BitPaySDK
         /// <param name="dateStart">The start date for the query.</param>
         /// <param name="dateEnd">The end date for the query.</param>
         /// <returns>A Ledger object populated with the BitPay ledger entries list.</returns>
+        /// <throws>LedgerQueryException LedgerQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<Ledger> GetLedger(string currency, DateTime dateStart, DateTime dateEnd)
         {
             try
@@ -703,6 +802,10 @@ namespace BitPaySDK
                     });
                 return new Ledger(entries);
             }
+            catch (BitPayException ex)
+            {
+                throw new LedgerQueryException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
@@ -716,6 +819,8 @@ namespace BitPaySDK
         ///     Retrieve a list of ledgers available and its current balance using the merchant facade.
         /// </summary>
         /// <returns>A list of Ledger objects retrieved from the server.</returns>
+        /// <throws>LedgerQueryException LedgerQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<Ledger>> GetLedgers()
         {
             try
@@ -730,6 +835,10 @@ namespace BitPaySDK
                         NullValueHandling = NullValueHandling.Ignore
                     });
                 return ledgers;
+            }
+            catch (BitPayException ex)
+            {
+                throw new LedgerQueryException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -746,6 +855,7 @@ namespace BitPaySDK
         /// <param name="recipients">A PayoutRecipients object with request parameters defined.</param>
         /// <returns>A list of BitPay PayoutRecipients objects.</returns>
         /// <throws>PayoutRecipientCreationException PayoutRecipientCreationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<PayoutRecipient>> SubmitPayoutRecipients(PayoutRecipients recipients)
         {
             try
@@ -761,6 +871,10 @@ namespace BitPaySDK
                     {
                         NullValueHandling = NullValueHandling.Ignore
                     });
+            }
+            catch (BitPayException ex)
+            {
+                throw new PayoutRecipientCreationException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -778,6 +892,7 @@ namespace BitPaySDK
         /// <param name="recipientId">The id of the recipient to retrieve.</param>
         /// <returns>A BitPay PayoutRecipient object.</returns>
         /// <throws>PayoutRecipientQueryException PayoutRecipientQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<PayoutRecipient> GetPayoutRecipient(string recipientId)
         {
             try
@@ -792,6 +907,10 @@ namespace BitPaySDK
                     {
                         NullValueHandling = NullValueHandling.Ignore
                     });
+            }
+            catch (BitPayException ex)
+            {
+                throw new PayoutRecipientQueryException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -810,6 +929,7 @@ namespace BitPaySDK
         /// <param name="offset">Offset for paging</param>
         /// <returns>A list of BitPayRecipient objects.</returns>
         /// <throws>PayoutRecipientQueryException PayoutRecipientQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<PayoutRecipient>> GetPayoutRecipients(string status = null, int limit = 100, int offset=0)
         {
             try
@@ -831,6 +951,10 @@ namespace BitPaySDK
                         NullValueHandling = NullValueHandling.Ignore
                     });
             }
+            catch (BitPayException ex)
+            {
+                throw new PayoutRecipientQueryException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
@@ -847,6 +971,7 @@ namespace BitPaySDK
         /// <param name="recipient">A PayoutRecipient object with updated parameters defined.</param>
         /// <returns>The updated recipient object.</returns>
         /// <throws>PayoutRecipientUpdateException PayoutRecipientUpdateException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<PayoutRecipient> UpdatePayoutRecipient(string recipientId, PayoutRecipient recipient)
         {
             try
@@ -863,6 +988,10 @@ namespace BitPaySDK
                         NullValueHandling = NullValueHandling.Ignore
                     });
             }
+            catch (BitPayException ex)
+            {
+                throw new PayoutRecipientUpdateException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
@@ -878,6 +1007,7 @@ namespace BitPaySDK
         /// <param name="recipientId">The id of the recipient to cancel.</param>
         /// <returns>True if the delete operation was successfull, false otherwise.</returns>
         /// <throws>PayoutRecipientCancellationException PayoutRecipientCancellationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<bool> DeletePayoutRecipient(string recipientId)
         {
             try
@@ -889,6 +1019,10 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
                 return responseObject.GetValue("status").ToString() == "success";
+            }
+            catch (BitPayException ex)
+            {
+                throw new PayoutRecipientCancellationException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -905,6 +1039,7 @@ namespace BitPaySDK
         /// <param name="recipientId">The id of the recipient to notify.</param>
         /// <returns>True if the notification was successfully sent, false otherwise.</returns>
         /// <throws>PayoutRecipientNotificationException PayoutRecipientNotificationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<bool> requestPayoutRecipientNotification(string recipientId)
         {
            try
@@ -918,7 +1053,11 @@ namespace BitPaySDK
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
                 return responseObject.GetValue("status").ToString() == "success";
             }
-           catch (Exception ex)
+            catch (BitPayException ex)
+            {
+                throw new PayoutRecipientNotificationException(ex, ex.GetApiCode());
+            }
+            catch (Exception ex)
            {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
                     throw new PayoutRecipientNotificationException(ex);
@@ -933,6 +1072,7 @@ namespace BitPaySDK
         /// <param name="payout ">A Payout object with request parameters defined.</param>
         /// <returns>A BitPay generated Payout object.</returns>
         /// <throws>PayoutCreationException PayoutCreationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<Payout> SubmitPayout(Payout payout)
         {
             try
@@ -948,10 +1088,14 @@ namespace BitPaySDK
                         NullValueHandling = NullValueHandling.Ignore
                     });
             }
+            catch (BitPayException ex)
+            {
+                throw new PayoutCreationException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new PayoutCreationException();
+                    throw new PayoutCreationException(ex);
 
                 throw;
             }
@@ -964,6 +1108,7 @@ namespace BitPaySDK
         /// <param name="payoutId">The id of the payout to retrieve.</param>
         /// <returns>A BitPay generated Payout object.</returns>
         /// <throws>PayoutQueryException PayoutQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<Payout> GetPayout(string payoutId)
         {
             try
@@ -978,6 +1123,10 @@ namespace BitPaySDK
                     {
                         NullValueHandling = NullValueHandling.Ignore
                     });
+            }
+            catch (BitPayException ex)
+            {
+                throw new PayoutQueryException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -994,6 +1143,7 @@ namespace BitPaySDK
         /// <param name="payoutId">The id of the payout to cancel.</param>
         /// <returns>True if payout was successfully canceled, false otherwise.</returns>
         /// <throws>PayoutCancellationException PayoutCancellationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<bool> CancelPayout(string payoutId)
         {
             try
@@ -1005,6 +1155,10 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
                 return responseObject.GetValue("status").ToString() == "success";
+            }
+            catch (BitPayException ex)
+            {
+                throw new PayoutCancellationException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -1026,6 +1180,7 @@ namespace BitPaySDK
         /// <param name="offset">Offset for paging</param>       
         /// <returns>A list of BitPay Payout objects.</returns>
         /// <throws>PayoutQueryException PayoutQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<Payout>> GetPayouts(DateTime? startDate = null, DateTime? endDate = null,
             string status = null, string reference = null,  int? limit = null, int? offset = null)
         {
@@ -1068,6 +1223,10 @@ namespace BitPaySDK
                         NullValueHandling = NullValueHandling.Ignore
                     });
             }
+            catch (BitPayException ex)
+            {
+                throw new PayoutQueryException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
@@ -1083,6 +1242,7 @@ namespace BitPaySDK
         /// <param name="payoutId">The id of the payout to notify.</param>
         /// <returns>True if the notification was successfully sent, false otherwise.</returns>
         /// <throws>PayoutNotificationException PayoutNotificationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<bool> requestPayoutNotification(string payoutId)
         {
             try
@@ -1095,6 +1255,10 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
                 return responseObject.GetValue("status").ToString() == "success";
+            }
+            catch (BitPayException ex)
+            {
+                throw new PayoutNotificationException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -1111,6 +1275,7 @@ namespace BitPaySDK
         /// <param name="batch">A PayoutBatch object with request parameters defined.</param>
         /// <returns>A BitPay generated PayoutBatch object.</returns>
         /// <throws>PayoutBatchCreationException PayoutBatchCreationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<PayoutBatch> SubmitPayoutBatch(PayoutBatch batch)
         {
             try
@@ -1132,6 +1297,10 @@ namespace BitPaySDK
 
                 return batch;
             }
+            catch (BitPayException ex)
+            {
+                throw new PayoutBatchCreationException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
@@ -1148,6 +1317,7 @@ namespace BitPaySDK
         /// <param name="payoutBatchId">The id of the payout batch to retrieve.</param>
         /// <returns>A BitPay PayoutBatch object.</returns>
         /// <throws>PayoutBatchQueryException PayoutBatchQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<PayoutBatch> GetPayoutBatch(string payoutBatchId)
         {
             try
@@ -1162,6 +1332,10 @@ namespace BitPaySDK
                     {
                         NullValueHandling = NullValueHandling.Ignore
                     });
+            }
+            catch (BitPayException ex)
+            {
+                throw new PayoutBatchQueryException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -1178,6 +1352,7 @@ namespace BitPaySDK
         /// <param name="payoutBatchId">The id of the payout batch to cancel.</param>
         /// <returns>True if the refund was successfully canceled, false otherwise.</returns>
         /// <throws>PayoutBatchCancellationException PayoutBatchCancellationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<bool> CancelPayoutBatch(string payoutBatchId)
         {
             try
@@ -1190,10 +1365,14 @@ namespace BitPaySDK
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
                 return responseObject.GetValue("status").ToString() == "success";
             }
+            catch (BitPayException ex)
+            {
+                throw new PayoutBatchCancellationException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new PayoutBatchCancellationException();
+                    throw new PayoutBatchCancellationException(ex);
 
                 throw;
             }
@@ -1209,6 +1388,7 @@ namespace BitPaySDK
         /// <param name="offset">Offset for paging</param>
         /// <returns>A list of BitPay PayoutBatch objects.</returns>
         /// <throws>PayoutBatchQueryException PayoutBatchQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<PayoutBatch>> GetPayoutBatches(DateTime? startDate = null, DateTime? endDate = null, string status = null,
             int? limit = null, int? offset = null)
         {
@@ -1245,10 +1425,14 @@ namespace BitPaySDK
                         NullValueHandling = NullValueHandling.Ignore
                     });
             }
+            catch (BitPayException ex)
+            {
+                throw new PayoutBatchQueryException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new PayoutBatchQueryException();
+                    throw new PayoutBatchQueryException(ex);
 
                 throw;
             }
@@ -1259,6 +1443,7 @@ namespace BitPaySDK
         /// <param name="payoutBatchId ">The id of the payout batch to notify.</param>
         /// <returns>True if the notification was successfully sent, false otherwise.</returns>
         /// <throws>PayoutBatchNotificationException PayoutBatchNotificationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<bool> requestPayoutBatchNotification(string payoutBatchId) 
         {
             try
@@ -1271,6 +1456,10 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
                 return responseObject.GetValue("status").ToString() == "success";
+            }
+            catch (BitPayException ex)
+            {
+                throw new PayoutBatchNotificationException(ex, ex.GetApiCode());
             }
             catch (Exception ex)
             {
@@ -1292,6 +1481,8 @@ namespace BitPaySDK
         /// <param name="limit">Maximum number of settlements to retrieve.</param>
         /// <param name="offset">Offset for paging</param>
         /// <returns>A list of BitPay Settlement objects</returns>
+        /// <throws>SettlementQueryException SettlementQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<Settlement>> GetSettlements(string currency, DateTime dateStart, DateTime dateEnd,
             string status = "", int limit = 100, int offset = 0)
         {
@@ -1312,10 +1503,14 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<List<Settlement>>(responseString);
             }
+            catch (BitPayException ex)
+            {
+                throw new SettlementQueryException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new SettlementException(ex);
+                    throw new SettlementQueryException(ex);
 
                 throw;
             }
@@ -1326,6 +1521,8 @@ namespace BitPaySDK
         /// </summary>
         /// <param name="settlementId">Settlement Id</param>
         /// <returns>A BitPay Settlement object.</returns>
+        /// <throws>SettlementQueryException SettlementQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<Settlement> GetSettlement(string settlementId)
         {
             try
@@ -1339,10 +1536,14 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<Settlement>(responseString);
             }
+            catch (BitPayException ex)
+            {
+                throw new SettlementQueryException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new SettlementException(ex);
+                    throw new SettlementQueryException(ex);
 
                 throw;
             }
@@ -1353,6 +1554,8 @@ namespace BitPaySDK
         /// </summary>
         /// <param name="settlement">Settlement to generate report for.</param>
         /// <returns>A detailed BitPay Settlement object.</returns>
+        /// <throws>SettlementQueryException SettlementQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
         public async Task<Settlement> GetSettlementReconciliationReport(Settlement settlement)
         {
             try
@@ -1366,10 +1569,14 @@ namespace BitPaySDK
                 var responseString = await ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<Settlement>(responseString);
             }
+            catch (BitPayException ex)
+            {
+                throw new SettlementQueryException(ex, ex.GetApiCode());
+            }
             catch (Exception ex)
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new SettlementException(ex);
+                    throw new SettlementQueryException(ex);
 
                 throw;
             }
@@ -1677,9 +1884,22 @@ namespace BitPaySDK
                     jObj = new JObject();
 
                 JToken value;
+                JToken code;
+
+                if (jObj.TryGetValue("status", out value))
+                {
+                   if (value.ToString().Equals("error"))
+                    {
+                        jObj.TryGetValue("code", out code);
+                        jObj.TryGetValue("message", out value);
+                        throw new BitPayApiCommunicationException(code.ToString(), value.ToString());
+                    }
+                }
 
                 // Check for error response.
-                if (jObj.TryGetValue("error", out value)) throw new BitPayApiCommunicationException(value.ToString());
+                if (jObj.TryGetValue("error", out value)) {
+                    throw new BitPayApiCommunicationException(value.ToString());
+                } 
 
                 if (jObj.TryGetValue("errors", out value))
                 {

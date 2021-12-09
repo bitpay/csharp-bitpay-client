@@ -6,6 +6,7 @@ namespace BitPaySDK.Exceptions
     {
         private const string BitPayMessage = "Error when communicating with the BitPay API";
         private static readonly string _bitpayCode = "BITPAY-API";
+        protected string ApiCode;
 
         public BitPayApiCommunicationException() : base(BitPayMessage)
         {
@@ -21,13 +22,17 @@ namespace BitPaySDK.Exceptions
         {
         }
 
-        public BitPayApiCommunicationException(string bitpayCode, string message) : base(bitpayCode, message)
+        public BitPayApiCommunicationException(string apiCode, string message) : base(apiCode, message, true)
         {
         }
 
-        public BitPayApiCommunicationException(string bitpayCode, string message, Exception cause) : base(bitpayCode,
-            message, cause)
+        public BitPayApiCommunicationException(string bitpayCode, string message, Exception cause, string apiCode = "000000") : base(bitpayCode, message, cause, apiCode)
         {
+        }
+
+        public String GetApiCode()
+        {
+            return ApiCode;
         }
     }
 }
