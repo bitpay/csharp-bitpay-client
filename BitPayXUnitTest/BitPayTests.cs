@@ -181,9 +181,9 @@ namespace BitPayXUnitTest
         public async Task TestShouldGetInvoice()
         {
             // create an invoice then retrieve it through the get method - they should match
-            // var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, Currency.EUR));
-            var retrievedInvoice = await _bitpay.GetInvoice("6q9QTcrg8DdQSj8WiAZHPD");
-            Assert.Equal("6q9QTcrg8DdQSj8WiAZHPD", retrievedInvoice.Id);
+            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, Currency.EUR));
+            var retrievedInvoice = await _bitpay.GetInvoice(invoice.Id);
+            Assert.Equal(invoice.Id, retrievedInvoice.Id);
         }
 
         [Fact]
@@ -459,7 +459,7 @@ namespace BitPayXUnitTest
             PayoutRecipients recipientsObj = new PayoutRecipients(recipientsList);
             var recipients = await _bitpay.SubmitPayoutRecipients(recipientsObj);
             var basicRecipient = recipients[0];
-            var result = await _bitpay.requestPayoutRecipientNotification(basicRecipient.Id);
+            var result = await _bitpay.RequestPayoutRecipientNotification(basicRecipient.Id);
 
             Assert.True(result);
         }
@@ -528,7 +528,7 @@ namespace BitPayXUnitTest
             batch.RecipientId = recipients.First().Id;
             batch.NotificationUrl = "https://hookb.in/QJOPBdMgRkukpp2WO60o";
             var createPayout = await _bitpay.SubmitPayout(batch);
-            var result = await _bitpay.requestPayoutNotification(createPayout.Id);
+            var result = await _bitpay.RequestPayoutNotification(createPayout.Id);
             var cancelledPayout = await _bitpay.CancelPayout(createPayout.Id);
 
             Assert.True(result);
@@ -611,7 +611,7 @@ namespace BitPayXUnitTest
             var batch = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
             batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
             batch = await _bitpay.SubmitPayoutBatch(batch);
-            var result = await _bitpay.requestPayoutBatchNotification(batch.Id);
+            var result = await _bitpay.RequestPayoutBatchNotification(batch.Id);
             var cancelledPayoutBatch = await _bitpay.CancelPayoutBatch(batch.Id);
 
             Assert.True(result);

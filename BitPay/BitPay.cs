@@ -1040,7 +1040,7 @@ namespace BitPaySDK
         /// <returns>True if the notification was successfully sent, false otherwise.</returns>
         /// <throws>PayoutRecipientNotificationException PayoutRecipientNotificationException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<bool> requestPayoutRecipientNotification(string recipientId)
+        public async Task<bool> RequestPayoutRecipientNotification(string recipientId)
         {
            try
            {
@@ -1243,7 +1243,7 @@ namespace BitPaySDK
         /// <returns>True if the notification was successfully sent, false otherwise.</returns>
         /// <throws>PayoutNotificationException PayoutNotificationException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<bool> requestPayoutNotification(string payoutId)
+        public async Task<bool> RequestPayoutNotification(string payoutId)
         {
             try
             {
@@ -1444,7 +1444,7 @@ namespace BitPaySDK
         /// <returns>True if the notification was successfully sent, false otherwise.</returns>
         /// <throws>PayoutBatchNotificationException PayoutBatchNotificationException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<bool> requestPayoutBatchNotification(string payoutBatchId) 
+        public async Task<bool> RequestPayoutBatchNotification(string payoutBatchId) 
         {
             try
             {

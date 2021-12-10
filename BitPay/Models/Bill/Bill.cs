@@ -98,7 +98,7 @@ namespace BitPaySDK.Models.Bill
         
         public string Url { get; set; }
         
-        public string CreateDate { get; set; }
+        public string CreatedDate { get; set; }
         
         public string Id { get; set; }
         
@@ -180,7 +180,7 @@ namespace BitPaySDK.Models.Bill
             return false;
         }
 
-        public bool ShouldSerializeCreateDate()
+        public bool ShouldSerializeCreatedDate()
         {
             return false;
         }
