@@ -205,19 +205,16 @@ namespace BitPaySDK
         /// </summary>
         /// <param name="invoiceId">The id of the invoice to updated.</param>
         /// <param name="buyerEmail">The buyer's email address.</param>
-        /// <param name="buyerSms">The buyer's cell number.</param>
-        /// <param name="smsCode">The buyer's received verification code.</param>
         /// <returns>A BitPay updated Invoice object.</returns>
         /// <throws>InvoiceUpdateException InvoiceUpdateException class</throws>
-        public async Task<Invoice> UpdateInvoice(string invoiceId, string buyerEmail, string buyerSms, string smsCode)
+        public async Task<Invoice> UpdateInvoice(string invoiceId, string buyerEmail)
         {
             try
             {
                 var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(Facade.Merchant));
                 parameters.Add("buyerEmail", buyerEmail);
-                parameters.Add("buyerSms", buyerSms);
-                parameters.Add("smsCode", smsCode);
+
                 var json = JsonConvert.SerializeObject(parameters);
                 var response = await Put("invoices/" + invoiceId, json).ConfigureAwait(false);
                 var responseString = await ResponseToJsonString(response).ConfigureAwait(false);

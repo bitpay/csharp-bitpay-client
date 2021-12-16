@@ -13,11 +13,6 @@ namespace BitPaySDK.Models.Invoice
 
         public string SelectedWallet { get; set; }
 
-        public string Sms { get; set; }
-
-        [JsonProperty(PropertyName = "smsVerified")]
-        public bool SmsVerified { get; set; }
-
         public string SetSelectedTransactionCurrency { get; set; }
     }
 }

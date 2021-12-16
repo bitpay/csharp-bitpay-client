@@ -174,9 +174,9 @@ namespace BitPayXUnitTest
         [Fact]
         public async Task TestShouldGetInvoice() {
             // create an invoice then retrieve it through the get method - they should match
-            // var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, Currency.EUR));
-            var retrievedInvoice = await _bitpay.GetInvoice("6q9QTcrg8DdQSj8WiAZHPD");
-            Assert.Equal("6q9QTcrg8DdQSj8WiAZHPD", retrievedInvoice.Id);
+            var invoice = await _bitpay.CreateInvoice(new Invoice(100.0, Currency.EUR));
+            var retrievedInvoice = await _bitpay.GetInvoice(invoice.Id);
+            Assert.Equal(invoice.Id, retrievedInvoice.Id);
         }
 
         [Fact]
@@ -276,7 +276,7 @@ namespace BitPayXUnitTest
             // update and delete invoice  by id
             var basicInvoice = await _bitpay.CreateInvoice(new Invoice(1.0, Currency.USD), Facade.Merchant);
             var retreivedInvoice = await _bitpay.GetInvoice(basicInvoice.Id);
-            var updatedInvoice = await _bitpay.UpdateInvoice(retreivedInvoice.Id, "sandbox@bitpay.com", "", "");
+            var updatedInvoice = await _bitpay.UpdateInvoice(retreivedInvoice.Id, "sandbox@bitpay.com");
             var cancelledInvoice = await _bitpay.CancelInvoice(updatedInvoice.Id);
             var retreivedCancelledInvoice = await _bitpay.GetInvoice(cancelledInvoice.Id);
             Assert.NotNull(basicInvoice);

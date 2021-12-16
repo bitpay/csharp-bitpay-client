@@ -98,15 +98,8 @@ namespace BitPaySDK.Models.Invoice
         [JsonProperty(PropertyName = "forcedBuyerSelectedWallet")]
         public string ForcedBuyerSelectedWallet { get; set; }
 
-        [JsonProperty(PropertyName = "buyerSms")]
-        public string BuyerSms { get; set; }
-
         [JsonProperty(PropertyName = "buyerEmail")]
         public string BuyerEmail { get; set; }
-
-        [JsonProperty(PropertyName = "smsCode")]
-        public string SmsCode { get; set; }
-
 
         // Buyer data
         //
@@ -411,19 +404,9 @@ namespace BitPaySDK.Models.Invoice
             return !string.IsNullOrEmpty(ForcedBuyerSelectedWallet);
         }
 
-        public bool ShouldSerializeBuyerSms()
-        {
-            return !string.IsNullOrEmpty(BuyerSms);
-        }
-
         public bool ShouldSerializeBuyerEmail()
         {
             return !string.IsNullOrEmpty(BuyerEmail);
-        }
-
-        public bool ShouldSerializeSmsCode()
-        {
-            return !string.IsNullOrEmpty(SmsCode);
         }
 
         public bool ShouldSerializeBuyerProvidedEmail()

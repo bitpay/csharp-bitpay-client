@@ -233,7 +233,7 @@ namespace BitPayUnitTest {
             // update and delete invoice  by id
             var basicInvoice = await _bitpay.CreateInvoice(new Invoice(1.0, Currency.USD), Facade.Merchant);
             var retreivedInvoice = await _bitpay.GetInvoice(basicInvoice.Id);
-            var updatedInvoice = await _bitpay.UpdateInvoice(retreivedInvoice.Id, "sandbox@bitpay.com", "", "");
+            var updatedInvoice = await _bitpay.UpdateInvoice(retreivedInvoice.Id, "sandbox@bitpay.com");
             var cancelledInvoice = await _bitpay.CancelInvoice(updatedInvoice.Id);
             var retreivedCancelledInvoice = await _bitpay.GetInvoice(cancelledInvoice.Id);
             Assert.IsNotNull(basicInvoice);
@@ -498,10 +498,10 @@ namespace BitPayUnitTest {
             retrievedBill.Items.Add(new Item(){Price = 60.0, Quantity = 7, Description = "product-added"});
                 
             var updatedBill = await _bitpay.UpdateBill(retrievedBill, retrievedBill.Id);
-            Assert.Equals(basicBill.Id, retrievedBill.Id);
-            Assert.Equals(retrievedBill.Id, updatedBill.Id);
-            Assert.Equals(updatedBill.Currency, Currency.EUR);
-            Assert.Equals(updatedBill.Name, "updatedBill");
+            Assert.AreEqual(basicBill.Id, retrievedBill.Id);
+            Assert.AreEqual(retrievedBill.Id, updatedBill.Id);
+            Assert.AreEqual(updatedBill.Currency, Currency.EUR);
+            Assert.AreEqual(updatedBill.Name, "updatedBill");
         }
 
         [TestMethod]
