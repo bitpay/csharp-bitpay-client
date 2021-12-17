@@ -386,7 +386,7 @@ namespace BitPayUnitTest
             PayoutRecipients recipientsObj = new PayoutRecipients(recipientsList);
             var recipients = await _bitpay.SubmitPayoutRecipients(recipientsObj);
             var basicRecipient = recipients[0];
-            var result = await _bitpay.requestPayoutRecipientNotification(basicRecipient.Id);
+            var result = await _bitpay.RequestPayoutRecipientNotification(basicRecipient.Id);
 
             Assert.IsTrue(result);
         }
@@ -457,7 +457,7 @@ namespace BitPayUnitTest
             batch.RecipientId = recipients.First().Id;
             batch.NotificationUrl = "https://hookb.in/QJOPBdMgRkukpp2WO60o";
             var createPayout = await _bitpay.SubmitPayout(batch);
-            var result = await _bitpay.requestPayoutNotification(createPayout.Id);
+            var result = await _bitpay.RequestPayoutNotification(createPayout.Id);
             var cancelledPayout = await _bitpay.CancelPayout(createPayout.Id);
 
             Assert.IsTrue(result);
@@ -543,7 +543,7 @@ namespace BitPayUnitTest
             var batch = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
             batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
             batch = await _bitpay.SubmitPayoutBatch(batch);
-            var result = await _bitpay.requestPayoutBatchNotification(batch.Id);
+            var result = await _bitpay.RequestPayoutBatchNotification(batch.Id);
             var cancelledPayoutBatch = await _bitpay.CancelPayoutBatch(batch.Id);
 
             Assert.IsTrue(result);
