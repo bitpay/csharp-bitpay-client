@@ -120,5 +120,7 @@ Meanwhile a new pairing code is generated, the BitPay.Net Setup utility will ask
 
 The pairing code is then entered into the BitPay merchant dashboard for the desired merchant.  Your interactive authentication at https://bitpay.com/login provides the authentication needed to create finalize the client-server pairing request.
 
+## Copyright
+Copyright (c) 2019 BitPay
 
-See also the xUnit test project for more examples of API calls.
+See also the tests project for more examples of API calls.
