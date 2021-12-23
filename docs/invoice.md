@@ -801,4 +801,4 @@ Invoice cancelInvoice = bitpay.CancelInvoice(invoice.Id).Result;
 ```
 
 
-### [Back to guide index](GUIDE.md)
+### [Back to guide index](../GUIDE.md)

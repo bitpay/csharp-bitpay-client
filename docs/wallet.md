@@ -3134,4 +3134,4 @@ var wallets = bitpay.GetSupportedWallets();
 ```
 
 
-### [Back to guide index](GUIDE.md)
+### [Back to guide index](../GUIDE.md)

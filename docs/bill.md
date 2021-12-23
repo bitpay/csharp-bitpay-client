@@ -448,5 +448,5 @@ String deliveryResult = bitpay.DeliverBill(bill.Id, bill.Token);
 ```
 
 
-### [Back to guide index](GUIDE.md)
+### [Back to guide index](../GUIDE.md)
 
