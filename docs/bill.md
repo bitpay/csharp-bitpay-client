@@ -446,3 +446,7 @@ String deliveryResult = bitpay.DeliverBill(bill.Id, bill.Token);
     "data": "Success"
 }
 ```
+
+
+### [Back to guide index](GUIDE.md)
+

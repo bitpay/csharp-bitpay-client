@@ -269,3 +269,6 @@ Boolean result = bitpay.RequestRefundNotification(createRefund.Id);
 | Name | Description | Type |  
 | --- | --- | :---: | 
 | status | successful response status will be always be “success” | `string` |
+
+
+### [Back to guide index](GUIDE.md)

@@ -171,3 +171,5 @@ var ledger = bitpay.GetLedger(Currency.BTC, yesterday.AddMonths(-1).AddDays(3), 
   }
 ]
 ```
+
+### [Back to guide index](GUIDE.md)

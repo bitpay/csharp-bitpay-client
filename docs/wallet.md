@@ -3132,3 +3132,6 @@ var wallets = bitpay.GetSupportedWallets();
   ]
 }
 ```
+
+
+### [Back to guide index](GUIDE.md)
