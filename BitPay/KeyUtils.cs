@@ -11,7 +11,6 @@ namespace BitPaySDK
     public class KeyUtils
     {
         private static string PrivateKeyFile;
-
         private const string Alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
         private static readonly char[] HexArray = "0123456789abcdef".ToCharArray();
 

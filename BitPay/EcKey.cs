@@ -82,6 +82,14 @@ namespace BitPaySDK
             PublicKey = PublicKeyFromPrivate(privateKey);
         }
 
+        public BigInteger PrivateKey
+        {
+            get
+            {
+                return _privateKey;
+            }
+        }
+
         /// <summary>
         ///     Gets the hash160 form of the public key (as seen in addresses).
         /// </summary>
