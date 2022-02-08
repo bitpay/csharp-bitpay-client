@@ -43,7 +43,7 @@ namespace BitPayXUnitTest
         {
             // JSON minified with the BitPay configuration as in the required configuration file
             // and parsed into a IConfiguration object
-            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"PrivateKeyPath\":\"bitpay_private_test.key\",\"ApiTokens\":{\"merchant\":\"A4qqz5JXoK5TMi3hD8EfKNHJB2ybLgdYRkbZwZ5M9ZgT\",\"payout\":\"G4pfTiUU7967YJs7Z7n8e2SuQPa2abDTgFrjFB5ZFZsT\"}},\"Prod\":{\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"merchant\":\"\"}}}}}";
+            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"PrivateKeyPath\":\"sec/bitpay_test_private.key\",\"ApiTokens\":{\"merchant\":\"A4qqz5JXoK5TMi3hD8EfKNHJB2ybLgdYRkbZwZ5M9ZgT\",\"payout\":\"G4pfTiUU7967YJs7Z7n8e2SuQPa2abDTgFrjFB5ZFZsT\"}},\"Prod\":{\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"merchant\":\"\"}}}}}";
             var memoryJsonFile = new MemoryFileInfo("config.json", Encoding.UTF8.GetBytes(json), DateTimeOffset.Now);
             var memoryFileProvider = new MockFileProvider(memoryJsonFile);
 
@@ -327,22 +327,24 @@ namespace BitPayXUnitTest
             var today = date;
             var sevenDaysAgo = date.AddDays(-95);
             var invoices = await _bitpay.GetInvoices(sevenDaysAgo, today, InvoiceStatus.Complete);
-            Invoice firstInvoice = invoices.First();
-
+            Invoice firstInvoice = invoices[0];
             Assert.NotNull(firstInvoice);
-            string refundEmail = "";
+            Refund createdRefund = await _bitpay.CreateRefund(firstInvoice.Id, firstInvoice.Price, firstInvoice.Currency, true, false, false);
+            List<Refund> retrievedRefunds = await _bitpay.GetRefunds(firstInvoice.Id);
+            Refund firstRefund = retrievedRefunds.Last();
+            Refund updatedRefund = await _bitpay.UpdateRefund(firstRefund.Id, "created");
+            Refund retrievedRefund = await _bitpay.GetRefund(firstRefund.Id);
+            Boolean sentStatus = await _bitpay.SendRefundNotification(firstRefund.Id);
+            Refund cancelRefund = await _bitpay.CancelRefund(firstRefund.Id);
+            List<Wallet> supportedWallets = await _bitpay.GetSupportedWallets();
 
-            Boolean createdRefund = await _bitpay.CreateRefund(firstInvoice, refundEmail, firstInvoice.Price, firstInvoice.Currency);
-            List<Refund> retrievedRefunds = await _bitpay.GetRefunds(firstInvoice);
-            Refund firstRefund = retrievedRefunds.First();
-            Refund retrievedRefund = await _bitpay.GetRefund(firstInvoice, firstRefund.Id);
-            Boolean cancelled = await _bitpay.CancelRefund(firstInvoice, firstRefund.Id);
-
-            Assert.True(createdRefund);
-            Assert.True(retrievedRefunds.Count > 0);
-            Assert.NotNull(firstRefund);
-            Assert.NotNull(retrievedRefund);
-            Assert.True(cancelled);
+            Assert.NotNull(invoices);
+            Assert.NotNull(retrievedRefunds);
+            Assert.Equal("created", updatedRefund.Status);
+            Assert.Equal(firstRefund.Id, retrievedRefund.Id);
+            Assert.True(sentStatus);
+            Assert.Equal("canceled", cancelRefund.Status);
+            Assert.NotNull(supportedWallets);
         }
         [Fact]
         public async Task testShouldCreateGetCancelRefundRequestNew() {
@@ -510,7 +512,7 @@ namespace BitPayXUnitTest
         [Fact]
         public async Task testShouldSubmitPayout()
         {
-            var ledgerCurrency = Currency.ETH;
+            var ledgerCurrency = Currency.USD;
             var currency = Currency.USD;
             var payout = new Payout(5.0, currency, ledgerCurrency);
             var recipients = await _bitpay.GetPayoutRecipients("active", 1);
@@ -537,14 +539,14 @@ namespace BitPayXUnitTest
         {
             var endDate = DateTime.Now;
             var startDate = endDate.AddDays(-50);
-            var batches = await _bitpay.GetPayouts(startDate, endDate, PayoutStatus.New, "");
+            var batches = await _bitpay.GetPayouts(startDate, endDate, PayoutStatus.Cancelled, "");
             Assert.True(batches.Count > 0);
         }
 
         [Fact]
         public async Task testShouldSubmitGetAndDeletePayout()
         {
-            var ledgerCurrency = Currency.ETH;
+            var ledgerCurrency = Currency.USD;
             var currency = Currency.USD;
             var batch = new Payout(5.0, currency, ledgerCurrency);
             var recipients = await _bitpay.GetPayoutRecipients("active", 1);
@@ -564,7 +566,7 @@ namespace BitPayXUnitTest
         [Fact]
         public async Task testShouldRequestPayoutNotification()
         {
-            var ledgerCurrency = Currency.ETH;
+            var ledgerCurrency = Currency.USD;
             var currency = Currency.USD;
             var batch = new Payout(5.0, currency, ledgerCurrency);
             var recipients = await _bitpay.GetPayoutRecipients("active", 1);
@@ -594,17 +596,16 @@ namespace BitPayXUnitTest
 
             var effectiveDate = threeDaysFromNow;
             var currency = Currency.USD;
-            var ledgerCurrency = Currency.ETH;
+            var ledgerCurrency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
                 new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
-                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")
             };
             var batch = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
             batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
             batch = await _bitpay.SubmitPayoutBatch(batch);
 
             Assert.NotNull(batch.Id);
-            Assert.True(batch.Instructions.Count == 2);
+            Assert.True(batch.Instructions.Count == 1);
             
             await _bitpay.CancelPayoutBatch(batch.Id);
         }
@@ -618,7 +619,7 @@ namespace BitPayXUnitTest
 
             var effectiveDate = threeDaysFromNow;
             var currency = Currency.USD;
-            var ledgerCurrency = Currency.ETH;
+            var ledgerCurrency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
                 new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
                 new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")
@@ -643,14 +644,13 @@ namespace BitPayXUnitTest
         public async Task testShouldRequestPayoutBatchNotification()
         {
             var date = DateTime.Now;
-            var ledgerCurrency = Currency.ETH;
+            var ledgerCurrency = Currency.USD;
             var threeDaysFromNow = date.AddDays(3);
             var currency = Currency.USD;
             var effectiveDate = threeDaysFromNow;
             var instructions = new List<PayoutInstruction>() {
                 new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
-                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")
-            };
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")            };
             var batch = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
             batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
             batch = await _bitpay.SubmitPayoutBatch(batch);
@@ -675,7 +675,7 @@ namespace BitPayXUnitTest
         {
             var endDate = DateTime.Now;
             var startDate = endDate.AddDays(-50);
-            var batches = await _bitpay.GetPayoutBatches(startDate, endDate, PayoutStatus.New);
+            var batches = await _bitpay.GetPayoutBatches(startDate, endDate, PayoutStatus.Cancelled);
             Assert.True(batches.Count > 0, "No batches retrieved");
         }
 
