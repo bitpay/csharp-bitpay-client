@@ -25,7 +25,7 @@ namespace BitPayXUnitTest
         // The pairing code generated in your BitPay account -
         // https://test.bitpay.com/dashboard/merchant/api-tokens
         // This is the POS Pairing Code
-        private static readonly string PairingCode = "Bh3yy6r";
+        private static readonly string PairingCode = "hyxq4Ew";
 
         // Your favourite client name
         private static readonly string ClientName = "BitPay .Net Client v2.2.1907 Tester on " + Environment.MachineName;
@@ -76,7 +76,7 @@ namespace BitPayXUnitTest
                     It should get you to a page to approve it. After you approve it, run the tests
                     again and they should pass.
                  */
-                throw new BitPayException("Please approve the pairing code " + pcode + " in your account.");
+               throw new BitPayException("Please approve the pairing code " + pcode + " in your account.");
             }
 
             // payouts require the Payout Facade

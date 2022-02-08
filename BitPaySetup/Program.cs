@@ -3,6 +3,7 @@ using System.IO;
 using BitPaySDK;
 using BitPaySetup.Models;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace BitPaySetup
 {
@@ -12,9 +13,11 @@ namespace BitPaySetup
         private static bool confInitiated;
         private static string confFilePath;
         private static string ecKeyFilePath;
+        private static string ecKeyPlain;
         private static readonly EcKey ecKey = null;
         private static string env;
-        private static string pairingCode = "";
+        private static string mPairingCode = "";
+        private static string pPairingCode = "";
         private static string facade = "";
         private static string notification = "";
         private static string envUrl = "";
@@ -129,122 +132,240 @@ namespace BitPaySetup
             if (env == Env.Test) ecKeyFilePath = appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKeyPath;
             if (env == Env.Prod) ecKeyFilePath = appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKeyPath;
 
-            if (!string.IsNullOrEmpty(ecKeyFilePath))
+            ecKey = KeyUtils.CreateEcKey();
+            ecKeyPlain = ecKey.PrivateKey.ToString();
+            Console.WriteLine(" Select whether you want token as a plain text format or in a file format");
+            Console.WriteLine(" 1. Generate key (Plain text forrmat)");
+            Console.WriteLine(" 2. Save key in a file (Encrypted format)");
+            Console.WriteLine("");
+            Console.WriteLine(" Select an option");
+            Console.WriteLine(" > ");
+            var option = Console.ReadLine();
+
+            if (option.ToString() == "1")
             {
-                Console.WriteLine(" The current private key file defined is: " + ecKeyFilePath);
-                Console.WriteLine(" Would you like to change it? [yes|no] (default: no)");
-                Console.WriteLine();
-                Console.Write(" > ");
-                var answer = Console.ReadLine();
-                while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
-                    answer = Console.ReadLine();
-
-                if (answer.ToLower() == "no" || answer.ToLower() == "")
+                SetNotification("This is private key: " + ecKeyPlain + "\n" + "This is public key: " + ecKey.PublicKeyHexBytes + "\n" + "Please save it somewhere for future purposes. This 1st msg", 1);
+                if (!string.IsNullOrEmpty(ecKeyFilePath))
                 {
-                    if (File.Exists(ecKeyFilePath))
-                    {
-                        SetNotification(" Selected private key file: " + ecKeyFilePath, 1);
-
-                        return;
-                    }
-
-                    SetNotification(" The private key file does not longer exists in: \n \"" + ecKeyFilePath +
-                                    "\"\n Please, proceed with the following instructions.", 2);
-                    Console.Clear();
-                    DrawTitle();
-                }
-            }
-
-            Console.WriteLine(" Enter the full path for the private key file where this will loaded from:");
-            Console.WriteLine(" If click Enter, a file named \"bitpay_private_" + env.ToLower() +
-                              " will be generated in the root of this application and");
-            Console.WriteLine(" any file with the same name in this directory will be overwritten.");
-            Console.WriteLine();
-            Console.Write(" > ");
-            var newEcKeyPath = Console.ReadLine().Trim();
-
-            if (string.IsNullOrEmpty(newEcKeyPath))
-            {
-                string ecKeyFileName = @"bitpay_private_" + env.ToLower() + ".key";
-
-                try
-                {
-                    if (!Directory.Exists(ecKeyFilePath))
-                    {
-                        DirectoryInfo dir = Directory.CreateDirectory("output");
-                        ecKeyFilePath = Path.Combine(dir.FullName, ecKeyFileName);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-
-                if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
-                {
-                    SetNotification(" A file with the same name already exists: \n \"" + ecKeyFilePath +
-                                    "\"\n Make sure you want to modify it, then delete it manually before trying again" +
-                                    "\"\n For security reasons we won't delete a private key.", 2);
-
-                    GenerateKeyPair(ecKey);
-                    return;
-                }
-
-                ecKey = KeyUtils.CreateEcKey();
-                KeyUtils.PrivateKeyExists(ecKeyFilePath);
-                KeyUtils.SaveEcKey(ecKey);
-
-                if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
-                {
-                    SetNotification(" New private key generated successfully with public key:\n " +
-                                    ecKey.PublicKeyHexBytes +
-                                    "\n in: \"" + ecKeyFilePath + "\"", 1);
-                }
-                else
-                {
-                    SetNotification(" Something went wrong when creating the file: \n \"" + newEcKeyPath +
-                                    "\"\n Make sure the directory exists and you have the right permissions, then trying again.",
-                        2);
-
-                    GenerateKeyPair(ecKey);
-                    return;
-                }
-            }
-            else
-            {
-                if (!File.Exists(newEcKeyPath))
-                {
-                    SetNotification(" The file entered not found in: \n \"" + newEcKeyPath + "\"", 2);
-                    Console.Clear();
-                    DrawTitle();
-                    Console.WriteLine(" Would you like to provide a different file path? [yes|no] (default: no)");
-                    Console.WriteLine(
-                        " If 'no', a new file will be generated in the entered location with the given name.");
+                    Console.WriteLine(" The current private key file defined is: " + ecKeyFilePath);
+                    Console.WriteLine(" Would you like to change it? [yes|no] (default: no)");
                     Console.WriteLine();
                     Console.Write(" > ");
                     var answer = Console.ReadLine();
                     while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
                         answer = Console.ReadLine();
 
-                    if (answer.ToLower() == "yes") GenerateKeyPair(ecKey);
-
-                    ecKeyFilePath = Path.GetFullPath(newEcKeyPath);
-                }
-                else
-                {
-                    if (KeyUtils.PrivateKeyExists(newEcKeyPath))
+                    if (answer.ToLower() == "no" || answer.ToLower() == "")
                     {
-                        SetNotification(" A file with the same name already exists: \n \"" + newEcKeyPath +
+                        if (File.Exists(ecKeyFilePath))
+                        {
+                            SetNotification(" Selected private key file: " + ecKeyFilePath, 1);
+
+                            return;
+                        }
+
+                        SetNotification(" The private key file does not longer exists in: \n \"" + ecKeyFilePath +
+                                        "\"\n Please, proceed with the following instructions.", 2);
+                        Console.Clear();
+                        DrawTitle();
+                    }
+                }
+
+                Console.WriteLine();
+                Console.Write(" Hit enter ");
+                var newEcKeyPath = Console.ReadLine().Trim();
+
+                if (string.IsNullOrEmpty(newEcKeyPath))
+                {
+                    Random rndNum = new Random();
+                    int number = rndNum.Next();
+                    string ecKeyFileName = @"bitpay_private_" + env.ToLower() + number + ".key";
+
+                    try
+                    {
+                        if (!Directory.Exists(ecKeyFilePath))
+                        {
+                            DirectoryInfo dir = Directory.CreateDirectory("newOutput");
+                            ecKeyFilePath = Path.Combine(dir.FullName, ecKeyFileName);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+
+                    if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
+                    {
+                        SetNotification(" A file with the same name already exists: \n \"" + ecKeyFilePath +
                                         "\"\n Make sure you want to modify it, then delete it manually before trying again" +
                                         "\"\n For security reasons we won't delete a private key.", 2);
 
                         GenerateKeyPair(ecKey);
                         return;
                     }
+
+                    // ecKey = KeyUtils.CreateEcKey();
+                    KeyUtils.PrivateKeyExists(ecKeyFilePath);
+                    KeyUtils.SaveEcKey(ecKey);
+
+                    if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
+                    {
+                        SetNotification(" This is private key: " + ecKeyPlain + "\n" + "This is public key: " + ecKey.PublicKeyHexBytes + "\n" + "Please save it somewhere for future purposes.", 1);
+                        if (env == Env.Test) appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKey = ecKeyPlain;
+                        if (env == Env.Prod) appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKey = ecKeyPlain;
+                        GenerateConfFile(confFilePath);
+                    }
+                    else
+                    {
+                        SetNotification(" Something went wrong when creating the file: \n \"" + newEcKeyPath +
+                                        "\"\n Make sure the directory exists and you have the right permissions, then trying again.",
+                            2);
+
+                        GenerateKeyPair(ecKey);
+                        return;
+                    }
+                }
+                else
+                {
+                    if (!File.Exists(newEcKeyPath))
+                    {
+                        SetNotification(" The file entered not found in: \n \"" + newEcKeyPath + "\"", 2);
+                        Console.Clear();
+                        DrawTitle();
+                        Console.WriteLine(" Would you like to provide a different file path? [yes|no] (default: no)");
+                        Console.WriteLine(
+                            " If 'no', a new file will be generated in the entered location with the given name.");
+                        Console.WriteLine();
+                        Console.Write(" > ");
+                        var answer = Console.ReadLine();
+                        while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
+                            answer = Console.ReadLine();
+
+                        if (answer.ToLower() == "yes") GenerateKeyPair(ecKey);
+
+                        ecKeyFilePath = Path.GetFullPath(newEcKeyPath);
+                        ecKeyPlain = ecKey.PrivateKey.ToString();
+                    }
+                    else
+                    {
+                        if (KeyUtils.PrivateKeyExists(newEcKeyPath))
+                        {
+                            SetNotification(" A file with the same name already exists: \n \"" + newEcKeyPath +
+                                            "\"\n Make sure you want to modify it, then delete it manually before trying again" +
+                                            "\"\n For security reasons we won't delete a private key.", 2);
+
+                            GenerateKeyPair(ecKey);
+                            return;
+                        }
+                    }
+
+                    try
+                    {
+                        ecKey = KeyUtils.CreateEcKey();
+                        KeyUtils.PrivateKeyExists(ecKeyFilePath);
+                        KeyUtils.SaveEcKey(ecKey);
+
+                        if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
+                        {
+                            SetNotification(" New private key generated successfully with public key:\n " +
+                                            ecKey.PublicKeyHexBytes +
+                                            "\n in: \"" + ecKeyFilePath + "\"", 1);
+                        }
+                        else
+                        {
+                            throw new Exception(" Could not store the file: \n \"" + newEcKeyPath + "\"");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        SetNotification(
+                            " An error occurred, please, check if the you have the right\n permissions to write in the specified directory.\n Error Details: " +
+                            e.Message, 2);
+
+                        GenerateKeyPair(ecKey);
+                    }
+
+                    SetNotification(" New Private key generated successfully with public key: " + ecKey.PublicKeyHexBytes +
+                                    " in: \n \"" + newEcKeyPath + "\"", 1);
                 }
 
-                try
+                if (env == Env.Test) 
+                { 
+                 appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKeyPath = ecKeyFilePath;
+                 appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKey = ecKeyPlain;
+                }
+                if (env == Env.Prod)
                 {
+                  appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKeyPath = ecKeyFilePath;
+                  appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKey = ecKeyPlain;
+                }
+
+                GenerateConfFile(confFilePath);
+            }
+
+            if (option.ToString() == "2")
+            {
+                if (!string.IsNullOrEmpty(ecKeyFilePath))
+                {
+                    Console.WriteLine(" The current private key file defined is: " + ecKeyFilePath);
+                    Console.WriteLine(" Would you like to change it? [yes|no] (default: no)");
+                    Console.WriteLine();
+                    Console.Write(" > ");
+                    var answer = Console.ReadLine();
+                    while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
+                        answer = Console.ReadLine();
+
+                    if (answer.ToLower() == "no" || answer.ToLower() == "")
+                    {
+                        if (File.Exists(ecKeyFilePath))
+                        {
+                            SetNotification(" Selected private key file: " + ecKeyFilePath, 1);
+
+                            return;
+                        }
+
+                        SetNotification(" The private key file does not longer exists in: \n \"" + ecKeyFilePath +
+                                        "\"\n Please, proceed with the following instructions.", 2);
+                        Console.Clear();
+                        DrawTitle();
+                    }
+                }
+
+                Console.WriteLine(" Enter the full path for the private key file where this will loaded from:");
+                Console.WriteLine(" If click Enter, a file named \"bitpay_private_" + env.ToLower() +
+                                  " will be generated in the root of this application and");
+                Console.WriteLine(" any file with the same name in this directory will be overwritten.");
+                Console.WriteLine();
+                Console.Write(" > ");
+                var newEcKeyPath = Console.ReadLine().Trim();
+
+                if (string.IsNullOrEmpty(newEcKeyPath))
+                {
+                    string ecKeyFileName = @"bitpay_private_" + env.ToLower() + ".key";
+
+                    try
+                    {
+                        if (!Directory.Exists(ecKeyFilePath))
+                        {
+                            DirectoryInfo dir = Directory.CreateDirectory("output");
+                            ecKeyFilePath = Path.Combine(dir.FullName, ecKeyFileName);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+
+                    if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
+                    {
+                        SetNotification(" A file with the same name already exists: \n \"" + ecKeyFilePath +
+                                        "\"\n Make sure you want to modify it, then delete it manually before trying again" +
+                                        "\"\n For security reasons we won't delete a private key.", 2);
+
+                        GenerateKeyPair(ecKey);
+                        return;
+                    }
+
                     ecKey = KeyUtils.CreateEcKey();
                     KeyUtils.PrivateKeyExists(ecKeyFilePath);
                     KeyUtils.SaveEcKey(ecKey);
@@ -257,26 +378,82 @@ namespace BitPaySetup
                     }
                     else
                     {
-                        throw new Exception(" Could not store the file: \n \"" + newEcKeyPath + "\"");
+                        SetNotification(" Something went wrong when creating the file: \n \"" + newEcKeyPath +
+                                        "\"\n Make sure the directory exists and you have the right permissions, then trying again.",
+                            2);
+
+                        GenerateKeyPair(ecKey);
+                        return;
                     }
                 }
-                catch (Exception e)
+                else
                 {
-                    SetNotification(
-                        " An error occurred, please, check if the you have the right\n permissions to write in the specified directory.\n Error Details: " +
-                        e.Message, 2);
+                    if (!File.Exists(newEcKeyPath))
+                    {
+                        SetNotification(" The file entered not found in: \n \"" + newEcKeyPath + "\"", 2);
+                        Console.Clear();
+                        DrawTitle();
+                        Console.WriteLine(" Would you like to provide a different file path? [yes|no] (default: no)");
+                        Console.WriteLine(
+                            " If 'no', a new file will be generated in the entered location with the given name.");
+                        Console.WriteLine();
+                        Console.Write(" > ");
+                        var answer = Console.ReadLine();
+                        while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
+                            answer = Console.ReadLine();
 
-                    GenerateKeyPair(ecKey);
+                        if (answer.ToLower() == "yes") GenerateKeyPair(ecKey);
+
+                        ecKeyFilePath = Path.GetFullPath(newEcKeyPath);
+                    }
+                    else
+                    {
+                        if (KeyUtils.PrivateKeyExists(newEcKeyPath))
+                        {
+                            SetNotification(" A file with the same name already exists: \n \"" + newEcKeyPath +
+                                            "\"\n Make sure you want to modify it, then delete it manually before trying again" +
+                                            "\"\n For security reasons we won't delete a private key.", 2);
+
+                            GenerateKeyPair(ecKey);
+                            return;
+                        }
+                    }
+
+                    try
+                    {
+                        ecKey = KeyUtils.CreateEcKey();
+                        KeyUtils.PrivateKeyExists(ecKeyFilePath);
+                        KeyUtils.SaveEcKey(ecKey);
+
+                        if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
+                        {
+                            SetNotification(" New private key generated successfully with public key:\n " +
+                                            ecKey.PublicKeyHexBytes +
+                                            "\n in: \"" + ecKeyFilePath + "\"", 1);
+                        }
+                        else
+                        {
+                            throw new Exception(" Could not store the file: \n \"" + newEcKeyPath + "\"");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        SetNotification(
+                            " An error occurred, please, check if the you have the right\n permissions to write in the specified directory.\n Error Details: " +
+                            e.Message, 2);
+
+                        GenerateKeyPair(ecKey);
+                    }
+
+                    SetNotification(" New Private key generated successfully with public key: " + ecKey.PublicKeyHexBytes +
+                                    " in: \n \"" + newEcKeyPath + "\"", 1);
                 }
 
-                SetNotification(" New Private key generated successfully with public key: " + ecKey.PublicKeyHexBytes +
-                                " in: \n \"" + newEcKeyPath + "\"", 1);
+                if (env == Env.Test) appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKeyPath = ecKeyFilePath;
+                if (env == Env.Prod) appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKeyPath = ecKeyFilePath;
+
+                GenerateConfFile(confFilePath);
             }
-
-            if (env == Env.Test) appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKeyPath = ecKeyFilePath;
-            if (env == Env.Prod) appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKeyPath = ecKeyFilePath;
-
-            GenerateConfFile(confFilePath);
         }
 
         private static void GetPairingCodeAndToken()
@@ -295,57 +472,26 @@ namespace BitPaySetup
                               " facade? [yes|no] (default: yes)");
             Console.WriteLine();
             Console.Write(" > ");
-            var answer = Console.ReadLine();
-            while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
+            var answer = Console.ReadLine().Trim().ToLower();
+            while (answer != "yes" && answer != "no" && answer != "")
                 answer = Console.ReadLine();
 
-            if (answer.ToLower() == "no")
+            if (answer == "no")
             {
-                GetPairingCodeAndToken();
+                System.Environment.Exit(1);
                 return;
             }
 
-            if (facade == Facade.Payout)
-            {
-                SetNotification(
-                    " In order to get access to the Payout facade, you need to contact Support at support@bitpay.com",
-                    3);
-                Console.Clear();
-                DrawTitle();
-                Console.WriteLine(" Did you contact and receive confirmation yet? [yes|no] (default: yes)");
-                Console.WriteLine(
-                    " If 'no', a new file will be generated in the entered location with the given name.");
-                Console.WriteLine();
-                Console.Write(" > ");
-                answer = Console.ReadLine();
-                while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
-                    answer = Console.ReadLine();
-
-                if (answer.ToLower() == "no")
-                {
-                    GetPairingCodeAndToken();
-                    return;
-                }
-            }
-
             var apiTokens = new ApiTokens();
-            if (env == Env.Test) apiTokens = appConfig.BitPayConfiguration.EnvConfig.Test.ApiTokens;
-            if (env == Env.Prod) apiTokens = appConfig.BitPayConfiguration.EnvConfig.Prod.ApiTokens;
-
-            if (TokenCurrentlyExists(facade, apiTokens))
+            if (env == Env.Test)
             {
-                SetNotification(" A token for this Facade (" + facade + ") on this Environment (" + env +
-                                ") already exists.", 3);
-                Console.Clear();
-                DrawTitle();
-                Console.WriteLine(" Would you like to replace it for a new one? [yes|no] (default: no)");
-                Console.WriteLine();
-                Console.Write(" > ");
-                answer = Console.ReadLine();
-                while (answer.ToLower() != "yes" && answer.ToLower() != "no")
-                    answer = Console.ReadLine();
-
-                if (answer.ToLower() == "no" || answer.ToLower() == "") return;
+                apiTokens = appConfig.BitPayConfiguration.EnvConfig.Test.ApiTokens;
+                
+            }
+            if (env == Env.Prod)
+            {
+                apiTokens = appConfig.BitPayConfiguration.EnvConfig.Prod.ApiTokens;
+                
             }
 
             var retry = true;
@@ -353,11 +499,35 @@ namespace BitPaySetup
             {
                 try
                 {
-                    var bitpay = new BitPay(confFilePath);
+                    if (facade == Facade.Merchant )
+                    {
+                        var bitpay = new BitPay(confFilePath);
 
-                    pairingCode = bitpay.RequestClientAuthorization(facade).Result;
+                        mPairingCode = bitpay.RequestClientAuthorization(facade).Result;
 
-                    newToken = bitpay.GetTokenByFacade(facade);
+                        newToken = bitpay.GetTokenByFacade(facade);
+
+                    }
+                    else if (facade == Facade.Payout)
+                    {
+                        var bitpay = new BitPay(confFilePath);
+
+                        pPairingCode = bitpay.RequestClientAuthorization(facade).Result;
+
+                        newToken = bitpay.GetTokenByFacade(facade);
+
+                    }
+                    else
+                    {
+                        var bitpay = new BitPay(confFilePath);
+
+                        mPairingCode = bitpay.RequestClientAuthorization(Facade.Merchant).Result;
+                        apiTokens.merchant = bitpay.GetTokenByFacade(Facade.Merchant);
+
+                        pPairingCode = bitpay.RequestClientAuthorization(Facade.Payout).Result;
+                        apiTokens.payout = bitpay.GetTokenByFacade(Facade.Payout);
+                    }
+                    
                 }
                 catch (Exception e)
                 {
@@ -381,23 +551,51 @@ namespace BitPaySetup
 
                 if (env == Env.Test)
                 {
-                    appConfig.BitPayConfiguration.EnvConfig.Test.ApiTokens = apiTokens;
-                    envUrl = "https://test.bitpay.com/";
+                    if (appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKey != "")
+                    {
+                        appConfig.BitPayConfiguration.EnvConfig.Test.ApiTokens = apiTokens;
+                        envUrl = "https://test.bitpay.com/";
+                        appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKeyPath = "";
+                    }
+                    
                 }
-
+                
                 if (env == Env.Prod)
                 {
-                    appConfig.BitPayConfiguration.EnvConfig.Prod.ApiTokens = apiTokens;
-                    envUrl = "https://bitpay.com/";
+                    if (appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKey != "")
+                    {
+                        appConfig.BitPayConfiguration.EnvConfig.Prod.ApiTokens = apiTokens;
+                        envUrl = "https://bitpay.com/";
+                        appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKeyPath = "";
+                    }
+                    
                 }
 
                 GenerateConfFile(confFilePath);
-
-                SetNotification(" New pairing code for " + facade + " facade: " + pairingCode +
+                if (facade == Facade.Merchant)
+                {
+                    SetNotification(" New pairing code for " + facade + " facade: " + mPairingCode +
                                 "\n Please, copy the above pairing code and approve on your BitPay Account at the following link:\n \"" +
                                 envUrl +
                                 "dashboard/merchant/api-tokens\".\n Once this Pairing Code is approved, press Enter to run some tests.\n",
                     1);
+                }
+                else if (facade == Facade.Payout)
+                {
+                    SetNotification(" New pairing code for " + facade + " facade: " + pPairingCode +
+                                "\n Please, copy the above pairing code and approve on your BitPay Account at the following link:\n \"" +
+                                envUrl +
+                                "dashboard/merchant/api-tokens\".\n Once this Pairing Code is approved, press Enter to run some tests.\n",
+                    1);
+                }
+                else if (facade == "both")
+                {
+                    SetNotification(" New pairing code for " + Facade.Merchant + " facade: " + mPairingCode + " and for " + Facade.Payout + " facade: " + pPairingCode +
+                                    "\n Please, copy the above pairing code and approve on your BitPay Account at the following link:\n \"" +
+                                    envUrl +
+                                    "dashboard/merchant/api-tokens\".\n Once this Pairing Code is approved, press Enter to run some tests.\n",
+                        1);
+                }
 
                 Console.Clear();
                 DrawTitle();
@@ -408,8 +606,10 @@ namespace BitPaySetup
 
                 while (retry = !TestTokenSuccess(facade))
                 {
-                    SetNotification(" Something went wrong\n Please, make sure you approved the pairing code: " +
-                                    pairingCode + " for " + facade +
+                    if (facade == Facade.Merchant)
+                    {
+                        SetNotification(" Something went wrong\n Please, make sure you approved the pairing code: " +
+                                    mPairingCode + " for " + facade +
                                     " facade\n Copy the above pairing code and approve on your BitPay Account at the following link:\n \"" +
                                     envUrl +
                                     "dashboard/merchant/api-tokens\".\n Once this Pairing Code is approved, press Enter to run some tests again.\n\n" +
@@ -418,6 +618,33 @@ namespace BitPaySetup
                                     "If your integration does not work with the generated files, please contact support at support@bitpay.com\n" +
                                     "or report it as an issue on the GitHub repository for this tool.\n",
                         2);
+                    }
+                    else if (facade == Facade.Payout)
+                    {
+                        SetNotification(" Something went wrong\n Please, make sure you approved the pairing code: " +
+                                    pPairingCode + " for " + facade +
+                                    " facade\n Copy the above pairing code and approve on your BitPay Account at the following link:\n \"" +
+                                    envUrl +
+                                    "dashboard/merchant/api-tokens\".\n Once this Pairing Code is approved, press Enter to run some tests again.\n\n" +
+                                    "* NOTE: If you approved the pairing code and a token has been stored in the configuration file, you can\n" +
+                                    "then ignore this message and close this application.\n" +
+                                    "If your integration does not work with the generated files, please contact support at support@bitpay.com\n" +
+                                    "or report it as an issue on the GitHub repository for this tool.\n",
+                        2);
+                    }
+                    else if (facade == "both")
+                    {
+                        SetNotification(" Something went wrong\n Please, make sure you approved the pairing code: " +
+                                    mPairingCode + " for " + Facade.Merchant + "and pairing code: " + pPairingCode + " for " + Facade.Payout +
+                                    " facade\n Copy the above pairing code and approve on your BitPay Account at the following link:\n \"" +
+                                    envUrl +
+                                    "dashboard/merchant/api-tokens\".\n Once this Pairing Code is approved, press Enter to run some tests again.\n\n" +
+                                    "* NOTE: If you approved the pairing code and a token has been stored in the configuration file, you can\n" +
+                                    "then ignore this message and close this application.\n" +
+                                    "If your integration does not work with the generated files, please contact support at support@bitpay.com\n" +
+                                    "or report it as an issue on the GitHub repository for this tool.\n",
+                        2);
+                    }
 
                     Console.Clear();
                     DrawTitle();
@@ -473,6 +700,7 @@ namespace BitPaySetup
                     " Select a facade for which you want to generate a new token pair (Press Enter to skip)");
                 Console.WriteLine(" 1. Merchant");
                 Console.WriteLine(" 2. Payout");
+                Console.WriteLine(" 3. Both");
                 Console.WriteLine();
                 Console.Write(" Select an option: ");
 
@@ -495,6 +723,9 @@ namespace BitPaySetup
                         case '2':
                             facade = Facade.Payout;
                             return;
+                        case '3':
+                            facade = "both";
+                            return;
                         default:
                             facade = null;
                             return;
@@ -502,22 +733,6 @@ namespace BitPaySetup
 
                 SetNotification(notificationColorCode: 2);
             }
-        }
-
-        private static bool TokenCurrentlyExists(string facade, ApiTokens apiTokens)
-        {
-            var tokenExists = true;
-            switch (facade)
-            {
-                case Facade.Merchant:
-                    if (string.IsNullOrEmpty(apiTokens.merchant)) tokenExists = false;
-                    break;
-                case Facade.Payout:
-                    if (string.IsNullOrEmpty(apiTokens.payout)) tokenExists = false;
-                    break;
-            }
-
-            return tokenExists;
         }
         
         private static bool TestTokenSuccess(string facade)
@@ -532,6 +747,11 @@ namespace BitPaySetup
                 else if (facade == Facade.Payout)
                 {
                     var response = bitpay.GetPayoutBatch("1").Result;
+                }
+                else
+                {
+                    var responseM = bitpay.GetInvoice("1", facade).Result;
+                    var responseP = bitpay.GetPayoutBatch("1").Result;
                 }
 
                 return true;

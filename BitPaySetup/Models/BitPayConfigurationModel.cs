@@ -27,10 +27,13 @@
         public Test()
         {
             PrivateKeyPath = "";
+            PrivateKey = "";
             ApiTokens = new ApiTokens();
         }
 
         public string PrivateKeyPath { get; set; }
+
+        public string PrivateKey { get; set; }
         public ApiTokens ApiTokens { get; set; }
     }
 
@@ -39,9 +42,12 @@
         public Prod()
         {
             PrivateKeyPath = "";
+            PrivateKey = "";
             ApiTokens = new ApiTokens();
         }
         public string PrivateKeyPath { get; set; }
+        public string PrivateKey { get; set; }
+
         public ApiTokens ApiTokens { get; set; }
     }
 
