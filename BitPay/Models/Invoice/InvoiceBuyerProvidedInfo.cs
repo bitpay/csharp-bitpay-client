@@ -1,8 +1,10 @@
-﻿namespace BitPaySDK.Models.Invoice
+﻿using Newtonsoft.Json;
+
+namespace BitPaySDK.Models.Invoice
 {
     public class InvoiceBuyerProvidedInfo
     {
-   
+
         public string Name { get; set; }
 
         public string PhoneNumber { get; set; }

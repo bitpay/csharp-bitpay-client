@@ -6,17 +6,18 @@
     public class Currency
     {
         // Crypto
-        public const string BCH = "BCH";
-        public const string BTC = "BTC";
-        public const string ETH = "ETH";
+        public const string BCH  = "BCH";
+        public const string BTC  = "BTC";
+        public const string ETH  = "ETH";
         public const string USDC = "USDC";
         public const string GUSD = "GUSD";
-        public const string PAX = "PAX";
-        public const string XRP = "XRP";
+        public const string PAX  = "PAX";
+        public const string XRP  = "XRP";
         public const string BUSD = "BUSD";
         public const string DOGE = "DOGE";
-        public const string LTC = "LTC";
-        
+        public const string LTC  = "LTC";
+        public const string SHIB = "SHIB";
+
         // FIAT
         public const string AED = "AED";
         public const string AFN = "AFN";

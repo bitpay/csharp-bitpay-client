@@ -15,6 +15,7 @@ using BitPaySDK.Models.Ledger;
 using BitPaySDK.Models.Payout;
 using BitPaySDK.Models.Rate;
 using BitPaySDK.Models.Settlement;
+using BitPaySDK.Models.Wallet;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
@@ -55,7 +56,7 @@ namespace BitPaySDK
         {
             _env = environment;
             BuildConfig(privateKeyPath, tokens);
-            InitKeys().Wait(); 
+            InitKeys().Wait();
             Init().Wait();
         }
 
@@ -189,7 +190,7 @@ namespace BitPaySDK
             bool signRequest = true)
         {
             try
-            { 
+            {
                 invoice.Token = GetAccessToken(facade);
                 invoice.Guid = Guid.NewGuid().ToString();
                 var json = JsonConvert.SerializeObject(invoice);
@@ -214,6 +215,37 @@ namespace BitPaySDK
 
             return invoice;
         }
+
+        /// <summary>
+        ///     Update a BitPay invoice.
+        /// </summary>
+        /// <param name="invoiceId">The id of the invoice to updated.</param>
+        /// <param name="buyerEmail">The buyer's email address.</param>
+        /// <returns>A BitPay updated Invoice object.</returns>
+        /// <throws>InvoiceUpdateException InvoiceUpdateException class</throws>
+        public async Task<Invoice> UpdateInvoice(string invoiceId, string buyerEmail)
+        {
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Merchant));
+                parameters.Add("buyerEmail", buyerEmail);
+
+                var json = JsonConvert.SerializeObject(parameters);
+                var response = await Put("invoices/" + invoiceId, json).ConfigureAwait(false);
+                var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
+                return JsonConvert.DeserializeObject<Invoice>(responseString);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new InvoiceUpdateException(ex);
+                 
+                throw;
+            }
+
+        }
+
 
         /// <summary>
         ///     Retrieve an invoice by id and token.
@@ -352,6 +384,8 @@ namespace BitPaySDK
             }
         }
 
+
+        ///     TODO to be deprecated in version 7.0
         /// <summary>
         ///     Create a refund for a BitPay invoice.
         /// </summary>
@@ -396,12 +430,83 @@ namespace BitPaySDK
         }
 
         /// <summary>
-        ///     Retrieve all refund requests on a BitPay invoice.
+        ///     Create a refund for a BitPay invoice.
         /// </summary>
-        /// <param name="invoice">The BitPay invoice object having the associated refunds.</param>
-        /// <returns>A BitPay invoice object with the associated Refund objects updated.</returns>
-        /// <throws>RefundQueryException RefundQueryException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        ///<param name="invoiceId">The BitPay invoice Id having the associated refund to be created.</param>           
+        ///<param name="amount">Amount to be refunded in the currency indicated.</param>              
+        ///<param name="currency">Reference currency used for the refund, usually the same as the currency used to create the invoice.</param>            
+        ///<param name="preview">Whether to create the refund request as a preview (which will not be acted on until status is updated)</param>             
+        ///<param name="immediate">Whether funds should be removed from merchant ledger immediately on submission or at time of processing</param>           
+        ///<param name="buyerPaysRefundFee">Whether the buyer should pay the refund fee (default is merchant)</param>  
+        ///<returns>An updated Refund Object</returns> 
+        ///<throws>RefundCreationException RefundCreationException class</throws> 
+        ///<throws>BitPayException BitPayException class</throws> 
+        public async Task<Refund> CreateRefund(string invoiceId, double amount, string currency, bool preview = false,
+            bool immediate = false, bool buyerPaysRefundFee = false)
+        {
+            try
+            {
+                var parameters = InitDynamicParams();
+                parameters.Add("token", GetAccessToken(Facade.Merchant));
+                parameters.Add("amount", amount);
+                parameters.Add("invoiceId", invoiceId);
+                parameters.Add("currency", currency);
+                parameters.Add("preview", preview);
+                parameters.Add("immediate", immediate);
+                parameters.Add("buyerPaysRefundFee", buyerPaysRefundFee);
+ 
+                var json = JsonConvert.SerializeObject(parameters);
+                var response = await Post("refunds/", json, true);
+                var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
+                return JsonConvert.DeserializeObject<Refund>(responseString);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new RefundCreationException(ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Update the status of a BitPay invoice.
+        /// </summary>
+        ///<param name="refundId">A BitPay refund ID</param> .
+        ///<param name="status">The new status for the refund to be updated.</param>   
+        /// <returns>A BitPay generated Refund object.</returns>
+        ///<throws>RefundUpdateException class</throws> 
+        public async Task<Refund> UpdateRefund(string refundId, string status)
+        {
+            
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Merchant)); 
+                parameters.Add("status", status);
+
+                var json = JsonConvert.SerializeObject(parameters);
+                var response = await Put("refunds/" + refundId, json).ConfigureAwait(false);
+                var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
+                return JsonConvert.DeserializeObject<Refund>(responseString);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new RefundUpdateException(ex);
+
+                throw;
+            }
+        }
+
+        ///     TODO to be deprecated in version 7.0
+        /// <summary>
+        ///     Retrieve all refund requests on a BitPay invoice
+        /// </summary>
+        ///<param name="invoice">The BitPay invoice object having the associated refunds.</param>
+        ///<returns>A BitPay invoice object with the associated Refund objects updated.</returns>
+        ///<throws>RefundQueryException RefundQueryException class</throws>
+        ///<throws>BitPayException BitPayException class</throws>
         public async Task<List<Refund>> GetRefunds(Invoice invoice)
         {
             try
@@ -411,7 +516,6 @@ namespace BitPaySDK
 
                 var response = await Get("invoices/" + invoice.Id + "/refunds", parameters);
                 var responseString = await ResponseToJsonString(response);
-
                 return JsonConvert.DeserializeObject<List<Refund>>(responseString);
             }
             catch (BitPayException ex)
@@ -427,6 +531,34 @@ namespace BitPaySDK
             }
         }
 
+        /// <summary>
+        ///     Retrieve all refund requests on a BitPay invoice.
+        /// </summary>
+        /// <param name="invoiceId">The id of the requested invoice.</param>
+        /// <returns>A BitPay invoice object with the associated Refund objects updated.</returns>
+        /// <throws>RefundQueryException RefundQueryException class</throws>
+        public async Task<List<Refund>> GetRefunds(string invoiceId)
+        {
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Merchant));
+                parameters.Add("invoiceId", invoiceId);
+               
+                var response = await Get("refunds/", parameters, true);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<List<Refund>>(responseString);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new RefundQueryException(ex);
+
+                throw;
+            }
+        }
+
+        ///     TODO to be deprecated in version 7.0
         /// <summary>
         ///     Retrieve a previously made refund request on a BitPay invoice.
         /// </summary>
@@ -461,11 +593,67 @@ namespace BitPaySDK
         }
 
         /// <summary>
+        ///     Retrieve a previously made refund request on a BitPay invoice.
+        /// </summary>
+        ///<param name="refundId"></param> refundId The BitPay refund ID.
+        ///<returns>A BitPay Refund object with the associated Refund object.</returns> 
+        ///<throws>RefundQueryException RefundQueryException class</throws> 
+        public async Task<Refund> GetRefund(string refundId)
+        {
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Merchant));
+
+                var response = await Get("refunds/" + refundId, parameters, true);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<Refund>(responseString);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new RefundQueryException(ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Send a refund notification
+        /// </summary>
+        /// <param name="refundId">A bitpay refundId </param>
+        /// <returns>An updated Refund Object </returns>
+        /// <throws>RefundCreationException RefundCreationException class </throws>
+        /// <throws>BitPayException BitPayException class </throws>
+        public async Task<bool> SendRefundNotification(string refundId)
+        {
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Merchant));
+
+                var json = JsonConvert.SerializeObject(parameters);
+                var response = await Post("refunds/" + refundId + "/notifications", json, true);
+                var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
+                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
+                return responseObject.GetValue("status").ToString() == "success";
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new RefundNotificationException(ex);
+
+                throw;
+            }
+        }
+
+        ///     TODO to be deprecated in version 7.0
+        /// <summary>
         ///     Implements the CancelRefund method bellow.
         /// </summary>
         /// <param name="invoiceId">The BitPay invoice Id having the associated refund to be canceled.</param>
         /// <param name="refundId">The refund Id for the refund to be canceled.</param>
-        /// <returns> ATrue if the refund was successfully canceled, false otherwise.</returns>
+        /// <returns> True if the refund was successfully canceled, false otherwise.</returns>
         /// <throws>RefundCancellationException RefundCancellationException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<bool> CancelRefund(string invoiceId, string refundId)
@@ -489,6 +677,7 @@ namespace BitPaySDK
             }
         }
 
+        ///     TODO to be deprecated in version 7.0
         /// <summary>
         ///     Implements the CancelRefund method bellow.
         /// </summary>
@@ -518,6 +707,7 @@ namespace BitPaySDK
             }
         }
 
+        ///     TODO to be deprecated in version 7.0
         /// <summary>
         ///     Cancel a previously submitted refund request on a BitPay invoice.
         /// </summary>
@@ -545,6 +735,54 @@ namespace BitPaySDK
             {
                 if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
                     throw new RefundCancellationException(ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Cancel a previously submitted refund request on a BitPay invoice.
+        /// </summary>
+        ///<param name="refundId">refundId The refund Id for the refund to be canceled.</param> 
+        ///<returns>An updated Refund Object.</returns> 
+        ///<throws>RefundCancellationException RefundCancellationException class</throws> 
+        public async Task<Refund> CancelRefund(string refundId)
+        {
+            try
+            {
+                var parameters = InitParams();
+                parameters.Add("token", GetAccessToken(Facade.Merchant));
+
+                var response = await Delete("refunds/" + refundId, parameters);
+                var responseString = await ResponseToJsonString(response).ConfigureAwait(false);
+                return JsonConvert.DeserializeObject<Refund>(responseString);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new RefundCancellationException(ex);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Retrieve all supported wallets.
+        /// </summary>
+        ///<returns>A list of wallet objets.</returns> 
+        ///<throws>WalletQueryException WalletQueryException class</throws> 
+        public async Task<List<Wallet>> GetSupportedWallets()
+        {
+            try
+            {
+                var response = await Get("supportedWallets/", null, false);
+                var responseString = await ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<List<Wallet>>(responseString);
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new WalletQueryException(ex);
 
                 throw;
             }
@@ -1437,6 +1675,7 @@ namespace BitPaySDK
                 throw;
             }
         }
+
         /// <summary>
         ///      Send a payout batch notification
         /// </summary>
@@ -1728,6 +1967,16 @@ namespace BitPaySDK
         }
 
         /// <summary>
+        ///     Just empty and dynamic parameters dictionary
+        /// </summary>
+        /// <returns></returns>
+        private Dictionary<string, dynamic> InitDynamicParams()
+        {
+            var parameters = new Dictionary<string, dynamic>();
+            return parameters;
+        }
+
+        /// <summary>
         ///     Make a GET request
         /// </summary>
         /// <param name="uri">The URI to query</param>
@@ -1897,9 +2146,15 @@ namespace BitPaySDK
                 }
 
                 // Check for error response.
-                if (jObj.TryGetValue("error", out value)) {
+                if (jObj.TryGetValue("error", out value))
+                {
                     throw new BitPayApiCommunicationException(value.ToString());
-                } 
+                }
+                
+                if (jObj.TryGetValue("status", out value) && value.ToString() == "error")
+                {
+                    if (jObj.TryGetValue("message", out value)) throw new BitPayApiCommunicationException(value.ToString());
+                }
 
                 if (jObj.TryGetValue("errors", out value))
                 {
@@ -1998,10 +2253,5 @@ namespace BitPaySDK
                 throw new ConfigNotFoundException(ex);
             }
         }
-
-        //public string function GetCurrencyInfo()
-        //{
-        //    foreach (var currenciesInfo in )
-       // }
     }
 }

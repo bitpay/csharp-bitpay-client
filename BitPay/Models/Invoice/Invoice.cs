@@ -101,6 +101,15 @@ namespace BitPaySDK.Models.Invoice
         [JsonProperty(PropertyName = "acceptanceWindow")]
         public long AcceptanceWindow { get; set; }
 
+        [JsonProperty(PropertyName = "forcedBuyerSelectedTransactionCurrency")]
+        public string ForcedBuyerSelectedTransactionCurrency { get; set; }
+
+        [JsonProperty(PropertyName = "forcedBuyerSelectedWallet")]
+        public string ForcedBuyerSelectedWallet { get; set; }
+
+        [JsonProperty(PropertyName = "buyerEmail")]
+        public string BuyerEmail { get; set; }
+
         // Buyer data
         //
 
@@ -108,6 +117,15 @@ namespace BitPaySDK.Models.Invoice
 
         // Response fields
         //
+
+        [JsonProperty(PropertyName = "merchantName")]
+        public string MerchantName { get; set; }
+
+        [JsonProperty(PropertyName = "bitpayIdRequired")]
+        public bool BitpayIdRequired { get; set; }
+
+        [JsonProperty(PropertyName = "isCancelled")]
+        public bool IsCancelled { get; set; }
 
         public string Id { get; set; }
 
@@ -131,6 +149,8 @@ namespace BitPaySDK.Models.Invoice
 
         public List<InvoiceTransaction> Transactions { get; set; }
 
+        public List<ItemizedDetails> ItemizedDetails { get; set; }
+
         public string ExceptionStatus { get; set; }
 
         public dynamic RefundAddresses
@@ -144,6 +164,8 @@ namespace BitPaySDK.Models.Invoice
         public string BuyerProvidedEmail { get; set; }
 
         public InvoiceBuyerProvidedInfo BuyerProvidedInfo { get; set; }
+
+        public UniversalCodes UniversalCodes { get; set; }
 
         public SupportedTransactionCurrencies SupportedTransactionCurrencies { get; set; }
 
@@ -325,6 +347,11 @@ namespace BitPaySDK.Models.Invoice
             return false;
         }
 
+        public bool ShouldSerializeIsCancelled()
+        {
+            return false;
+        }
+
         public bool ShouldSerializeTransactionCurrency()
         {
             return !string.IsNullOrEmpty(TransactionCurrency);
@@ -370,6 +397,11 @@ namespace BitPaySDK.Models.Invoice
             return false;
         }
 
+        public bool ShouldSerializeItemizedDetails()
+        {
+            return false;
+        }
+
         public bool ShouldSerializeExceptionStatus()
         {
             return false;
@@ -395,6 +427,31 @@ namespace BitPaySDK.Models.Invoice
             return false;
         }
 
+        public bool ShouldSerializeBitpayIdRequired()
+        {
+            return false;
+        }
+
+        public bool ShouldSerializeMerchantName()
+        {
+            return !string.IsNullOrEmpty(MerchantName);
+        }
+
+        public bool ShouldSerializeForcedBuyerSelectedTransactionCurrency()
+        {
+            return !string.IsNullOrEmpty(ForcedBuyerSelectedTransactionCurrency);
+        }
+
+        public bool ShouldSerializeForcedBuyerSelectedWallet()
+        {
+            return !string.IsNullOrEmpty(ForcedBuyerSelectedWallet);
+        }
+
+        public bool ShouldSerializeBuyerEmail()
+        {
+            return !string.IsNullOrEmpty(BuyerEmail);
+        }
+
         public bool ShouldSerializeBuyerProvidedEmail()
         {
             return false;
@@ -415,4 +472,4 @@ namespace BitPaySDK.Models.Invoice
             return !string.IsNullOrEmpty(CloseURL);
         }
     }
-} 
+}

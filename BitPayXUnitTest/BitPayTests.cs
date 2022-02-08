@@ -10,6 +10,7 @@ using BitPaySDK.Models;
 using BitPaySDK.Models.Bill;
 using BitPaySDK.Models.Invoice;
 using BitPaySDK.Models.Payout;
+using BitPaySDK.Models.Wallet;
 using Microsoft.Extensions.Configuration;
 using Buyer = BitPaySDK.Models.Invoice.Buyer;
 using InvoiceStatus = BitPaySDK.Models.Invoice.Status;
@@ -297,6 +298,22 @@ namespace BitPayXUnitTest
             Assert.True(invoices.Count > 0, "No invoices retrieved");
         }
 
+        [Fact]
+        public async Task TestShouldCreateUpdateAndDeleteInvoice()
+        {
+            // update and delete invoice  by id
+            var basicInvoice = await _bitpay.CreateInvoice(new Invoice(1.0, Currency.USD), Facade.Merchant);
+            var retreivedInvoice = await _bitpay.GetInvoice(basicInvoice.Id);
+            var updatedInvoice = await _bitpay.UpdateInvoice(retreivedInvoice.Id, "sandbox@bitpay.com");
+            var cancelledInvoice = await _bitpay.CancelInvoice(updatedInvoice.Id);
+            var retreivedCancelledInvoice = await _bitpay.GetInvoice(cancelledInvoice.Id);
+            Assert.NotNull(basicInvoice);
+            Assert.NotNull(retreivedInvoice);
+            Assert.NotNull(updatedInvoice);
+            Assert.NotNull(cancelledInvoice);
+            Assert.NotNull(retreivedCancelledInvoice);
+        }
+
         /*
         To use this test:
 	    You must have a paid/completed invoice in your account (list of invoices). The test looks for the first invoice in the "complete"
@@ -326,6 +343,32 @@ namespace BitPayXUnitTest
             Assert.NotNull(firstRefund);
             Assert.NotNull(retrievedRefund);
             Assert.True(cancelled);
+        }
+        [Fact]
+        public async Task testShouldCreateGetCancelRefundRequestNew() {
+
+            var date = DateTime.Now;
+            var today = date;
+            var sevenDaysAgo = date.AddDays(-95);
+            var invoices = await _bitpay.GetInvoices(sevenDaysAgo, today, InvoiceStatus.Complete);
+            Invoice firstInvoice = invoices[0];
+            Assert.NotNull(firstInvoice);
+            Refund createdRefund = await _bitpay.CreateRefund(firstInvoice.Id, firstInvoice.Price, firstInvoice.Currency, true, false, false);
+            List<Refund> retrievedRefunds = await _bitpay.GetRefunds(firstInvoice.Id);
+            Refund firstRefund = retrievedRefunds.Last();
+            Refund updatedRefund = await _bitpay.UpdateRefund(firstRefund.Id, "created");
+            Refund retrievedRefund = await _bitpay.GetRefund(firstRefund.Id);
+            Boolean sentStatus = await _bitpay.SendRefundNotification(firstRefund.Id);
+            Refund cancelRefund = await _bitpay.CancelRefund(firstRefund.Id);
+            List<Wallet> supportedWallets = await _bitpay.GetSupportedWallets();
+
+            Assert.NotNull(invoices);
+            Assert.NotNull(retrievedRefunds);
+            Assert.Equal("created", updatedRefund.Status);
+            Assert.Equal(firstRefund.Id, retrievedRefund.Id);
+            Assert.True(sentStatus);
+            Assert.Equal("canceled", cancelRefund.Status);
+            Assert.NotNull(supportedWallets);
         }
 
         [Fact]
