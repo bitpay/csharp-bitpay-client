@@ -98,6 +98,12 @@ namespace BitPaySDK.Models.Invoice
         [JsonProperty(PropertyName = "paymentCurrencies")]
         public List<string> PaymentCurrencies { get; set; }
 
+        [JsonProperty(PropertyName = "paymentString")]
+        public string PaymentString { get; set; }
+
+        [JsonProperty(PropertyName = "verificationLink")]
+        public string VerificationLink { get; set; }
+
         [JsonProperty(PropertyName = "acceptanceWindow")]
         public long AcceptanceWindow { get; set; }
 
@@ -121,8 +127,14 @@ namespace BitPaySDK.Models.Invoice
         [JsonProperty(PropertyName = "merchantName")]
         public string MerchantName { get; set; }
 
+        [JsonProperty(PropertyName = "selectedWallet")]
+        public string SelectedWallet { get; set; }
+
         [JsonProperty(PropertyName = "bitpayIdRequired")]
         public bool BitpayIdRequired { get; set; }
+
+        [JsonProperty(PropertyName = "forceCancel")]
+        public bool ForceCancel { get; set; }
 
         [JsonProperty(PropertyName = "isCancelled")]
         public bool IsCancelled { get; set; }
@@ -196,6 +208,21 @@ namespace BitPaySDK.Models.Invoice
             return !string.IsNullOrEmpty(OrderId);
         }
 
+        public bool ShouldSerializePaymentString()
+        {
+            return !string.IsNullOrEmpty(PaymentString);
+        }
+
+        public bool ShouldSerializeVerificationLink()
+        {
+            return !string.IsNullOrEmpty(VerificationLink);
+        }
+
+        public bool ShouldSerializeSelectedWallet()
+        {
+            return !string.IsNullOrEmpty(SelectedWallet);
+        }
+
         public bool ShouldSerializeItemDesc()
         {
             return !string.IsNullOrEmpty(ItemDesc);
@@ -229,6 +256,11 @@ namespace BitPaySDK.Models.Invoice
         public bool ShouldSerializeAutoRedirect()
         {
             return AutoRedirect;
+        }
+
+        public bool ShouldSerializeForceCancel()
+        {
+            return ForceCancel;
         }
 
         public bool ShouldSerializeExtendedNotifications()

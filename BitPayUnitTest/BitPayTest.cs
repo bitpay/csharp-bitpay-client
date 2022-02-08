@@ -11,6 +11,7 @@ using BitPaySDK.Models.Bill;
 using BitPaySDK.Models.Invoice;
 using BitPaySDK.Models.Payout;
 using BitPaySDK.Models.Wallet;
+using BitPaySDK.Models.Payout;
 using Microsoft.Extensions.Configuration;
 using Buyer = BitPaySDK.Models.Invoice.Buyer;
 using InvoiceStatus = BitPaySDK.Models.Invoice.Status;
@@ -48,7 +49,7 @@ namespace BitPayUnitTest
 
             // JSON minified with the BitPay configuration as in the required configuration file
             // and parsed into a IConfiguration object
-            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"ClientDescription\":\"" + ClientName + "\",\"ApiUrl\":\"https://test.bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"sec/bitpay_test_private.key\",\"ApiTokens\":{\"pos\":\"FrbBsxHFkoTbzJPDe6vzBghJzMvDe1nbGUJ3M6n5MHQd\",\"merchant\":\"EZYmyjSaUXh6NcF7Ej9g7dizhhsW2eRvWT29W6CG1omT\",\"payroll\":\"DjyLfN2JDeFoHgUV9Xpx3kvLpA5G2emiyFxUv1q9CREt\"}},\"Prod\":{\"ClientDescription\":\"\",\"ApiUrl\":\"https://bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"pos\":\"\",\"merchant\":\"\",\"payroll\":\"\"}}}}}";
+            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"ClientDescription\":\"" + ClientName + "\",\"ApiUrl\":\"https://test.bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"sec/bitpay_test_private.key\",\"ApiTokens\":{\"pos\":\"FrbBsxHFkoTbzJPDe6vzBghJzMvDe1nbGUJ3M6n5MHQd\",\"merchant\":\"HjQ3hokQAepwmBoBvdJHxeYfUL9Z97GfGvJ3rVBdS9sF\",\"payout\":\"ADnRYXTnVz4gGnLt8VLWYB3RVrYVzYbWfQLvDnq1wAoz\"}},\"Prod\":{\"ClientDescription\":\"\",\"ApiUrl\":\"https://bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"pos\":\"\",\"merchant\":\"\"}}}}}";
             var memoryJsonFile = new MemoryFileInfo("config.json", Encoding.UTF8.GetBytes(json), DateTimeOffset.Now);
             var memoryFileProvider = new MockFileProvider(memoryJsonFile);
 
@@ -276,6 +277,196 @@ namespace BitPayUnitTest
         }
 
         [TestMethod]
+        public async Task TestShouldSubmitPayoutRecipients()
+        {
+            List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient1@bitpay.com",
+                "recipient1",
+                "https://hookb.in/wNDlQMV7WMFz88VDyGnJ"));
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient2@bitpay.com",
+                "recipient2",
+                "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient3@bitpay.com",
+                "recipient3",
+                "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
+
+            var recipientsObj = new PayoutRecipients(recipientsList);
+            List<PayoutRecipient> recipients = await _bitpay.SubmitPayoutRecipients(recipientsObj);
+
+            Assert.IsNotNull(recipients);
+            Assert.AreEqual(recipients[0].Email, "sandbox+recipient1@bitpay.com");
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetPayoutRecipientId()
+        {
+            List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient1@bitpay.com",
+                "recipient1",
+                "https://hookb.in/wNDlQMV7WMFz88VDyGnJ"));
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient2@bitpay.com",
+                "recipient2",
+                "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient3@bitpay.com",
+                "recipient3",
+                "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
+
+            PayoutRecipients recipientsObj = new PayoutRecipients(recipientsList);
+            var recipients = await _bitpay.SubmitPayoutRecipients(recipientsObj);
+            var firstRecipient = recipients.First();
+            var retrieved = await _bitpay.GetPayoutRecipient(firstRecipient.Id);
+
+            Assert.IsNotNull(firstRecipient);
+            Assert.IsNotNull(retrieved.Id);
+            Assert.AreEqual(firstRecipient.Id, retrieved.Id);
+            Assert.AreEqual(firstRecipient.Email, "sandbox+recipient1@bitpay.com");
+        }
+
+        [TestMethod]
+        public async Task TestShouldSubmitGetAndDeletePayoutRecipient()
+        {
+            List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient17@bitpay.com",
+               "recipient1",
+               "https://hookb.in/wNDlQMV7WMFz88VDyGnJ"));
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient28@bitpay.com",
+                "recipient2",
+               "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient30@bitpay.com",
+                "recipient3",
+                "https://hookb.in/QJOPBdMgRkukpp2WO60o"));
+            var recipientsObj = new PayoutRecipients(recipientsList);
+
+            var basicRecipients = await _bitpay.SubmitPayoutRecipients(recipientsObj);
+            var basicRecipient = basicRecipients[0];
+            var retrieveRecipient = await _bitpay.GetPayoutRecipient(basicRecipient.Id);
+            var retrieveRecipients = await _bitpay.GetPayoutRecipients();
+            retrieveRecipient.Label = "Updated Label";
+            var updateRecipient = await _bitpay.UpdatePayoutRecipient(retrieveRecipient.Id, retrieveRecipient);
+            var deleteRecipient = await _bitpay.DeletePayoutRecipient(retrieveRecipient.Id);
+
+            Assert.IsNotNull(basicRecipient);
+            Assert.IsNotNull(retrieveRecipient.Id);
+            Assert.IsNotNull(retrieveRecipients);
+            Assert.AreEqual(basicRecipient.Id, retrieveRecipient.Id);
+            Assert.AreEqual(retrieveRecipient.Status, RecipientStatus.INVITED);
+            Assert.AreEqual(updateRecipient.Label, "Updated Label");
+            Assert.IsTrue(deleteRecipient);
+        }
+
+        [TestMethod]
+        public async Task TestShouldNotifyPayoutRecipientId()
+        {
+            List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
+            recipientsList.Add(new PayoutRecipient(
+                "sandbox+recipient1@bitpay.com",
+                "recipient1",
+                "https://hookb.in/wNDlQMV7WMFz88VDyGnJ"));
+            PayoutRecipients recipientsObj = new PayoutRecipients(recipientsList);
+            var recipients = await _bitpay.SubmitPayoutRecipients(recipientsObj);
+            var basicRecipient = recipients[0];
+            var result = await _bitpay.RequestPayoutRecipientNotification(basicRecipient.Id);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task TestShouldSubmitPayout()
+        {
+            var date = DateTime.Now;
+            var threeDaysFromNow = date.AddDays(3);
+            var effectiveDate = threeDaysFromNow;
+            var ledgerCurrency = Currency.USD;
+            var currency = Currency.USD;
+            var payout = new Payout(5.0, currency, ledgerCurrency);
+            var recipients = await _bitpay.GetPayoutRecipients("active", 1);
+            payout.RecipientId = recipients.First().Id;
+            payout.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
+            var createpayout = await _bitpay.SubmitPayout(payout);
+            var cancelledpayout = await _bitpay.CancelPayout(createpayout.Id);
+
+            Assert.IsNotNull(createpayout.Id);
+            Assert.IsTrue(cancelledpayout);
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetPayouts()
+        {
+            var endDate = DateTime.Now;
+            var startDate = endDate.AddDays(-50);
+            var batches = await _bitpay.GetPayouts(startDate, endDate);
+
+            Assert.IsTrue(batches.Count > 0);
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetPayoutsByStatus()
+        {
+            var endDate = DateTime.Now;
+            var startDate = endDate.AddDays(-50);
+            var batches = await _bitpay.GetPayouts(startDate, endDate, PayoutStatus.Cancelled, "");
+
+            Assert.IsTrue(batches.Count > 0, "No batches retrieved");
+        }
+
+        [TestMethod]
+        public async Task TestShouldSubmitGetAndDeletePayout()
+        {
+            var date = DateTime.Now;
+            var threeDaysFromNow = date.AddDays(3);
+            var effectiveDate = threeDaysFromNow;
+            var ledgerCurrency = Currency.USD;
+            var currency = Currency.USD;
+            var batch = new Payout(5.0, currency, ledgerCurrency);
+            var recipients = await _bitpay.GetPayoutRecipients("active", 1);
+            batch.RecipientId = recipients.First().Id;
+            batch.NotificationUrl = "https://hookb.in/QJOPBdMgRkukpp2WO60o";
+            var batch0 = await _bitpay.SubmitPayout(batch);
+            var batchRetrieved = await _bitpay.GetPayout(batch0.Id);
+            var batchCancelled = await _bitpay.CancelPayout(batchRetrieved.Id);
+
+            Assert.IsNotNull(batch0.Id);
+            Assert.IsNotNull(batchRetrieved.Id);
+            Assert.AreEqual(batch0.Id, batchRetrieved.Id);
+            Assert.AreEqual(batchRetrieved.Status, PayoutStatus.New);
+            Assert.IsTrue(batchCancelled);
+        }
+
+        [TestMethod]
+        public async Task TestShouldNotifyPayoutId()
+        {
+            var date = DateTime.Now;
+            var threeDaysFromNow = date.AddDays(3);
+            var effectiveDate = threeDaysFromNow;
+            var ledgerCurrency = Currency.USD;
+            var currency = Currency.USD;
+            var batch = new Payout(5.0, currency, ledgerCurrency);
+            var recipients = await _bitpay.GetPayoutRecipients("active", 1);
+            batch.RecipientId = recipients.First().Id;
+            batch.NotificationUrl = "https://hookb.in/QJOPBdMgRkukpp2WO60o";
+            var basicRecipient = await _bitpay.SubmitPayout(batch);
+            var result = await _bitpay.RequestPayoutNotification(basicRecipient.Id);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetPayoutRecipients()
+        {
+            var recipients = await _bitpay.GetPayoutRecipients("active", 1);
+            Assert.AreEqual(1, recipients.Count);
+        }
+
+        [TestMethod]
         public async Task TestShouldSubmitPayoutBatch() {
 
             var date = DateTime.Now;
@@ -283,7 +474,7 @@ namespace BitPayUnitTest
 
             var effectiveDate = threeDaysFromNow;
             var currency = Currency.USD;
-            var ledgerCurrency = Currency.ETH;
+            var ledgerCurrency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
                 new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
                 new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")
@@ -307,7 +498,7 @@ namespace BitPayUnitTest
 
             var effectiveDate = threeDaysFromNow;
             var currency = Currency.USD;
-            var ledgerCurrency = Currency.ETH;
+            var ledgerCurrency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
                 new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
                 new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")
@@ -330,11 +521,11 @@ namespace BitPayUnitTest
         }
 
         [TestMethod]
-        public async Task testShouldRequestPayoutBatchNotification()
+        public async Task TestShouldRequestPayoutBatchNotification()
         {
 
             var date = DateTime.Now;
-            var ledgerCurrency = Currency.ETH;
+            var ledgerCurrency = Currency.USD;
             var threeDaysFromNow = date.AddDays(3);
             var currency = Currency.USD;
             var effectiveDate = threeDaysFromNow;
@@ -369,7 +560,7 @@ namespace BitPayUnitTest
 
             var endDate = DateTime.Now;
             var startDate = endDate.AddDays(-50);
-            var batches = await _bitpay.GetPayoutBatches(startDate, endDate, PayoutStatus.New);
+            var batches = await _bitpay.GetPayoutBatches(startDate, endDate, PayoutStatus.Cancelled);
 
             Assert.IsTrue(batches.Count > 0, "No batches retrieved");
         }
@@ -586,7 +777,7 @@ namespace BitPayUnitTest
             Assert.IsTrue(bills.Count > 0, "No bills retrieved");
         }
         [TestMethod]
-        public async Task testShouldCreateGetCancelRefundRequestNew()
+        public async Task TestShouldCreateGetCancelRefundRequestNew()
         {
 
             var date = DateTime.Now;

@@ -12,6 +12,8 @@
         public const string USDC = "USDC";
         public const string GUSD = "GUSD";
         public const string PAX  = "PAX";
+        public const string DAI  = "DAI";
+        public const string WBTC  = "WBTC";
         public const string XRP  = "XRP";
         public const string BUSD = "BUSD";
         public const string DOGE = "DOGE";

@@ -12,5 +12,8 @@
         public MinerFeesItem Xrp { get; set; }
         public MinerFeesItem Doge { get; set; }
         public MinerFeesItem Ltc { get; set; }
+        public MinerFeesItem Dai { get; set; }
+        public MinerFeesItem Wbtc { get; set; }
+        public MinerFeesItem Shib { get; set; }
     }
 }
