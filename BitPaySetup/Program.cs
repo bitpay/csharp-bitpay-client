@@ -135,7 +135,7 @@ namespace BitPaySetup
             ecKey = KeyUtils.CreateEcKey();
             ecKeyPlain = ecKey.PrivateKey.ToString();
             Console.WriteLine(" Select whether you want token as a plain text format or in a file format");
-            Console.WriteLine(" 1. Generate key (Plain text forrmat)");
+            Console.WriteLine(" 1. Generate key (Plain text format)");
             Console.WriteLine(" 2. Save key in a file (Encrypted format)");
             Console.WriteLine("");
             Console.WriteLine(" Select an option");
@@ -194,17 +194,7 @@ namespace BitPaySetup
                         throw ex;
                     }
 
-                    if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
-                    {
-                        SetNotification(" A file with the same name already exists: \n \"" + ecKeyFilePath +
-                                        "\"\n Make sure you want to modify it, then delete it manually before trying again" +
-                                        "\"\n For security reasons we won't delete a private key.", 2);
-
-                        GenerateKeyPair(ecKey);
-                        return;
-                    }
-
-                    // ecKey = KeyUtils.CreateEcKey();
+                    ecKey = KeyUtils.CreateEcKey();
                     KeyUtils.PrivateKeyExists(ecKeyFilePath);
                     KeyUtils.SaveEcKey(ecKey);
 
@@ -245,18 +235,6 @@ namespace BitPaySetup
 
                         ecKeyFilePath = Path.GetFullPath(newEcKeyPath);
                         ecKeyPlain = ecKey.PrivateKey.ToString();
-                    }
-                    else
-                    {
-                        if (KeyUtils.PrivateKeyExists(newEcKeyPath))
-                        {
-                            SetNotification(" A file with the same name already exists: \n \"" + newEcKeyPath +
-                                            "\"\n Make sure you want to modify it, then delete it manually before trying again" +
-                                            "\"\n For security reasons we won't delete a private key.", 2);
-
-                            GenerateKeyPair(ecKey);
-                            return;
-                        }
                     }
 
                     try
@@ -356,16 +334,6 @@ namespace BitPaySetup
                         throw ex;
                     }
 
-                    if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
-                    {
-                        SetNotification(" A file with the same name already exists: \n \"" + ecKeyFilePath +
-                                        "\"\n Make sure you want to modify it, then delete it manually before trying again" +
-                                        "\"\n For security reasons we won't delete a private key.", 2);
-
-                        GenerateKeyPair(ecKey);
-                        return;
-                    }
-
                     ecKey = KeyUtils.CreateEcKey();
                     KeyUtils.PrivateKeyExists(ecKeyFilePath);
                     KeyUtils.SaveEcKey(ecKey);
@@ -405,18 +373,6 @@ namespace BitPaySetup
                         if (answer.ToLower() == "yes") GenerateKeyPair(ecKey);
 
                         ecKeyFilePath = Path.GetFullPath(newEcKeyPath);
-                    }
-                    else
-                    {
-                        if (KeyUtils.PrivateKeyExists(newEcKeyPath))
-                        {
-                            SetNotification(" A file with the same name already exists: \n \"" + newEcKeyPath +
-                                            "\"\n Make sure you want to modify it, then delete it manually before trying again" +
-                                            "\"\n For security reasons we won't delete a private key.", 2);
-
-                            GenerateKeyPair(ecKey);
-                            return;
-                        }
                     }
 
                     try
