@@ -128,6 +128,9 @@ namespace BitPaySetup
         {
             Console.Clear();
             DrawTitle();
+            var valid = false;
+            var newEcKeyPath = "";
+            var createKeyFile = false;
 
             if (env == Env.Test) ecKeyFilePath = appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKeyPath;
             if (env == Env.Prod) ecKeyFilePath = appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKeyPath;
@@ -139,276 +142,294 @@ namespace BitPaySetup
             Console.WriteLine(" 2. Save key in a file (Encrypted format)");
             Console.WriteLine("");
             Console.WriteLine(" Select an option");
-            Console.WriteLine(" > ");
-            var option = Console.ReadLine();
-
-            if (option.ToString() == "1")
+            Console.WriteLine();
+            Console.Write(" > ");
+            // var option = Console.ReadLine();
+            var key = Console.ReadKey();
+            if (char.IsDigit(key.KeyChar))
             {
-                SetNotification("This is private key: " + ecKeyPlain + "\n" + "This is public key: " + ecKey.PublicKeyHexBytes + "\n" + "Please save it somewhere for future purposes. This 1st msg", 1);
-                if (!string.IsNullOrEmpty(ecKeyFilePath))
-                {
-                    Console.WriteLine(" The current private key file defined is: " + ecKeyFilePath);
-                    Console.WriteLine(" Would you like to change it? [yes|no] (default: no)");
-                    Console.WriteLine();
-                    Console.Write(" > ");
-                    var answer = Console.ReadLine();
-                    while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
-                        answer = Console.ReadLine();
-
-                    if (answer.ToLower() == "no" || answer.ToLower() == "")
-                    {
-                        if (File.Exists(ecKeyFilePath))
-                        {
-                            SetNotification(" Selected private key file: " + ecKeyFilePath, 1);
-
-                            return;
-                        }
-
-                        SetNotification(" The private key file does not longer exists in: \n \"" + ecKeyFilePath +
-                                        "\"\n Please, proceed with the following instructions.", 2);
-                        Console.Clear();
-                        DrawTitle();
-                    }
-                }
-
-                Console.WriteLine();
-                Console.Write(" Hit enter ");
-                var newEcKeyPath = Console.ReadLine().Trim();
-
-                if (string.IsNullOrEmpty(newEcKeyPath))
-                {
-                    Random rndNum = new Random();
-                    int number = rndNum.Next();
-                    string ecKeyFileName = @"bitpay_private_" + env.ToLower() + number + ".key";
-
-                    try
-                    {
-                        if (!Directory.Exists(ecKeyFilePath))
-                        {
-                            DirectoryInfo dir = Directory.CreateDirectory("newOutput");
-                            ecKeyFilePath = Path.Combine(dir.FullName, ecKeyFileName);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw ex;
-                    }
-
-                    ecKey = KeyUtils.CreateEcKey();
-                    KeyUtils.PrivateKeyExists(ecKeyFilePath);
-                    KeyUtils.SaveEcKey(ecKey);
-
-                    if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
-                    {
-                        SetNotification(" This is private key: " + ecKeyPlain + "\n" + "This is public key: " + ecKey.PublicKeyHexBytes + "\n" + "Please save it somewhere for future purposes.", 1);
-                        if (env == Env.Test) appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKey = ecKeyPlain;
-                        if (env == Env.Prod) appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKey = ecKeyPlain;
-                        GenerateConfFile(confFilePath);
-                    }
-                    else
-                    {
-                        SetNotification(" Something went wrong when creating the file: \n \"" + newEcKeyPath +
-                                        "\"\n Make sure the directory exists and you have the right permissions, then trying again.",
-                            2);
-
-                        GenerateKeyPair(ecKey);
-                        return;
-                    }
-                }
-                else
-                {
-                    if (!File.Exists(newEcKeyPath))
-                    {
-                        SetNotification(" The file entered not found in: \n \"" + newEcKeyPath + "\"", 2);
-                        Console.Clear();
-                        DrawTitle();
-                        Console.WriteLine(" Would you like to provide a different file path? [yes|no] (default: no)");
-                        Console.WriteLine(
-                            " If 'no', a new file will be generated in the entered location with the given name.");
-                        Console.WriteLine();
-                        Console.Write(" > ");
-                        var answer = Console.ReadLine();
-                        while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
-                            answer = Console.ReadLine();
-
-                        if (answer.ToLower() == "yes") GenerateKeyPair(ecKey);
-
-                        ecKeyFilePath = Path.GetFullPath(newEcKeyPath);
-                        ecKeyPlain = ecKey.PrivateKey.ToString();
-                    }
-
-                    try
-                    {
-                        ecKey = KeyUtils.CreateEcKey();
-                        KeyUtils.PrivateKeyExists(ecKeyFilePath);
-                        KeyUtils.SaveEcKey(ecKey);
-
-                        if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
-                        {
-                            SetNotification(" New private key generated successfully with public key:\n " +
-                                            ecKey.PublicKeyHexBytes +
-                                            "\n in: \"" + ecKeyFilePath + "\"", 1);
-                        }
-                        else
-                        {
-                            throw new Exception(" Could not store the file: \n \"" + newEcKeyPath + "\"");
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        SetNotification(
-                            " An error occurred, please, check if the you have the right\n permissions to write in the specified directory.\n Error Details: " +
-                            e.Message, 2);
-
-                        GenerateKeyPair(ecKey);
-                    }
-
-                    SetNotification(" New Private key generated successfully with public key: " + ecKey.PublicKeyHexBytes +
-                                    " in: \n \"" + newEcKeyPath + "\"", 1);
-                }
-
-                if (env == Env.Test) 
-                { 
-                 appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKeyPath = ecKeyFilePath;
-                 appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKey = ecKeyPlain;
-                }
-                if (env == Env.Prod)
-                {
-                  appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKeyPath = ecKeyFilePath;
-                  appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKey = ecKeyPlain;
-                }
-
-                GenerateConfFile(confFilePath);
+                valid = int.Parse(key.KeyChar.ToString()) > 0 && int.Parse(key.KeyChar.ToString()) < 3;
+            }
+            else
+            {
+                GenerateKeyPair(ecKey);
             }
 
-            if (option.ToString() == "2")
+            if (valid) 
             {
-                if (!string.IsNullOrEmpty(ecKeyFilePath))
+                switch (key.KeyChar)
                 {
-                    Console.WriteLine(" The current private key file defined is: " + ecKeyFilePath);
-                    Console.WriteLine(" Would you like to change it? [yes|no] (default: no)");
-                    Console.WriteLine();
-                    Console.Write(" > ");
-                    var answer = Console.ReadLine();
-                    while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
-                        answer = Console.ReadLine();
+                    case '1':
+                        // TODO: If the selection is "Plain text format" no key file should be generated
+                        // SetNotification("This is private key: " + ecKeyPlain + "\n" + "This is public key: " + ecKey.PublicKeyHexBytes + "\n" + "Please save it somewhere for future purposes. This 1st msg", 1);
+                        // if (!string.IsNullOrEmpty(ecKeyFilePath))
+                        // {
+                        //     Console.WriteLine(" The current private key file defined is: " + ecKeyFilePath);
+                        //     Console.WriteLine(" Would you like to change it? [yes|no] (default: no)");
+                        //     Console.WriteLine();
+                        //     Console.Write(" > ");
+                        //     var answer = Console.ReadLine();
+                        //     while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
+                        //         answer = Console.ReadLine();
+                        //
+                        //     if (answer.ToLower() == "no" || answer.ToLower() == "")
+                        //     {
+                        //         if (File.Exists(ecKeyFilePath))
+                        //         {
+                        //             SetNotification(" Selected private key file: " + ecKeyFilePath, 1);
+                        //
+                        //             return;
+                        //         }
+                        //
+                        //         SetNotification(" The private key file does not longer exists in: \n \"" + ecKeyFilePath +
+                        //                         "\"\n Please, proceed with the following instructions.", 2);
+                        //         Console.Clear();
+                        //         DrawTitle();
+                        //     }
+                        // }
+                        //
+                        // // Console.WriteLine();
+                        // // Console.Write(" Hit enter ");
+                        // // newEcKeyPath = Console.ReadLine().Trim();
+                        //
+                        // if (string.IsNullOrEmpty(newEcKeyPath))
+                        // {
+                        //     Random rndNum = new Random();
+                        //     int number = rndNum.Next();
+                        //     string ecKeyFileName = @"bitpay_private_" + env.ToLower() + number + ".key";
+                        //
+                        //     try
+                        //     {
+                        //         if (!Directory.Exists(ecKeyFilePath))
+                        //         {
+                        //             DirectoryInfo dir = Directory.CreateDirectory("output");
+                        //             ecKeyFilePath = Path.Combine(dir.FullName, ecKeyFileName);
+                        //         }
+                        //     }
+                        //     catch (Exception ex)
+                        //     {
+                        //         throw ex;
+                        //     }
+                        //
+                        //     ecKey = KeyUtils.CreateEcKey();
+                        //     KeyUtils.PrivateKeyExists(ecKeyFilePath);
+                        //     KeyUtils.SaveEcKey(ecKey);
+                        //
+                        //     if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
+                        //     {
+                        //         SetNotification(" This is private key: " + ecKeyPlain + "\n" + "This is public key: " + ecKey.PublicKeyHexBytes + "\n" + "Please save it somewhere for future purposes.", 1);
+                        //         if (env == Env.Test) appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKey = ecKeyPlain;
+                        //         if (env == Env.Prod) appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKey = ecKeyPlain;
+                        //         GenerateConfFile(confFilePath);
+                        //     }
+                        //     else
+                        //     {
+                        //         SetNotification(" Something went wrong when creating the file: \n \"" + newEcKeyPath +
+                        //                         "\"\n Make sure the directory exists and you have the right permissions, then trying again.",
+                        //             2);
+                        //
+                        //         GenerateKeyPair(ecKey);
+                        //         return;
+                        //     }
+                        // }
+                        // else
+                        // {
+                        //     if (!File.Exists(newEcKeyPath))
+                        //     {
+                        //         SetNotification(" The file entered not found in: \n \"" + newEcKeyPath + "\"", 2);
+                        //         Console.Clear();
+                        //         DrawTitle();
+                        //         Console.WriteLine(" Would you like to provide a different file path? [yes|no] (default: no)");
+                        //         Console.WriteLine(
+                        //             " If 'no', a new file will be generated in the entered location with the given name.");
+                        //         Console.WriteLine();
+                        //         Console.Write(" > ");
+                        //         var answer = Console.ReadLine();
+                        //         while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
+                        //             answer = Console.ReadLine();
+                        //
+                        //         if (answer.ToLower() == "yes") GenerateKeyPair(ecKey);
+                        //
+                        //         ecKeyFilePath = Path.GetFullPath(newEcKeyPath);
+                        //         ecKeyPlain = ecKey.PrivateKey.ToString();
+                        //     }
+                        //
+                        //     try
+                        //     {
+                        //         ecKey = KeyUtils.CreateEcKey();
+                        //         KeyUtils.PrivateKeyExists(ecKeyFilePath);
+                        //         KeyUtils.SaveEcKey(ecKey);
+                        //
+                        //         if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
+                        //         {
+                        //             SetNotification(" New private key generated successfully with public key:\n " +
+                        //                             ecKey.PublicKeyHexBytes +
+                        //                             "\n in: \"" + ecKeyFilePath + "\"", 1);
+                        //         }
+                        //         else
+                        //         {
+                        //             throw new Exception(" Could not store the file: \n \"" + newEcKeyPath + "\"");
+                        //         }
+                        //     }
+                        //     catch (Exception e)
+                        //     {
+                        //         SetNotification(
+                        //             " An error occurred, please, check if the you have the right\n permissions to write in the specified directory.\n Error Details: " +
+                        //             e.Message, 2);
+                        //
+                        //         GenerateKeyPair(ecKey);
+                        //     }
+                        //
+                        //     SetNotification(" New Private key generated successfully with public key: " + ecKey.PublicKeyHexBytes +
+                        //                     " in: \n \"" + newEcKeyPath + "\"", 1);
+                        // }
 
-                    if (answer.ToLower() == "no" || answer.ToLower() == "")
-                    {
-                        if (File.Exists(ecKeyFilePath))
+                        if (env == Env.Test) 
                         {
-                            SetNotification(" Selected private key file: " + ecKeyFilePath, 1);
-
-                            return;
+                            // TODO: If the selection is "Plain text format" no key file path should be saved
+                            // appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKeyPath = ecKeyFilePath;
+                            appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKey = ecKeyPlain;
+                        }
+                        if (env == Env.Prod)
+                        {
+                            // TODO: If the selection is "Plain text format" no key file path should be saved
+                            // appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKeyPath = ecKeyFilePath;
+                            appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKey = ecKeyPlain;
                         }
 
-                        SetNotification(" The private key file does not longer exists in: \n \"" + ecKeyFilePath +
-                                        "\"\n Please, proceed with the following instructions.", 2);
-                        Console.Clear();
-                        DrawTitle();
-                    }
-                }
-
-                Console.WriteLine(" Enter the full path for the private key file where this will loaded from:");
-                Console.WriteLine(" If click Enter, a file named \"bitpay_private_" + env.ToLower() +
-                                  " will be generated in the root of this application and");
-                Console.WriteLine(" any file with the same name in this directory will be overwritten.");
-                Console.WriteLine();
-                Console.Write(" > ");
-                var newEcKeyPath = Console.ReadLine().Trim();
-
-                if (string.IsNullOrEmpty(newEcKeyPath))
-                {
-                    string ecKeyFileName = @"bitpay_private_" + env.ToLower() + ".key";
-
-                    try
-                    {
-                        if (!Directory.Exists(ecKeyFilePath))
-                        {
-                            DirectoryInfo dir = Directory.CreateDirectory("output");
-                            ecKeyFilePath = Path.Combine(dir.FullName, ecKeyFileName);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw ex;
-                    }
-
-                    ecKey = KeyUtils.CreateEcKey();
-                    KeyUtils.PrivateKeyExists(ecKeyFilePath);
-                    KeyUtils.SaveEcKey(ecKey);
-
-                    if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
-                    {
-                        SetNotification(" New private key generated successfully with public key:\n " +
-                                        ecKey.PublicKeyHexBytes +
-                                        "\n in: \"" + ecKeyFilePath + "\"", 1);
-                    }
-                    else
-                    {
-                        SetNotification(" Something went wrong when creating the file: \n \"" + newEcKeyPath +
-                                        "\"\n Make sure the directory exists and you have the right permissions, then trying again.",
-                            2);
-
-                        GenerateKeyPair(ecKey);
+                        GenerateConfFile(confFilePath);
                         return;
-                    }
-                }
-                else
-                {
-                    if (!File.Exists(newEcKeyPath))
-                    {
-                        SetNotification(" The file entered not found in: \n \"" + newEcKeyPath + "\"", 2);
-                        Console.Clear();
-                        DrawTitle();
-                        Console.WriteLine(" Would you like to provide a different file path? [yes|no] (default: no)");
-                        Console.WriteLine(
-                            " If 'no', a new file will be generated in the entered location with the given name.");
+                    case '2':
+                        if (!string.IsNullOrEmpty(ecKeyFilePath))
+                        {
+                            Console.WriteLine(" The current private key file defined is: " + ecKeyFilePath);
+                            Console.WriteLine(" Would you like to change it? [yes|no] (default: no)");
+                            Console.WriteLine();
+                            Console.Write(" > ");
+                            var answer = Console.ReadLine();
+                            while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
+                                answer = Console.ReadLine();
+
+                            if (answer.ToLower() == "no" || answer.ToLower() == "")
+                            {
+                                if (File.Exists(ecKeyFilePath))
+                                {
+                                    SetNotification(" Selected private key file: " + ecKeyFilePath, 1);
+
+                                    return;
+                                }
+
+                                SetNotification(" The private key file does not longer exists in: \n \"" + ecKeyFilePath +
+                                                "\"\n Please, proceed with the following instructions.", 2);
+                                Console.Clear();
+                                DrawTitle();
+                            }
+                        }
+
+                        Console.WriteLine(" Enter the full path for the private key file where this will loaded from:");
+                        Console.WriteLine(" If click Enter, a file named \"bitpay_private_" + env.ToLower() +
+                                          " will be generated in the root of this application and");
+                        Console.WriteLine(" any file with the same name in this directory will be overwritten.");
                         Console.WriteLine();
                         Console.Write(" > ");
-                        var answer = Console.ReadLine();
-                        while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
-                            answer = Console.ReadLine();
+                        newEcKeyPath = Console.ReadLine().Trim();
 
-                        if (answer.ToLower() == "yes") GenerateKeyPair(ecKey);
-
-                        ecKeyFilePath = Path.GetFullPath(newEcKeyPath);
-                    }
-
-                    try
-                    {
-                        ecKey = KeyUtils.CreateEcKey();
-                        KeyUtils.PrivateKeyExists(ecKeyFilePath);
-                        KeyUtils.SaveEcKey(ecKey);
-
-                        if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
+                        if (string.IsNullOrEmpty(newEcKeyPath))
                         {
-                            SetNotification(" New private key generated successfully with public key:\n " +
-                                            ecKey.PublicKeyHexBytes +
-                                            "\n in: \"" + ecKeyFilePath + "\"", 1);
+                            string ecKeyFileName = @"bitpay_private_" + env.ToLower() + ".key";
+
+                            try
+                            {
+                                if (!Directory.Exists(ecKeyFilePath))
+                                {
+                                    DirectoryInfo dir = Directory.CreateDirectory("output");
+                                    ecKeyFilePath = Path.Combine(dir.FullName, ecKeyFileName);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                throw ex;
+                            }
+
+                            ecKey = KeyUtils.CreateEcKey();
+                            KeyUtils.PrivateKeyExists(ecKeyFilePath);
+                            KeyUtils.SaveEcKey(ecKey);
+
+                            if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
+                            {
+                                SetNotification(" New private key generated successfully with public key:\n " +
+                                                ecKey.PublicKeyHexBytes +
+                                                "\n in: \"" + ecKeyFilePath + "\"", 1);
+                            }
+                            else
+                            {
+                                SetNotification(" Something went wrong when creating the file: \n \"" + newEcKeyPath +
+                                                "\"\n Make sure the directory exists and you have the right permissions, then trying again.",
+                                    2);
+
+                                GenerateKeyPair(ecKey);
+                                return;
+                            }
                         }
                         else
                         {
-                            throw new Exception(" Could not store the file: \n \"" + newEcKeyPath + "\"");
+                            if (!File.Exists(newEcKeyPath))
+                            {
+                                SetNotification(" The file entered not found in: \n \"" + newEcKeyPath + "\"", 2);
+                                Console.Clear();
+                                DrawTitle();
+                                Console.WriteLine(" Would you like to provide a different file path? [yes|no] (default: no)");
+                                Console.WriteLine(
+                                    " If 'no', a new file will be generated in the entered location with the given name.");
+                                Console.WriteLine();
+                                Console.Write(" > ");
+                                var answer = Console.ReadLine();
+                                while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
+                                    answer = Console.ReadLine();
+
+                                if (answer.ToLower() == "yes") GenerateKeyPair(ecKey);
+
+                                ecKeyFilePath = Path.GetFullPath(newEcKeyPath);
+                            }
+
+                            try
+                            {
+                                ecKey = KeyUtils.CreateEcKey();
+                                KeyUtils.PrivateKeyExists(ecKeyFilePath);
+                                KeyUtils.SaveEcKey(ecKey);
+
+                                if (KeyUtils.PrivateKeyExists(ecKeyFilePath))
+                                {
+                                    SetNotification(" New private key generated successfully with public key:\n " +
+                                                    ecKey.PublicKeyHexBytes +
+                                                    "\n in: \"" + ecKeyFilePath + "\"", 1);
+                                }
+                                else
+                                {
+                                    throw new Exception(" Could not store the file: \n \"" + newEcKeyPath + "\"");
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                SetNotification(
+                                    " An error occurred, please, check if the you have the right\n permissions to write in the specified directory.\n Error Details: " +
+                                    e.Message, 2);
+
+                                GenerateKeyPair(ecKey);
+                            }
+
+                            SetNotification(" New Private key generated successfully with public key: " + ecKey.PublicKeyHexBytes +
+                                            " in: \n \"" + newEcKeyPath + "\"", 1);
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        SetNotification(
-                            " An error occurred, please, check if the you have the right\n permissions to write in the specified directory.\n Error Details: " +
-                            e.Message, 2);
 
-                        GenerateKeyPair(ecKey);
-                    }
+                        if (env == Env.Test) appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKeyPath = ecKeyFilePath;
+                        if (env == Env.Prod) appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKeyPath = ecKeyFilePath;
 
-                    SetNotification(" New Private key generated successfully with public key: " + ecKey.PublicKeyHexBytes +
-                                    " in: \n \"" + newEcKeyPath + "\"", 1);
+                        GenerateConfFile(confFilePath);
+                        return;
+                    default:
+                        return;
                 }
-
-                if (env == Env.Test) appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKeyPath = ecKeyFilePath;
-                if (env == Env.Prod) appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKeyPath = ecKeyFilePath;
-
-                GenerateConfFile(confFilePath);
             }
         }
 
