@@ -58,10 +58,10 @@ namespace BitPayXUnitTest
             // Initialize with separate variables
             _bitpay = new BitPay(
                 Env.Test,
-                "bitpay_private_test.key",
+                "/Users/antonio.buedo/Bitpay/Repos/csharp-bitpay-client/BitPayXUnitTest/bin/Debug/bitpay_private_test.key",
                 new Env.Tokens(){
-                    Merchant = "A4qqz5JXoK5TMi3hD8EfKNHJB2ybLgdYRkbZwZ5M9ZgT",
-                    Payout = "G4pfTiUU7967YJs7Z7n8e2SuQPa2abDTgFrjFB5ZFZsT"
+                    Merchant = "EUxbieiBNDb6GCKq6WDoovWwWpkpE2PpP4tNo7mzCAk9",
+                    Payout = "EUxbieiBNDb6GCKq6WDoovWwWpkpE2PpP4tNo7mzCAk9"
                 }
             );
 
