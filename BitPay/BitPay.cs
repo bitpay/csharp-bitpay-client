@@ -19,6 +19,7 @@ using BitPaySDK.Models.Wallet;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
+using Org.BouncyCastle.Math;
 
 /**
  * @author Antonio Buedo
@@ -1860,8 +1861,8 @@ namespace BitPaySDK
             }
             else
             {
-                _ecKey = KeyUtils.CreateEcKey();
-                await KeyUtils.SaveEcKey(_ecKey);
+                _ecKey = KeyUtils.CreateEcKeyFromHexString(_configuration
+                .GetSection("BitPayConfiguration:EnvConfig:" + _env + ":PrivateKey").Value);
             }
         }
 
