@@ -1861,7 +1861,7 @@ namespace BitPaySDK
             }
             else
             {
-                _ecKey = KeyUtils.CreateEcKeyFromHexString(_configuration
+                _ecKey = KeyUtils.CreateEcKeyFromString(_configuration
                 .GetSection("BitPayConfiguration:EnvConfig:" + _env + ":PrivateKey").Value);
             }
         }

@@ -88,6 +88,10 @@ namespace BitPaySDK
             {
                 return _privateKey;
             }
+            set
+            {
+
+            }
         }
 
         /// <summary>

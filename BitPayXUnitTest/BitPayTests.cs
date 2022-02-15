@@ -501,7 +501,7 @@ namespace BitPayXUnitTest
         {
             List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
             recipientsList.Add(new PayoutRecipient(
-                "sandbox+recipient1@bitpay.com",
+                "sandbox1@bitpay.com",
                 "recipient1",
                 "https://hookb.in/wNDlQMV7WMFz88VDyGnJ"));
             PayoutRecipients recipientsObj = new PayoutRecipients(recipientsList);
@@ -601,7 +601,7 @@ namespace BitPayXUnitTest
             var currency = Currency.USD;
             var ledgerCurrency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox1@bitpay.com"),
             };
             var batch = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
             batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
@@ -653,7 +653,8 @@ namespace BitPayXUnitTest
             var effectiveDate = threeDaysFromNow;
             var instructions = new List<PayoutInstruction>() {
                 new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
-                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")            };
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")            
+            };
             var batch = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
             batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
             batch = await _bitpay.SubmitPayoutBatch(batch);
