@@ -23,8 +23,8 @@ using Org.BouncyCastle.Math;
 
 /**
  * @author Antonio Buedo
- * @date 18.11.2021
- * @version 4.2.2111
+ * @date 10.02.2022
+ * @version 4.3.2202
  *
  * See bitpay.com/api for more information.
  */

@@ -56,17 +56,17 @@ namespace BitPayXUnitTest
 
             // Initialize the BitPay object to be used in the following tests
             // Initialize with IConfiguration object
-            _bitpay = new BitPay(configuration);
+            // _bitpay = new BitPay(configuration);
 
             // Initialize with separate variables
-            //_bitpay = new BitPay(
-            //    Env.Test,
-            //    "bitpay_private_test.key",
-            //    new Env.Tokens(){
-            //        Merchant = "33M2EDt2RnzuByHM6ge9AoZjxXVRGDB6RQ84fD51uMbi",
-            //        Payout = "FRGpBpDeAarAFNYyD2KkFVXNizU3LbgMNgbxXTecJzTV"
-            //    }
-            //);
+            _bitpay = new BitPay(
+                Env.Test,
+                "bitpay_private_test.key",
+                new Env.Tokens(){
+                    Merchant = "33M2EDt2RnzuByHM6ge9AoZjxXVRGDB6RQ84fD51uMbi",
+                    Payout = "FRGpBpDeAarAFNYyD2KkFVXNizU3LbgMNgbxXTecJzTV"
+                }
+            );
 
             // ledgers require the Merchant Facade
             if (!_bitpay.tokenExist(Facade.Merchant))
