@@ -36,7 +36,12 @@ namespace BitPaySDK
             var key = new EcKey(pkey);
             return key;
         }
-
+        public static EcKey CreateEcKeyFromString(string privateKey)
+        {
+            var pkey = new BigInteger(privateKey);
+            var key = new EcKey(pkey);
+            return key;
+        }
         // Convenience method.
         public static EcKey CreateEcKeyFromHexStringFile(string privKeyFile)
         {

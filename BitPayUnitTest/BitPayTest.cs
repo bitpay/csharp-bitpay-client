@@ -11,12 +11,12 @@ using BitPaySDK.Models.Bill;
 using BitPaySDK.Models.Invoice;
 using BitPaySDK.Models.Payout;
 using BitPaySDK.Models.Wallet;
-using BitPaySDK.Models.Payout;
 using Microsoft.Extensions.Configuration;
 using Buyer = BitPaySDK.Models.Invoice.Buyer;
 using InvoiceStatus = BitPaySDK.Models.Invoice.Status;
 using BillStatus = BitPaySDK.Models.Bill.Status;
 using PayoutStatus = BitPaySDK.Models.Payout.Status;
+using System.IO;
 
 namespace BitPayUnitTest
 {
@@ -49,7 +49,9 @@ namespace BitPayUnitTest
 
             // JSON minified with the BitPay configuration as in the required configuration file
             // and parsed into a IConfiguration object
-            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"ClientDescription\":\"" + ClientName + "\",\"ApiUrl\":\"https://test.bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"sec/bitpay_test_private.key\",\"ApiTokens\":{\"pos\":\"FrbBsxHFkoTbzJPDe6vzBghJzMvDe1nbGUJ3M6n5MHQd\",\"merchant\":\"HjQ3hokQAepwmBoBvdJHxeYfUL9Z97GfGvJ3rVBdS9sF\",\"payout\":\"ADnRYXTnVz4gGnLt8VLWYB3RVrYVzYbWfQLvDnq1wAoz\"}},\"Prod\":{\"ClientDescription\":\"\",\"ApiUrl\":\"https://bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"pos\":\"\",\"merchant\":\"\"}}}}}";
+            // var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"ClientDescription\":\"" + ClientName + "\",\"ApiUrl\":\"https://test.bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"sec/bitpay_test_private.key\",\"ApiTokens\":{\"pos\":\"FrbBsxHFkoTbzJPDe6vzBghJzMvDe1nbGUJ3M6n5MHQd\",\"merchant\":\"HjQ3hokQAepwmBoBvdJHxeYfUL9Z97GfGvJ3rVBdS9sF\",\"payout\":\"ADnRYXTnVz4gGnLt8VLWYB3RVrYVzYbWfQLvDnq1wAoz\"}},\"Prod\":{\"ClientDescription\":\"\",\"ApiUrl\":\"https://bitpay.com/\",\"ApiVersion\":\"2.0.0\",\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"pos\":\"\",\"merchant\":\"\"}}}}}";
+
+            var json = File.ReadAllText(@"BitPay.config.json");
             var memoryJsonFile = new MemoryFileInfo("config.json", Encoding.UTF8.GetBytes(json), DateTimeOffset.Now);
             var memoryFileProvider = new MockFileProvider(memoryJsonFile);
 

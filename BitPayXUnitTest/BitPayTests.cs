@@ -16,6 +16,7 @@ using Buyer = BitPaySDK.Models.Invoice.Buyer;
 using InvoiceStatus = BitPaySDK.Models.Invoice.Status;
 using BillStatus = BitPaySDK.Models.Bill.Status;
 using PayoutStatus = BitPaySDK.Models.Payout.Status;
+using System.IO;
 
 namespace BitPayXUnitTest
 {
@@ -43,7 +44,9 @@ namespace BitPayXUnitTest
         {
             // JSON minified with the BitPay configuration as in the required configuration file
             // and parsed into a IConfiguration object
-            var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"PrivateKeyPath\":\"sec/bitpay_test_private.key\",\"ApiTokens\":{\"merchant\":\"A4qqz5JXoK5TMi3hD8EfKNHJB2ybLgdYRkbZwZ5M9ZgT\",\"payout\":\"G4pfTiUU7967YJs7Z7n8e2SuQPa2abDTgFrjFB5ZFZsT\"}},\"Prod\":{\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"merchant\":\"\"}}}}}";
+            //var json = "{\"BitPayConfiguration\":{\"Environment\":\"Test\",\"EnvConfig\":{\"Test\":{\"PrivateKeyPath\":\"sec/bitpay_test_private.key\",\"ApiTokens\":{\"merchant\":\"A4qqz5JXoK5TMi3hD8EfKNHJB2ybLgdYRkbZwZ5M9ZgT\",\"payout\":\"G4pfTiUU7967YJs7Z7n8e2SuQPa2abDTgFrjFB5ZFZsT\"}},\"Prod\":{\"PrivateKeyPath\":\"\",\"ApiTokens\":{\"merchant\":\"\"}}}}}";
+            
+            var json = File.ReadAllText(@"BitPay.config.json");
             var memoryJsonFile = new MemoryFileInfo("config.json", Encoding.UTF8.GetBytes(json), DateTimeOffset.Now);
             var memoryFileProvider = new MockFileProvider(memoryJsonFile);
 
@@ -58,10 +61,10 @@ namespace BitPayXUnitTest
             // Initialize with separate variables
             _bitpay = new BitPay(
                 Env.Test,
-                "/Users/antonio.buedo/Bitpay/Repos/csharp-bitpay-client/BitPayXUnitTest/bin/Debug/bitpay_private_test.key",
+                "bitpay_private_test.key",
                 new Env.Tokens(){
-                    Merchant = "EUxbieiBNDb6GCKq6WDoovWwWpkpE2PpP4tNo7mzCAk9",
-                    Payout = "EUxbieiBNDb6GCKq6WDoovWwWpkpE2PpP4tNo7mzCAk9"
+                    Merchant = "33M2EDt2RnzuByHM6ge9AoZjxXVRGDB6RQ84fD51uMbi",
+                    Payout = "FRGpBpDeAarAFNYyD2KkFVXNizU3LbgMNgbxXTecJzTV"
                 }
             );
 
@@ -498,7 +501,7 @@ namespace BitPayXUnitTest
         {
             List<PayoutRecipient> recipientsList = new List<PayoutRecipient>();
             recipientsList.Add(new PayoutRecipient(
-                "sandbox+recipient1@bitpay.com",
+                "sandbox1@bitpay.com",
                 "recipient1",
                 "https://hookb.in/wNDlQMV7WMFz88VDyGnJ"));
             PayoutRecipients recipientsObj = new PayoutRecipients(recipientsList);
@@ -598,7 +601,7 @@ namespace BitPayXUnitTest
             var currency = Currency.USD;
             var ledgerCurrency = Currency.USD;
             var instructions = new List<PayoutInstruction>() {
-                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox1@bitpay.com"),
             };
             var batch = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
             batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
@@ -650,7 +653,8 @@ namespace BitPayXUnitTest
             var effectiveDate = threeDaysFromNow;
             var instructions = new List<PayoutInstruction>() {
                 new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient1@bitpay.com"),
-                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")            };
+                new PayoutInstruction(10.0, RecipientReferenceMethod.EMAIL, "sandbox+recipient2@bitpay.com")            
+            };
             var batch = new PayoutBatch(currency, effectiveDate, instructions, ledgerCurrency);
             batch.NotificationUrl = "https://hookbin.com/yDEDeWJKyasG9yjj9X9P";
             batch = await _bitpay.SubmitPayoutBatch(batch);
