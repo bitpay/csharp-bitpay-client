@@ -5,10 +5,10 @@
     <TargetFrameworks>net452;net46;net461;net462;net47;net471;net472;netstandard2.0;netcoreapp2.0;netcoreapp2.1;netcoreapp2.2</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <!-- version numbers will be updated by build -->
-    <AssemblyVersion>4.3.2202.0</AssemblyVersion>
-    <FileVersion>4.3.2202</FileVersion>
-    <VersionPrefix>4.3.2202</VersionPrefix>
-    <Version>4.3.2202</Version>
+    <AssemblyVersion>4.4.2203.0</AssemblyVersion>
+    <FileVersion>4.4.2203</FileVersion>
+    <VersionPrefix>4.4.2203</VersionPrefix>
+    <Version>4.4.2203</Version>
     <Authors>Antonio Buedo</Authors>
     <Company>BitPay Inc.</Company>
     <Owners>BitPay, Inc.</Owners>
