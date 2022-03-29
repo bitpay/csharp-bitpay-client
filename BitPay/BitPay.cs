@@ -24,7 +24,7 @@ using Org.BouncyCastle.Math;
 /**
  * @author Antonio Buedo
  * @date 29.03.2022
- * @version 4.3.2203
+ * @version 4.4.2203
  *
  * See bitpay.com/api for more information.
  */
@@ -51,12 +51,12 @@ namespace BitPaySDK
         ///     Constructor for use if the keys and SIN are managed by this library.
         /// </summary>
         /// <param name="environment">Target environment. Options: Env.Test / Env.Prod</param>
-        /// <param name="privateKeyPath">Private Key file path.</param>
+        /// <param name="privateKey">Private Key file path or plain text key.</param>
         /// <param name="tokens">Env.Tokens containing the available tokens.</param>
-        public BitPay(string environment, string privateKeyPath, Env.Tokens tokens)
+        public BitPay(string environment, string privateKey, Env.Tokens tokens)
         {
             _env = environment;
-            BuildConfig(privateKeyPath, tokens);
+            BuildConfig(privateKey, tokens);
             InitKeys().Wait();
             Init().Wait();
         }
@@ -2139,11 +2139,11 @@ namespace BitPaySDK
                 if (jObj.TryGetValue("status", out value))
                 {
                    if (value.ToString().Equals("error"))
-                    {
-                        jObj.TryGetValue("code", out code);
-                        jObj.TryGetValue("message", out value);
-                        throw new BitPayApiCommunicationException(code.ToString(), value.ToString());
-                    }
+                   {
+                       jObj.TryGetValue("code", out code);
+                       jObj.TryGetValue("message", out value);
+                       throw new BitPayApiCommunicationException(code.ToString(), value.ToString());
+                   }
                 }
 
                 // Check for error response.
@@ -2229,19 +2229,28 @@ namespace BitPaySDK
         ///     Builds the configuration object
         /// </summary>
         /// <returns></returns>
-        private void BuildConfig(string privateKeyPath, Env.Tokens tokens)
+        private void BuildConfig(string privateKey, Env.Tokens tokens)
         {
             try
             {
-                if (!File.Exists(privateKeyPath))
+                var keyType = "PrivateKeyPath";
+                if (!File.Exists(privateKey))
                 {
-                    throw new Exception("Private Key file not found");
+                    try
+                    {
+                        _ecKey = KeyUtils.CreateEcKeyFromString(privateKey);
+                        keyType = "PrivateKey";
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("Private Key file not found OR invalid key provided");
+                    }
                 }
 
                 var config = new Dictionary<string, string>
                 {
                     {"BitPayConfiguration:Environment", _env},
-                    {"BitPayConfiguration:EnvConfig:" + _env + ":PrivateKeyPath", privateKeyPath},
+                    {"BitPayConfiguration:EnvConfig:" + _env + ":" + keyType, privateKey},
                     {"BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:merchant", tokens.Merchant},
                     {"BitPayConfiguration:EnvConfig:" + _env + ":ApiTokens:payout", tokens.Payout}
                 };
