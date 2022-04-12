@@ -317,8 +317,8 @@ namespace BitPaySDK
                 // UTC date, ISO-8601 format yyyy-mm-dd or yyyy-mm-ddThh:mm:ssZ. Default is current time.
                 var parameters = InitParams();
                 parameters.Add("token", GetAccessToken(Facade.Merchant));
-                parameters.Add("dateStart", dateStart.ToString("yyyy-MM-dd"));
-                parameters.Add("dateEnd", dateEnd.ToString("yyyy-MM-dd"));
+                parameters.Add("dateStart", dateStart.ToString("yyyy-MM-ddThh:mm:ss.fffZ"));
+                parameters.Add("dateEnd", dateEnd.ToString("yyyy-MM-ddThh:mm:ss.fffZ"));
                 if (!String.IsNullOrEmpty(status))
                 {
                     parameters.Add("status", status);

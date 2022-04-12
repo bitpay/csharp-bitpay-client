@@ -108,6 +108,25 @@ namespace BitPayUnitTest
         }
 
         [TestMethod]
+        public async Task TestShouldGetInvoicesWithDate()
+        {
+            // get invoices between two dates
+            var invoices = await _bitpay.GetInvoices(yesterday, tomorrow);
+            Assert.IsTrue(invoices.Count > 0, "No invoices retrieved");
+        }
+
+        [TestMethod]
+        public async Task TestShouldGetInvoicesWithDateTime()
+        {
+            // get invoices between two date and time
+            var endDate = new DateTime(2022, 4, 6, 11, 0, 0);
+            var startDate = new DateTime(2022, 4, 5, 11, 0, 0);
+            List<Invoice> invoices = await _bitpay.GetInvoices(startDate, endDate);
+            Assert.IsTrue(invoices.Count > 0, "No invoices retrieved");
+
+        }
+
+        [TestMethod]
         public async Task TestShouldGetInvoiceStatus() {
             // create an invoice and make sure we receive a correct invoice status (new)
             var basicInvoice = await _bitpay.CreateInvoice(new Invoice(10.0, Currency.USD));
