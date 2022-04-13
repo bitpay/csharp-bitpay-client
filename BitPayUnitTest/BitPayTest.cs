@@ -119,9 +119,12 @@ namespace BitPayUnitTest
         public async Task TestShouldGetInvoicesWithDateTime()
         {
             // get invoices between two date and time
-            var endDate = new DateTime(2022, 4, 6, 11, 0, 0);
-            var startDate = new DateTime(2022, 4, 5, 11, 0, 0);
-            List<Invoice> invoices = await _bitpay.GetInvoices(startDate, endDate);
+            var endDate = DateTime.Now.AddDays(-105);
+            endDate.AddHours(1);
+            endDate.AddMinutes(20);
+            endDate.AddSeconds(20);
+            var startDate = DateTime.Now;
+            List<Invoice> invoices = await _bitpay.GetInvoices(endDate, startDate);
             Assert.IsTrue(invoices.Count > 0, "No invoices retrieved");
 
         }
