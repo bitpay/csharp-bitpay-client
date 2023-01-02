@@ -61,6 +61,9 @@ namespace BitPay.Models.Invoice
 
         [JsonProperty(PropertyName = "params")]
         public RefundParams PaymentUrls { get; set; }
+        
+        [JsonProperty(PropertyName = "reference")]
+        public string Reference { get; set; }
 
         public bool ShouldSerializeId()
         {

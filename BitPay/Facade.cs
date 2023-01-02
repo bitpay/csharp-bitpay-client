@@ -4,5 +4,6 @@ namespace BitPay
     {
         public const string Merchant = "merchant";
         public const string Payout = "payout";
+        public const string Pos = "pos";
     }
 }
