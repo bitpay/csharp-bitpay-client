@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using BitPaySDK.Exceptions;
+using BitPay.Exceptions;
 using Newtonsoft.Json;
 
-namespace BitPaySDK.Models.Payout
+namespace BitPay.Models.Payout
 {
     public class Payout
     {
@@ -91,7 +90,7 @@ namespace BitPaySDK.Models.Payout
         }
 
         [JsonProperty(PropertyName = "effectiveDate")]
-        [JsonConverter(typeof(BitPaySDK.Converters.DateStringConverter))]
+        [JsonConverter(typeof(Converters.DateStringConverter))]
         public DateTime? EffectiveDate { get; set; }
 
         [JsonProperty(PropertyName = "transactions")]
@@ -143,10 +142,10 @@ namespace BitPaySDK.Models.Payout
         [JsonProperty(PropertyName = "message")]
         public string Message { get; set; }
 
-        [JsonConverter(typeof(BitPaySDK.Converters.DateStringConverter))]
+        [JsonConverter(typeof(Converters.DateStringConverter))]
         public DateTime RequestDate { get; set; }
 
-        [JsonConverter(typeof(BitPaySDK.Converters.DateStringConverter))]
+        [JsonConverter(typeof(Converters.DateStringConverter))]
         public DateTime DateExecuted { get; set; }
 
         public dynamic ExchangeRates

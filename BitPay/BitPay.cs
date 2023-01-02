@@ -7,29 +7,11 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using BitPaySDK.Exceptions;
-using BitPaySDK.Models;
-using BitPaySDK.Models.Bill;
-using BitPaySDK.Models.Invoice;
-using BitPaySDK.Models.Ledger;
-using BitPaySDK.Models.Payout;
-using BitPaySDK.Models.Rate;
-using BitPaySDK.Models.Settlement;
-using BitPaySDK.Models.Wallet;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Microsoft.Extensions.Configuration;
-using Org.BouncyCastle.Math;
 
-/**
- * @author Antonio Buedo
- * @date 29.03.2022
- * @version 4.4.2203
- *
- * See bitpay.com/api for more information.
- */
-
-namespace BitPaySDK
+namespace BitPay
 {
     public class BitPay
     {

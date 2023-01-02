@@ -1,7 +1,6 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
-namespace BitPaySDK.Models.Invoice
+namespace BitPay.Models.Invoice
 {
    public class ItemizedDetails
     {

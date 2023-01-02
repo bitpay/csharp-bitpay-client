@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BitPaySDK.Models.Rate
+namespace BitPay.Models.Rate
 {
 	/// <summary>
 	///     Provides an interface to the BitPay server to obtain exchange rate information.
 	/// </summary>
 	public class Rates
     {
-        private readonly BitPay _bp;
+        private readonly global::BitPay.BitPay _bp;
         private List<Rate> _rates;
 
-        public Rates(List<Rate> rates, BitPay bp)
+        public Rates(List<Rate> rates, global::BitPay.BitPay bp)
         {
             _bp = bp;
             _rates = rates;

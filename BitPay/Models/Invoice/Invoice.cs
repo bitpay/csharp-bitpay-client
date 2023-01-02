@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using BitPaySDK.Exceptions;
+﻿using System.Collections.Generic;
+using BitPay.Exceptions;
 using Newtonsoft.Json;
 
-namespace BitPaySDK.Models.Invoice
+namespace BitPay.Models.Invoice
 {
     public class Invoice
     {

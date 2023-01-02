@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using BitPaySDK.Exceptions;
+using BitPay.Exceptions;
 using Newtonsoft.Json;
 
-namespace BitPaySDK.Models.Payout
+namespace BitPay.Models.Payout
 {
     public class PayoutInstruction
     {

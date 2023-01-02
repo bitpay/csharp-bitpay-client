@@ -1,4 +1,4 @@
-﻿namespace BitPaySDK.Models
+﻿namespace BitPay.Models
 {
     /// <summary>
     /// Model provided to avoid mistyping. Check the allowed currencies at: https://bitpay.com/currencies

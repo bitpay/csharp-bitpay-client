@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using BitPaySDK.Exceptions;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
-namespace BitPaySDK.Models.Wallet
+namespace BitPay.Models.Wallet
 {
     public class Currencies
     {

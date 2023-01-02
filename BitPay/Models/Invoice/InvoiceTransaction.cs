@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace BitPaySDK.Models.Invoice
+namespace BitPay.Models.Invoice
 {
     /// <summary>
     ///     Provides information about a single invoice transaction.

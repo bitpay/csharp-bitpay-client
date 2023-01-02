@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using BitPaySDK.Exceptions;
+using BitPay.Exceptions;
 using Newtonsoft.Json;
 
-namespace BitPaySDK.Models.Bill
+namespace BitPay.Models.Bill
 {
     public class Bill
     {

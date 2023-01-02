@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BitPaySDK.Models.Settlement
+namespace BitPay.Models.Settlement
 {
     public class InvoiceData
     {

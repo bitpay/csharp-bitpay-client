@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BitPaySDK.Models.Settlement
+namespace BitPay.Models.Settlement
 {
     public class Settlement
     {
