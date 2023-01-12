@@ -729,7 +729,7 @@ namespace BitPay
         {
             if (File.Exists(privateKey.Value()) && KeyUtils.PrivateKeyExists(privateKey.Value()))
             {
-                return KeyUtils.LoadEcKey().Result;
+                return KeyUtils.LoadEcKey();
             }
             else
             {
@@ -737,7 +737,7 @@ namespace BitPay
                 {
                     return KeyUtils.CreateEcKeyFromString(privateKey.Value());
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     throw new Exception("Private Key file not found OR invalid key provided");
                 }
@@ -775,7 +775,7 @@ namespace BitPay
             if (KeyUtils.PrivateKeyExists(config
                 .GetSection("BitPayConfiguration:EnvConfig:" + env + ":PrivateKeyPath").Value))
             {
-                return KeyUtils.LoadEcKey().Result;
+                return KeyUtils.LoadEcKey();
             }
             
             return KeyUtils.CreateEcKeyFromString(config

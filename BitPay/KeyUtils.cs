@@ -49,7 +49,7 @@ namespace BitPay
             return CreateEcKeyFromHexString(privateKey);
         }
 
-        public static async Task<EcKey> LoadEcKey()
+        public static EcKey LoadEcKey()
         {
             // using (var fs = File.OpenRead(PrivateKeyFile))
             // {

@@ -6,7 +6,6 @@ namespace BitPay.Exceptions
     {
         private const string BitPayMessage = "An unexpected error occured while trying to manage the payout batch";
         private readonly string _bitpayCode = "BITPAY-PAYOUT-BATCH-GENERIC";
-        protected string ApiCode;
 
         public PayoutBatchException() : base(BitPayMessage)
         {
@@ -25,11 +24,6 @@ namespace BitPay.Exceptions
         public PayoutBatchException(string bitpayCode, string message, Exception cause, string apiCode = "000000") : base(bitpayCode, message, cause, apiCode)
         {
             ApiCode = apiCode;
-        }
-
-        public String GetApiCode()
-        {
-            return ApiCode;
         }
     }
 }
