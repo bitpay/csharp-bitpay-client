@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace BitPaySDK
+namespace BitPay
 {
     public class Converters
     {

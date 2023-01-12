@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace BitPaySDK.Models
+namespace BitPay.Models
 {
     /// <summary>
     ///     Provides BitPay token policy information.

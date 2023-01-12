@@ -1,9 +1,9 @@
 using System;
 using System.IO;
-using BitPaySDK;
+using BitPay;
 using BitPaySetup.Models;
 using Newtonsoft.Json;
-using System.Collections.Generic;
+using Environment = BitPay.Environment;
 
 namespace BitPaySetup
 {
@@ -101,13 +101,13 @@ namespace BitPaySetup
                     {
                         case '1':
                             Console.WriteLine(key.KeyChar.ToString());
-                            env = Env.Test;
+                            env = Environment.Test.ToString();
                             SetNotification(" Selected environment: " + env, 1);
 
                             break;
                         default:
                             Console.WriteLine(key.KeyChar.ToString());
-                            env = Env.Prod;
+                            env = Environment.Prod.ToString();
                             GenerateConfFile(confFilePath);
                             SetNotification(" Selected environment: " + env, 1);
 
@@ -134,8 +134,8 @@ namespace BitPaySetup
                 Console.Clear();
                 DrawTitle();
 
-                if (env == Env.Test) ecKeyFilePath = appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKeyPath;
-                if (env == Env.Prod) ecKeyFilePath = appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKeyPath;
+                if (env == Environment.Test.ToString()) ecKeyFilePath = appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKeyPath;
+                if (env == Environment.Prod.ToString()) ecKeyFilePath = appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKeyPath;
 
                 Console.WriteLine(" Select whether you want token as a plain text format or in a file format");
                 Console.WriteLine(" 1. Generate key (Plain text format)");
@@ -168,9 +168,9 @@ namespace BitPaySetup
                                     " This is private key: " + ecKeyPlain + "\n" + "This is public key: " +
                                     ecKey.PublicKeyHexBytes + "\n" + "Please save it somewhere for future purposes.",
                                     1);
-                                if (env == Env.Test)
+                                if (env == Environment.Test.ToString())
                                     appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKey = ecKeyPlain;
-                                if (env == Env.Prod)
+                                if (env == Environment.Prod.ToString())
                                     appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKey = ecKeyPlain;
                                 GenerateConfFile(confFilePath);
                             }
@@ -326,9 +326,9 @@ namespace BitPaySetup
                                                 " in: \n \"" + newEcKeyPath + "\"", 1);
                             }
 
-                            if (env == Env.Test)
+                            if (env == Environment.Test.ToString())
                                 appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKeyPath = ecKeyFilePath;
-                            if (env == Env.Prod)
+                            if (env == Environment.Prod.ToString())
                                 appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKeyPath = ecKeyFilePath;
 
                             GenerateConfFile(confFilePath);
@@ -369,12 +369,12 @@ namespace BitPaySetup
             }
 
             var apiTokens = new ApiTokens();
-            if (env == Env.Test)
+            if (env == Environment.Test.ToString())
             {
                 apiTokens = appConfig.BitPayConfiguration.EnvConfig.Test.ApiTokens;
                 
             }
-            if (env == Env.Prod)
+            if (env == Environment.Prod.ToString())
             {
                 apiTokens = appConfig.BitPayConfiguration.EnvConfig.Prod.ApiTokens;
                 
@@ -387,31 +387,31 @@ namespace BitPaySetup
                 {
                     if (facade == Facade.Merchant )
                     {
-                        var bitpay = new BitPay(confFilePath);
+                        var bitpay = new Client(new ConfigFilePath(confFilePath));
 
-                        mPairingCode = bitpay.RequestClientAuthorization(facade).Result;
+                        mPairingCode = bitpay.CreatePairingCodeForFacade(facade).Result;
 
-                        newToken = bitpay.GetTokenByFacade(facade);
+                        newToken = bitpay.GetAccessToken(facade);
 
                     }
                     else if (facade == Facade.Payout)
                     {
-                        var bitpay = new BitPay(confFilePath);
+                        var bitpay = new Client(new ConfigFilePath(confFilePath));
 
-                        pPairingCode = bitpay.RequestClientAuthorization(facade).Result;
+                        pPairingCode = bitpay.CreatePairingCodeForFacade(facade).Result;
 
-                        newToken = bitpay.GetTokenByFacade(facade);
+                        newToken = bitpay.GetAccessToken(facade);
 
                     }
                     else
                     {
-                        var bitpay = new BitPay(confFilePath);
+                        var bitpay = new Client(new ConfigFilePath(confFilePath));
 
-                        mPairingCode = bitpay.RequestClientAuthorization(Facade.Merchant).Result;
-                        apiTokens.merchant = bitpay.GetTokenByFacade(Facade.Merchant);
+                        mPairingCode = bitpay.CreatePairingCodeForFacade(Facade.Merchant).Result;
+                        apiTokens.merchant = bitpay.GetAccessToken(Facade.Merchant);
 
-                        pPairingCode = bitpay.RequestClientAuthorization(Facade.Payout).Result;
-                        apiTokens.payout = bitpay.GetTokenByFacade(Facade.Payout);
+                        pPairingCode = bitpay.CreatePairingCodeForFacade(Facade.Payout).Result;
+                        apiTokens.payout = bitpay.GetAccessToken(Facade.Payout);
                     }
                     
                 }
@@ -435,7 +435,7 @@ namespace BitPaySetup
                         break;
                 }
 
-                if (env == Env.Test)
+                if (env == Environment.Test.ToString())
                 {
                     if (appConfig.BitPayConfiguration.EnvConfig.Test.PrivateKey != "")
                     {
@@ -446,7 +446,7 @@ namespace BitPaySetup
                     
                 }
                 
-                if (env == Env.Prod)
+                if (env == Environment.Prod.ToString())
                 {
                     if (appConfig.BitPayConfiguration.EnvConfig.Prod.PrivateKey != "")
                     {
@@ -625,7 +625,7 @@ namespace BitPaySetup
         {
             try
             {
-                var bitpay = new BitPay(confFilePath);
+                var bitpay = new Client(new ConfigFilePath(confFilePath));
                 if (facade == Facade.Merchant)
                 {
                     var response = bitpay.GetInvoices(DateTime.Today, DateTime.Today).Result;

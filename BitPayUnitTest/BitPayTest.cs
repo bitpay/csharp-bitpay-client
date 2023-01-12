@@ -1,22 +1,22 @@
-﻿using BitPaySDK;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BitPaySDK.Exceptions;
-using BitPaySDK.Models;
-using BitPaySDK.Models.Bill;
-using BitPaySDK.Models.Invoice;
-using BitPaySDK.Models.Payout;
-using BitPaySDK.Models.Wallet;
 using Microsoft.Extensions.Configuration;
-using Buyer = BitPaySDK.Models.Invoice.Buyer;
-using InvoiceStatus = BitPaySDK.Models.Invoice.Status;
-using BillStatus = BitPaySDK.Models.Bill.Status;
-using PayoutStatus = BitPaySDK.Models.Payout.Status;
+using Buyer = BitPay.Models.Invoice.Buyer;
+using InvoiceStatus = BitPay.Models.Invoice.Status;
+using BillStatus = BitPay.Models.Bill.Status;
+using PayoutStatus = BitPay.Models.Payout.Status;
 using System.IO;
+using BitPay;
+using BitPay.Exceptions;
+using BitPay.Models;
+using BitPay.Models.Bill;
+using BitPay.Models.Invoice;
+using BitPay.Models.Payout;
+using BitPay.Models.Wallet;
 
 namespace BitPayUnitTest
 {
@@ -25,7 +25,7 @@ namespace BitPayUnitTest
     public class BitPayTest
     {
         // This is the BitPay object we're going to use through all the tests
-        private BitPay _bitpay;
+        private BitPay.BitPay _bitpay;
         // The pairing code generated in your BitPay account -
         // https://test.bitpay.com/dashboard/merchant/api-tokens
         // This is the POS Pairing Code
@@ -60,7 +60,7 @@ namespace BitPayUnitTest
                 .Build();
             
             // Initialize the BitPay object to be used in the following tests
-            _bitpay = new BitPay(configuration);
+            _bitpay = new BitPay.BitPay(configuration);
 
             // ledgers require the Merchant Facade
             if (!_bitpay.tokenExist(Facade.Merchant)) {

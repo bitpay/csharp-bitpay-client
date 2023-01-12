@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace BitPaySDK.Models.Invoice
+namespace BitPay.Models.Invoice
 {
     public class Refund
     {
@@ -62,6 +61,9 @@ namespace BitPaySDK.Models.Invoice
 
         [JsonProperty(PropertyName = "params")]
         public RefundParams PaymentUrls { get; set; }
+        
+        [JsonProperty(PropertyName = "reference")]
+        public string Reference { get; set; }
 
         public bool ShouldSerializeId()
         {

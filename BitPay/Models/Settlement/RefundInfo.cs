@@ -1,4 +1,4 @@
-﻿namespace BitPaySDK.Models.Settlement
+﻿namespace BitPay.Models.Settlement
 {
     public class RefundInfo
     {

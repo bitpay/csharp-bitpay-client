@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BitPaySDK.Exceptions
+namespace BitPay.Exceptions
 {
     public class RatesException : BitPayException
     {
