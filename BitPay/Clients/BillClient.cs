@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BitPay.Exceptions;
 using BitPay.Models.Bill;
+using BitPay.Utils;
 using Newtonsoft.Json;
 
 namespace BitPay.Clients
 {
     public class BillClient
     {
-        private readonly BitPayClient _bitPayClient;
+        private readonly IBitPayClient _bitPayClient;
         private readonly AccessTokens _accessTokens;
 
 
-        public BillClient(BitPayClient bitPayClient, AccessTokens accessTokens)
+        public BillClient(IBitPayClient bitPayClient, AccessTokens accessTokens)
         {
             _bitPayClient = bitPayClient ?? throw new MissingRequiredField(nameof(bitPayClient));
             _accessTokens = accessTokens ?? throw new MissingRequiredField(nameof(accessTokens));
@@ -32,10 +33,9 @@ namespace BitPay.Clients
         {
             try
             {
-                bill.Token = this._accessTokens.GetAccessToken(facade);
                 var json = JsonConvert.SerializeObject(bill);
                 var response = await _bitPayClient.Post("bills", json, signRequest).ConfigureAwait(false);
-                var responseString = await _bitPayClient.ResponseToJsonString(response).ConfigureAwait(false);
+                var responseString =await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 var serializerSettings = new JsonSerializerSettings
                     {ObjectCreationHandling = ObjectCreationHandling.Replace};
                 JsonConvert.PopulateObject(responseString, bill, serializerSettings);
@@ -87,7 +87,7 @@ namespace BitPay.Clients
                 }
 
                 var response = await _bitPayClient.Get("bills/" + billId, parameters, signRequest);
-                var responseString = await _bitPayClient.ResponseToJsonString(response);
+                var responseString =await HttpResponseParser.ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<Bill>(responseString);
             }
             catch (BitPayException ex)
@@ -132,7 +132,7 @@ namespace BitPay.Clients
                 }
 
                 var response = await _bitPayClient.Get("bills", parameters);
-                var responseString = await _bitPayClient.ResponseToJsonString(response);
+                var responseString =await HttpResponseParser.ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<List<Bill>>(responseString);
             }
             catch (BitPayException ex)
@@ -162,7 +162,7 @@ namespace BitPay.Clients
             {
                 var json = JsonConvert.SerializeObject(bill);
                 var response = await _bitPayClient.Put("bills/" + billId, json).ConfigureAwait(false);
-                var responseString = await _bitPayClient.ResponseToJsonString(response).ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 var serializerSettings = new JsonSerializerSettings
                     {ObjectCreationHandling = ObjectCreationHandling.Replace};
                 JsonConvert.PopulateObject(responseString, bill, serializerSettings);
@@ -198,7 +198,7 @@ namespace BitPay.Clients
             {
                 var json = JsonConvert.SerializeObject(new Dictionary<string, string> {{"token", billToken}});
                 var response = await _bitPayClient.Post("bills/" + billId + "/deliveries", json, signRequest).ConfigureAwait(false);
-                responseString = await _bitPayClient.ResponseToJsonString(response).ConfigureAwait(false);
+                responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
             }
             catch (BitPayException ex)
             {

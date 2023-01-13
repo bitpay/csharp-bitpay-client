@@ -15,6 +15,7 @@ namespace BitPay.Models.Wallet
         public string Key { get; set; }
         public string DisplayName { get; set; }
         public string Avatar { get; set; }
+        public string Image { get; set; }
 
         [JsonProperty(PropertyName = "payPro")]
         public bool PayPro { get; set; }

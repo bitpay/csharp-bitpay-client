@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BitPay.Exceptions;
 using BitPay.Models.Payout;
+using BitPay.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -10,13 +11,15 @@ namespace BitPay.Clients
 {
     public class PayoutRecipientsClient
     {
-        private readonly BitPayClient _bitPayClient;
+        private readonly IBitPayClient _bitPayClient;
         private readonly AccessTokens _accessTokens;
+        private readonly IGuidGenerator _guidGenerator;
 
-        public PayoutRecipientsClient(BitPayClient bitPayClient, AccessTokens accessTokens)
+        public PayoutRecipientsClient(IBitPayClient bitPayClient, AccessTokens accessTokens, IGuidGenerator guidGenerator)
         {
             _bitPayClient = bitPayClient ?? throw new MissingRequiredField("bitPayClient");
             _accessTokens = accessTokens ?? throw new MissingRequiredField("accessTokens");
+            _guidGenerator = guidGenerator ?? throw new MissingRequiredField("guidGenerator");
         }
         
         /// <summary>
@@ -32,11 +35,14 @@ namespace BitPay.Clients
             try
             {
                 recipients.Token = _accessTokens.GetAccessToken(Facade.Payout);
-                recipients.Guid = Guid.NewGuid().ToString();
-                
+                if (recipients.Guid == null)
+                {
+                    recipients.Guid = _guidGenerator.Execute();
+                }
+
                 var json = JsonConvert.SerializeObject(recipients);
                 var response = await _bitPayClient.Post("recipients", json, true);
-                var responseString = await _bitPayClient.ResponseToJsonString(response);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<List<PayoutRecipient>>(responseString,
                     new JsonSerializerSettings
                     {
@@ -73,7 +79,7 @@ namespace BitPay.Clients
                 parameters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
 
                 var response = await _bitPayClient.Get("recipients/" + recipientId, parameters);
-                var responseString = await _bitPayClient.ResponseToJsonString(response);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<PayoutRecipient>(responseString,
                     new JsonSerializerSettings
                     {
@@ -116,7 +122,7 @@ namespace BitPay.Clients
                 parameters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
 
                 var response = await _bitPayClient.Get("recipients", parameters);
-                var responseString = await _bitPayClient.ResponseToJsonString(response);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<List<PayoutRecipient>>(responseString,
                     new JsonSerializerSettings
                     {
@@ -140,7 +146,9 @@ namespace BitPay.Clients
         ///     Update a Payout Recipient.
         /// </summary>
         /// <param name="recipientId">The recipient id for the recipient to be updated.</param>
-        /// <param name="recipient">A PayoutRecipient object with updated parameters defined.</param>
+        /// <param name="recipient">A PayoutRecipient object with updated parameters defined.
+        ///     Available changes: label, token
+        /// </param>
         /// <returns>The updated recipient object.</returns>
         /// <throws>PayoutRecipientUpdateException PayoutRecipientUpdateException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
@@ -155,7 +163,7 @@ namespace BitPay.Clients
 
                 var json = JsonConvert.SerializeObject(recipient);
                 var response = await _bitPayClient.Put("recipients/" + recipientId, json).ConfigureAwait(false);
-                var responseString = await _bitPayClient.ResponseToJsonString(response).ConfigureAwait(false); 
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false); 
                 return JsonConvert.DeserializeObject<PayoutRecipient>(responseString,
                     new JsonSerializerSettings
                     {
@@ -191,7 +199,7 @@ namespace BitPay.Clients
                 parameters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
                 
                 var response = await _bitPayClient.Delete("recipients/" + recipientId, parameters);
-                var responseString = await _bitPayClient.ResponseToJsonString(response).ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
                 return responseObject.GetValue("status").ToString() == "success";
             }
@@ -224,7 +232,7 @@ namespace BitPay.Clients
 
                 var json = JsonConvert.SerializeObject(parameters);
                 var response = await _bitPayClient.Post("recipients/" + recipientId + "/notifications", json, true);
-                var responseString = await _bitPayClient.ResponseToJsonString(response).ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
                 return responseObject.GetValue("status").ToString() == "success";
            }

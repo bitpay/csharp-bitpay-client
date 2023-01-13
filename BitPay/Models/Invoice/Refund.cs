@@ -54,7 +54,7 @@ namespace BitPay.Models.Invoice
         public string Id { get; set; }
 
         [JsonProperty(PropertyName = "requestDate")]
-        public string RequestDate { get; set; }
+        public DateTime RequestDate { get; set; }
 
         [JsonProperty(PropertyName = "status")]
         public string Status { get; set; }
@@ -64,6 +64,15 @@ namespace BitPay.Models.Invoice
         
         [JsonProperty(PropertyName = "reference")]
         public string Reference { get; set; }
+        
+        [JsonProperty(PropertyName = "transactionCurrency")]
+        public string TransactionCurrency { get; set; }
+        
+        [JsonProperty(PropertyName = "transactionAmount")]
+        public decimal TransactionAmount { get; set; }
+        
+        [JsonProperty(PropertyName = "transactionRefundFee")]
+        public decimal TransactionRefundFee { get; set; }
 
         public bool ShouldSerializeId()
         {

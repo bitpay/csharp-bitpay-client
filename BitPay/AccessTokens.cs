@@ -63,7 +63,7 @@ namespace BitPay
             _data[facade] = token;
         }
 
-        public string GetAccessToken(string key)
+        public virtual string GetAccessToken(string key)
         {
             if (!_data.ContainsKey(key))
                 throw new TokenNotFoundException(key);
@@ -76,7 +76,7 @@ namespace BitPay
         /// </summary>
         /// <param name="facade">The facade name for which authorization is tested.</param>
         /// <returns>True if this client is authorized, false otherwise.</returns>
-        public bool TokenExists(string facade)
+        public virtual bool TokenExists(string facade)
         {
             return _data.ContainsKey(facade);
         }

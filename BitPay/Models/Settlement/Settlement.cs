@@ -12,7 +12,7 @@ namespace BitPay.Models.Settlement
         public string Status { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime DateExecuted { get; set; }
-        public DateTime DateCompleted { get; set; }
+        public DateTime? DateCompleted { get; set; }
         public DateTime OpeningDate { get; set; }
         public DateTime ClosingDate { get; set; }
         public decimal OpeningBalance { get; set; }

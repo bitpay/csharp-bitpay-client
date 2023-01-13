@@ -2,7 +2,7 @@
 
 namespace BitPay.Models.Wallet
 {
-    public class CurrencyQr
+    public class Qr
     {
         public string Type { get; set; }
 
