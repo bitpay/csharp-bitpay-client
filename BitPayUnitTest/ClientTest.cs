@@ -66,7 +66,7 @@ namespace BitPayUnitTest
         }
 
         [Fact]
-        public async Task it_should_provide_client_by_config_file()
+        public void it_should_provide_client_by_config_file()
         {
             // given
             string path = GetBitPayUnitTestPath() + Path.DirectorySeparatorChar + "BitPay.config.json";
@@ -80,7 +80,7 @@ namespace BitPayUnitTest
         }
 
         [Fact]
-        public async Task TestShouldThrowsBitPayExceptionForInvalidPrivateKey()
+        public void TestShouldThrowsBitPayExceptionForInvalidPrivateKey()
         {
             void Client() => new Client(new PrivateKey("invalid"), _accessTokens.Object, Environment.Test);
             BitPayException exception = Assert.Throws<BitPayException>((Action) Client);
@@ -602,7 +602,7 @@ namespace BitPayUnitTest
             Assert.Equal("0.007391", result.DisplayAmountPaid);
             Assert.Equal("false", result.ExceptionStatus);
             Assert.Equal(6, result.TargetConfirmations);
-            Assert.Equal(1, result.Transactions.Count);
+            Assert.Single(result.Transactions);
             Assert.Equal("medium", result.TransactionSpeed);
             Assert.Equal("john@doe.com", result.Buyer.Email);
             Assert.Equal("https://merchantwebsite.com/shop/return", result.RedirectUrl);
@@ -1743,7 +1743,13 @@ namespace BitPayUnitTest
 
         private static string GetBitPayUnitTestPath()
         {
-            return Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+            var bitPayUnitTestPath = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName;
+            if (bitPayUnitTestPath == null)
+            {
+                throw new Exception("Invalid BitPay unit test path");
+            }
+            
+            return bitPayUnitTestPath;
         }
         
         private static string GetJsonResponsePath()

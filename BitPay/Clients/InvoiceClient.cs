@@ -295,11 +295,26 @@ namespace BitPay.Clients
 
             var parameters = ResourceClientUtil.InitParams();
             parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
-            var json = JsonConvert.SerializeObject(parameters);
 
-            var response = await _bitPayClient.Post("invoices/" + invoiceId + "/events", json);
+            var response = await _bitPayClient.Get("invoices/" + invoiceId + "/events", parameters);
             var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<InvoiceEventToken>(responseString);
+        }
+
+        public async Task<Invoice> PayInvoice(string invoiceId, string status)
+        {
+            if (invoiceId == null) throw new MissingFieldException(nameof(invoiceId));
+            if (status == null) throw new MissingFieldException(nameof(status));
+            
+            var parameters = ResourceClientUtil.InitParams();
+            parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
+            parameters.Add("status", status);
+            
+            var json = JsonConvert.SerializeObject(parameters);
+
+            var response = await _bitPayClient.Put("invoices/pay/" + invoiceId, json);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+            return JsonConvert.DeserializeObject<Invoice>(responseString);
         }
     }
 }

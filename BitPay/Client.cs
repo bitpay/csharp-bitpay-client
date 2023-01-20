@@ -236,6 +236,16 @@ namespace BitPay
         {
             return await CreateInvoiceClient().RequestInvoiceWebhookToBeResent(invoiceId);
         }
+        
+        /// <summary>
+        ///     Pay invoice.
+        /// </summary>
+        /// <param name="invoiceId">Invoice ID.</param>
+        /// <param name="status">Status></param>
+        public async Task<Invoice> PayInvoice(string invoiceId, string status = "complete")
+        {
+            return await CreateInvoiceClient().PayInvoice(invoiceId, status);
+        }
 
         /// <summary>
         ///     Retrieves a bus token which can be used to subscribe to invoice events.

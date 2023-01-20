@@ -33,6 +33,7 @@ namespace BitPay.Clients
         {
             try
             {
+                bill.Token = _accessTokens.GetAccessToken(facade);
                 var json = JsonConvert.SerializeObject(bill);
                 var response = await _bitPayClient.Post("bills", json, signRequest).ConfigureAwait(false);
                 var responseString =await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
