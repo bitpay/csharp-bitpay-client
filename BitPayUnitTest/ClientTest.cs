@@ -26,9 +26,9 @@ namespace BitPayUnitTest
         const string MerchantToken = "merchantToken";
         const string PayoutToken = "payoutToken";
 
-        private Mock<IBitPayClient> _bitPayClient;
-        private Mock<AccessTokens> _accessTokens;
-        private Mock<IGuidGenerator> _guidGenerator;
+        private readonly Mock<IBitPayClient> _bitPayClient;
+        private readonly Mock<AccessTokens> _accessTokens;
+        private readonly Mock<IGuidGenerator> _guidGenerator;
 
         public ClientTest()
         {
@@ -183,13 +183,12 @@ namespace BitPayUnitTest
         {
             // given
             var testedClass = GetTestedClassAsMerchant();
-            var parameters = new Dictionary<string, dynamic>();
-            parameters.Add("token", MerchantToken);
+            var requestParameters = new Dictionary<string, dynamic> {{"token", MerchantToken}};
 
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "createBillResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "bills/3Zpmji8bRKxWJo2NJbWX5H",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(parameters, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
             
@@ -230,14 +229,12 @@ namespace BitPayUnitTest
         {
             // given
             var testedClass = GetTestedClassAsMerchant();
-            var parameters = new Dictionary<string, dynamic>();
-            parameters.Add("token", MerchantToken);
-            parameters.Add("status", "draft");
+            var requestParameters = new Dictionary<string, dynamic> {{"token", MerchantToken}, {"status", "draft"}};
 
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getBillsResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "bills",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(parameters, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
             
@@ -281,10 +278,7 @@ namespace BitPayUnitTest
             var billId = "3Zpmji8bRKxWJo2NJbWX5H";
             var testedClass = GetTestedClassAsMerchant();
 
-            var newItem = new Item();
-            newItem.Description = "Test Item 3";
-            newItem.Price = 5.00;
-            newItem.Quantity = 1;
+            var newItem = new Item {Description = "Test Item 3", Price = 5.00, Quantity = 1};
             var billToUpdate = GetBill();
             billToUpdate.Status = "draft";
             billToUpdate.Items.Add(newItem);
@@ -420,13 +414,12 @@ namespace BitPayUnitTest
         public void it_should_get_invoice()
         {
             // given
-            var parameters = new Dictionary<string, dynamic>();
-            parameters.Add("token", MerchantToken);
+            var requestParameters = new Dictionary<string, dynamic> {{"token", MerchantToken}};
 
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getInvoiceResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "invoices/G3viJEJgE8Jk2oekSdgT2A",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(parameters, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
 
@@ -468,13 +461,12 @@ namespace BitPayUnitTest
         public void it_should_get_invoice_by_guid()
         {
             // given
-            var parameters = new Dictionary<string, dynamic>();
-            parameters.Add("token", MerchantToken);
+            var requestParameters = new Dictionary<string, dynamic> {{"token", MerchantToken}};
 
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getInvoiceResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "invoices/guid/payment#1234",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(parameters, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
 
@@ -519,7 +511,7 @@ namespace BitPayUnitTest
             var dateStart = new DateTime(2021, 5, 10);
             var dateEnd = new DateTime(2021, 5, 12);
             var parameters = new Dictionary<string, dynamic> {{"limit", 10}};
-            var parametersExpected = new Dictionary<string, dynamic>
+            var requestParameters = new Dictionary<string, dynamic>
             {
                 {"limit", 10}, {"token", "merchantToken"}, {"dateStart", "2021-05-10"}, {"dateEnd", "2021-05-12"}
             };
@@ -527,7 +519,7 @@ namespace BitPayUnitTest
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getInvoicesResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "invoices",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(parametersExpected, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
 
@@ -572,13 +564,11 @@ namespace BitPayUnitTest
             // given
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "updateInvoiceResponse.json"));
             _bitPayClient.Setup(b => b.Put(
-            "invoices/G3viJEJgE8Jk2oekSdgT2A",
-            "{\"buyerSms\":\"+12223334444\",\"token\":\"merchantToken\"}")
+                "invoices/G3viJEJgE8Jk2oekSdgT2A",
+                "{\"buyerSms\":\"+12223334444\",\"token\":\"merchantToken\"}")
             ).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
             var testedClass = GetTestedClassAsMerchant();
-            var updatedData = new Dictionary<string, dynamic>();
-            updatedData.Add("buyerSms", "+12223334444");
-            
+            var updatedData = new Dictionary<string, dynamic> {{"buyerSms", "+12223334444"}};
 
             // when
             var result = testedClass.UpdateInvoice("G3viJEJgE8Jk2oekSdgT2A", updatedData).Result;
@@ -620,18 +610,66 @@ namespace BitPayUnitTest
         public void it_should_cancel_invoice()
         {
             // given
-            var additionalData = new Dictionary<string, dynamic>
+            var requestParameters = new Dictionary<string, dynamic>
             {
                 {"token", MerchantToken}, { "forceCancel", true}
             };
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "cancelInvoiceSuccessResponse.json"));
             _bitPayClient.Setup(b => b.Delete(
                 "invoices/Hpqc63wvE1ZjzeeH4kEycF",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(additionalData, d))
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d))
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
 
             // when
             var result = this.GetTestedClassAsMerchant().CancelInvoice("Hpqc63wvE1ZjzeeH4kEycF").Result;
+
+            // then
+            Assert.Equal("payment#1234", result.Guid);
+            Assert.Equal("https://bitpay.com/invoice?id=G3viJEJgE8Jk2oekSdgT2A", result.Url);
+            Assert.Equal("\"{ \"ref\" : 711454, \"item\" : \"test_item\" }\"", result.PosData);
+            Assert.Equal("expired", result.Status);
+            Assert.Equal(20, result.Price);
+            Assert.Equal("USD", result.Currency);
+            Assert.Equal("20210511_fghij", result.OrderId);
+            Assert.Equal(1620733980748L, result.InvoiceTime);
+            Assert.Equal(1620734880748L, result.ExpirationTime);
+            Assert.Equal(1620734253073L, result.CurrentTime);
+            Assert.Equal("payment#1234", result.Guid);
+            Assert.Equal("G3viJEJgE8Jk2oekSdgT2A", result.Id);
+            Assert.False(result.LowFeeDetected);
+            Assert.Equal(739100, result.AmountPaid);
+            Assert.Equal("0.007391", result.DisplayAmountPaid);
+            Assert.Equal("false", result.ExceptionStatus);
+            Assert.Equal(6, result.TargetConfirmations);
+            Assert.Equal(new List<InvoiceTransaction>(), result.Transactions);
+            Assert.Equal("medium", result.TransactionSpeed);
+            Assert.Equal("john@doe.com", result.Buyer.Email);
+            Assert.Equal("https://merchantwebsite.com/shop/return", result.RedirectUrl);
+            Assert.False(result.AutoRedirect);
+            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseURL);
+            Assert.False(result.RefundAddressRequestPending);
+            Assert.Equal("john@doe.com", result.BuyerProvidedEmail);
+            Assert.Equal("john@doe.com", result.BuyerProvidedInfo.EmailAddress);
+            Assert.Equal("bitpay", result.BuyerProvidedInfo.SelectedWallet);
+            Assert.Equal("BCH", result.BuyerProvidedInfo.SelectedTransactionCurrency);
+        }
+        
+        [Fact]
+        public void it_should_cancel_invoice_by_guid()
+        {
+            // given
+            var requestParameters = new Dictionary<string, dynamic>
+            {
+                {"token", MerchantToken}, { "forceCancel", true}
+            };
+            HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "cancelInvoiceSuccessResponse.json"));
+            _bitPayClient.Setup(b => b.Delete(
+                "invoices/guid/payment#1234",
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d))
+            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+
+            // when
+            var result = this.GetTestedClassAsMerchant().CancelInvoiceByGuid("payment#1234").Result;
 
             // then
             Assert.Equal("payment#1234", result.Guid);
@@ -686,14 +724,14 @@ namespace BitPayUnitTest
         public void it_should_retrieve_an_invoice_event_token()
         {
             // given
-            var expectedParameters = new Dictionary<string, dynamic>
+            var requestParameters = new Dictionary<string, dynamic>
             {
                 {"token", MerchantToken}
             };
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getInvoiceEventToken.json"));
             _bitPayClient.Setup(b => b.Get(
                 "invoices/GZRP3zgNHTDf8F5BmdChKz/events",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(expectedParameters, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
             true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
 
@@ -709,14 +747,11 @@ namespace BitPayUnitTest
         [Fact]
         public void it_should_get_ledgers()
         {
-            var additionalData = new Dictionary<string, dynamic>
-            {
-                {"token", MerchantToken}
-            };
+            var requestParameters = new Dictionary<string, dynamic> {{"token", MerchantToken}};
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getLedgersResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "ledgers",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(additionalData, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
 
@@ -734,14 +769,14 @@ namespace BitPayUnitTest
         [Fact]
         public void it_should_get_ledger_entries()
         {
-            var additionalData = new Dictionary<string, dynamic>
+            var requestParameters = new Dictionary<string, dynamic>
             {
                 {"token", MerchantToken}, {"startDate", "2021-05-10"}, {"endDate", "2021-05-31"}
             };
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getLedgerEntriesResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "ledgers/USD",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(additionalData, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
 
@@ -771,10 +806,6 @@ namespace BitPayUnitTest
         public void it_should_submit_payout()
         {
             // given
-            var additionalData = new Dictionary<string, dynamic>
-            {
-                {"token", PayoutToken}
-            };
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "createPayoutResponse.json"));
             _bitPayClient.Setup(b => b.Post(
                 "payouts",
@@ -818,14 +849,11 @@ namespace BitPayUnitTest
         public void it_should_get_payout()
         {
             // given
-            var additionalData = new Dictionary<string, dynamic>
-            {
-                {"token", PayoutToken}
-            };
+            var requestParameters = new Dictionary<string, dynamic> {{"token", PayoutToken}};
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getPayoutResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "payouts/JMwv8wQCXANoU2ZZQ9a9GH",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(additionalData, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
             
@@ -833,46 +861,43 @@ namespace BitPayUnitTest
             var result = GetTestedClassAsPayout().GetPayout("JMwv8wQCXANoU2ZZQ9a9GH").Result;
             
             // then
-                Assert.Null(result.Account);
-                Assert.Equal(10.0, result.Amount);
-                Assert.Null(result.Btc);
-                Assert.Equal("USD", result.Currency);
-                Assert.Equal(DateTime.Parse("2021-05-27T09:00:00.000Z").ToUniversalTime(), result.DateExecuted);
-                Assert.Null(result.DepositTotal);
-                Assert.Equal(DateTime.Parse("2021-05-27T09:00:00.000Z").ToUniversalTime(), result.EffectiveDate);
-                Assert.Equal("john@doe.com", result.Email);
-                Assert.Equal(27883.962246420004, result.ExchangeRates["BTC"].Property("GBP").Value.Value);
-                Assert.Null(result.Fee);
-                Assert.Equal("JMwv8wQCXANoU2ZZQ9a9GH", result.Id);
-                Assert.Equal("John Doe", result.Label);
-                Assert.Equal("GBP", result.LedgerCurrency);
-                Assert.Null(result.Message);
-                Assert.Equal("merchant@email.com", result.NotificationEmail);
-                Assert.Equal("https://yournotiticationURL.com/wed3sa0wx1rz5bg0bv97851eqx", result.NotificationUrl);
-                Assert.Null(result.PercentFee);
-                Assert.Null(result.Rate);
-                Assert.Equal("LDxRZCGq174SF8AnQpdBPB", result.RecipientId);
-                Assert.Equal("payout_20210527", result.Reference);
-                Assert.Equal(DateTime.Parse("2021-05-27T10:47:37.834Z").ToUniversalTime(), result.RequestDate);
-                Assert.Equal("7qohDf2zZnQK5Qanj8oyC2", result.ShopperId);
-                Assert.Equal("complete", result.Status);
-                Assert.Null(result.SupportPhone);
-                Assert.Equal("6RZSTPtnzEaroAe2X4YijenRiqteRDNvzbT8NjtcHjUVd9FUFwa7dsX8RFgRDDC5SL", result.Token);
-                Assert.Equal("db53d7e2bf3385a31257ce09396202d9c2823370a5ca186db315c45e24594057", result.Transactions[0].Txid);
+            Assert.Null(result.Account);
+            Assert.Equal(10.0, result.Amount);
+            Assert.Null(result.Btc);
+            Assert.Equal("USD", result.Currency);
+            Assert.Equal(DateTime.Parse("2021-05-27T09:00:00.000Z").ToUniversalTime(), result.DateExecuted);
+            Assert.Null(result.DepositTotal);
+            Assert.Equal(DateTime.Parse("2021-05-27T09:00:00.000Z").ToUniversalTime(), result.EffectiveDate);
+            Assert.Equal("john@doe.com", result.Email);
+            Assert.Equal(27883.962246420004, result.ExchangeRates["BTC"].Property("GBP").Value.Value);
+            Assert.Null(result.Fee);
+            Assert.Equal("JMwv8wQCXANoU2ZZQ9a9GH", result.Id);
+            Assert.Equal("John Doe", result.Label);
+            Assert.Equal("GBP", result.LedgerCurrency);
+            Assert.Null(result.Message);
+            Assert.Equal("merchant@email.com", result.NotificationEmail);
+            Assert.Equal("https://yournotiticationURL.com/wed3sa0wx1rz5bg0bv97851eqx", result.NotificationUrl);
+            Assert.Null(result.PercentFee);
+            Assert.Null(result.Rate);
+            Assert.Equal("LDxRZCGq174SF8AnQpdBPB", result.RecipientId);
+            Assert.Equal("payout_20210527", result.Reference);
+            Assert.Equal(DateTime.Parse("2021-05-27T10:47:37.834Z").ToUniversalTime(), result.RequestDate);
+            Assert.Equal("7qohDf2zZnQK5Qanj8oyC2", result.ShopperId);
+            Assert.Equal("complete", result.Status);
+            Assert.Null(result.SupportPhone);
+            Assert.Equal("6RZSTPtnzEaroAe2X4YijenRiqteRDNvzbT8NjtcHjUVd9FUFwa7dsX8RFgRDDC5SL", result.Token);
+            Assert.Equal("db53d7e2bf3385a31257ce09396202d9c2823370a5ca186db315c45e24594057", result.Transactions[0].Txid);
         }
 
         [Fact]
         public void it_should_cancel_payout()
         {
             // given
-            var additionalData = new Dictionary<string, dynamic>
-            {
-                {"token", PayoutToken}
-            };
+            var requestParameters = new Dictionary<string, dynamic> {{"token", PayoutToken}};
             HttpContent response = new StringContent("{\"status\": \"success\",\"data\": {},\"message\": null }");
             _bitPayClient.Setup(b => b.Delete(
                 "payouts/KMXZeQigXG6T5abzCJmTcH",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(additionalData, d))
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d))
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
             
             // when
@@ -886,23 +911,23 @@ namespace BitPayUnitTest
         public void it_should_get_payouts()
         {
             // given
-            var additionalData = new Dictionary<string, dynamic>
+            var parameters = new Dictionary<string, dynamic>
             {
                 {"startDate", "2021-05-27"}, {"endDate", "2021-05-31"}
             };
-            var expectedData = new Dictionary<string, dynamic>
+            var requestParameters = new Dictionary<string, dynamic>
             {
                 {"startDate", "2021-05-27"}, {"endDate", "2021-05-31"}, {"token", PayoutToken}
             };
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getPayoutsResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "payouts",
-                expectedData,
+                requestParameters,
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
             
             // when
-            var result = GetTestedClassAsPayout().GetPayouts(additionalData).Result;
+            var result = GetTestedClassAsPayout().GetPayouts(parameters).Result;
             
             //  then
             Assert.Null(result.First().Account);
@@ -1010,7 +1035,7 @@ namespace BitPayUnitTest
         public void it_should_get_payout_recipients_by_status()
         {
             // given
-            var additionalData = new Dictionary<string, dynamic>
+            var requestParameters = new Dictionary<string, dynamic>
             {
                 {"status", "invited"}, {"limit", "100"}, {"offset", "0"}, {"token", PayoutToken}
             };
@@ -1018,7 +1043,7 @@ namespace BitPayUnitTest
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getPayoutRecipientsResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "recipients",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(additionalData, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
             
@@ -1045,15 +1070,12 @@ namespace BitPayUnitTest
         public void it_should_get_payout_recipient()
         {
             // given
-            var additionalData = new Dictionary<string, dynamic>
-            {
-                {"token", PayoutToken}
-            };
+            var requestParameters = new Dictionary<string, dynamic> {{"token", PayoutToken}};
             
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getPayoutRecipientResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "recipients/JA4cEtmBxCp5cybtnh1rds",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(additionalData, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
             
@@ -1092,14 +1114,11 @@ namespace BitPayUnitTest
         public void it_should_delete_payout_recipient()
         {
             // given
-            var additionalData = new Dictionary<string, dynamic>
-            {
-                {"token", PayoutToken}
-            };
+            var requestParameters = new Dictionary<string, dynamic> {{"token", PayoutToken}};
             HttpContent response = new StringContent("{\"status\": \"success\", \"data\": {}, \"message\": null}");
             _bitPayClient.Setup(b => b.Delete(
                 "recipients/X3icwc4tE8KJ5hEPNPpDXW",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(additionalData, d))
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d))
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
 
             // when
@@ -1203,15 +1222,12 @@ namespace BitPayUnitTest
         public void it_should_get_refund_by_id()
         {
             // given
-            var additionalData = new Dictionary<string, dynamic>
-            {
-                {"token", MerchantToken}
-            };
+            var requestParameters = new Dictionary<string, dynamic> {{"token", MerchantToken}};
             
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getRefundResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "refunds/WoE46gSLkJQS48RJEiNw3L",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(additionalData, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
             
@@ -1241,15 +1257,12 @@ namespace BitPayUnitTest
         public void it_should_get_refund_by_guid()
         {
             // given
-            var additionalData = new Dictionary<string, dynamic>
-            {
-                {"token", MerchantToken}
-            };
+            var requestParameters = new Dictionary<string, dynamic> {{"token", MerchantToken}};
             
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getRefundResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "refunds/guid/ee26b5e0-9185-493e-bc12-e846d5fcf07c",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(additionalData, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
             
@@ -1279,7 +1292,7 @@ namespace BitPayUnitTest
         public void it_should_get_refunds_by_invoice_id()
         {
             // given
-            var additionalData = new Dictionary<string, dynamic>
+            var requestParameters = new Dictionary<string, dynamic>
             {
                 {"token", MerchantToken}, {"invoiceId", "Hpqc63wvE1ZjzeeH4kEycF"}
             };
@@ -1287,7 +1300,7 @@ namespace BitPayUnitTest
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getRefundsByInvoiceId.json"));
             _bitPayClient.Setup(b => b.Get(
                 "refunds",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(additionalData, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
             
@@ -1339,7 +1352,7 @@ namespace BitPayUnitTest
                 "refunds/X3icwc4tE8KJ5hEPNPpDXW",
                 "{\"token\":\"merchantToken\",\"status\":\"created\"}"
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
-            var status = "created";
+            const string status = "created";
 
             // when
             var result = GetTestedClassAsMerchant().UpdateRefund("X3icwc4tE8KJ5hEPNPpDXW", status).Result;
@@ -1357,7 +1370,7 @@ namespace BitPayUnitTest
                 "refunds/guid/ee26b5e0-9185-493e-bc12-e846d5fcf07c",
                 "{\"token\":\"merchantToken\",\"status\":\"created\"}"
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
-            var status = "created";
+            const string status = "created";
 
             // when
             var result = GetTestedClassAsMerchant().UpdateRefundByGuid("ee26b5e0-9185-493e-bc12-e846d5fcf07c", status).Result;
@@ -1388,14 +1401,11 @@ namespace BitPayUnitTest
         public void it_should_cancel_refund()
         {
             // given
-            var additionalData = new Dictionary<string, dynamic>
-            {
-                {"token", MerchantToken}
-            };
+            var requestParameters = new Dictionary<string, dynamic> {{"token", MerchantToken}};
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "cancelRefundResponse.json"));
             _bitPayClient.Setup(b => b.Delete(
                 "refunds/WoE46gSLkJQS48RJEiNw3L",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(additionalData, d))
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d))
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
 
             // when
@@ -1422,14 +1432,11 @@ namespace BitPayUnitTest
         public void it_should_cancel_refund_by_guid()
         {
             // given
-            var additionalData = new Dictionary<string, dynamic>
-            {
-                {"token", MerchantToken}
-            };
+            var requestParameters = new Dictionary<string, dynamic> {{"token", MerchantToken}};
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "cancelRefundResponse.json"));
             _bitPayClient.Setup(b => b.Delete(
                 "refunds/guid/WoE46gSLkJQS48RJEiNw3L",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(additionalData, d))
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d))
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
 
             // when
@@ -1456,11 +1463,11 @@ namespace BitPayUnitTest
         public void it_should_get_settlements()
         {
             // given
-            var additionalData = new Dictionary<string, dynamic>
+            var parameters = new Dictionary<string, dynamic>
             {
                 {"startDate", "2021-05-10"}, {"endDate", "2021-05-12"}, {"status", "processing"}
             };
-            var expectedData = new Dictionary<string, dynamic>
+            var requestParameters = new Dictionary<string, dynamic>
             {
                 {"startDate", "2021-05-10"}, {"endDate", "2021-05-12"}, {"status", "processing"}, {"token", MerchantToken}
             };
@@ -1468,12 +1475,12 @@ namespace BitPayUnitTest
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getSettlementsResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "settlements",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(expectedData, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
             
             // when
-            var result = GetTestedClassAsMerchant().GetSettlements(additionalData).Result;
+            var result = GetTestedClassAsMerchant().GetSettlements(parameters).Result;
             
             // then
             Assert.Equal(2, result.Count);
@@ -1528,15 +1535,12 @@ namespace BitPayUnitTest
         public void it_should_get_settlement()
         {
             // given
-            var expectedPassedData = new Dictionary<string, dynamic>
-            {
-                {"token", MerchantToken}
-            };
+            var requestParameters = new Dictionary<string, dynamic> {{"token", MerchantToken}};
             
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getSettlementResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "settlements/DNFnN3fFjjzLn6if5bdGJC",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(expectedPassedData, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
             
@@ -1572,7 +1576,7 @@ namespace BitPayUnitTest
         public void it_should_get_settlement_reconciliation_report()
         {
             // given
-            var expectedPassedData = new Dictionary<string, dynamic>
+            var requestParameters = new Dictionary<string, dynamic>
             {
                 {"token", "5T1T5yGDEtFDYe8jEVBSYLHKewPYXZrDLvZxtXBzn69fBbZYitYQYH4BFYFvvaVU7D"}
             };
@@ -1580,7 +1584,7 @@ namespace BitPayUnitTest
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getSettlementReconciliationReportResponse.json"));
             _bitPayClient.Setup(b => b.Get(
                 "settlements/RvNuCTMAkURKimwgvSVEMP/reconciliationReport",
-                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(expectedPassedData, d)),
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(requestParameters, d)),
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
             
@@ -1655,9 +1659,9 @@ namespace BitPayUnitTest
         private Bill GetBill() {
             List<string> cc = new List<string> {"jane@doe.com"};
 
-            List<Item> items = new List<Item>();
-            Item item1 = new Item();
-            Item item2 = new Item();
+            List<Item> items = new();
+            Item item1 = new();
+            Item item2 = new();
             item1.Id = "Test Item 1";
             item1.Price = 6.00;
             item1.Quantity = 1;
@@ -1667,7 +1671,7 @@ namespace BitPayUnitTest
             items.Add(item1);
             items.Add(item2);
 
-            Bill bill = new Bill
+            Bill bill = new()
             {
                 Number = "bill1234-ABCD",
                 Currency = "USD",
@@ -1703,7 +1707,7 @@ namespace BitPayUnitTest
                 AutoRedirect = true,
                 ForcedBuyerSelectedWallet = "bitpay"
             };
-            Buyer buyerData = new Buyer
+            Buyer buyerData = new()
             {
                 Name = "Marcin",
                 Address1 = "SomeStreet",
@@ -1722,7 +1726,7 @@ namespace BitPayUnitTest
         
         private Payout GetPayoutExample()
         {
-            Payout payout = new Payout
+            Payout payout = new()
             {
                 Amount = 10.00,
                 Currency = "USD",
@@ -1739,8 +1743,8 @@ namespace BitPayUnitTest
 
         private PayoutRecipients GetPayoutRecipientsExample()
         {
-            PayoutRecipient payoutRecipient1 = new PayoutRecipient("alice@email.com", "Alice");
-            PayoutRecipient payoutRecipient2 = new PayoutRecipient("bob@email.com", "Bob");
+            PayoutRecipient payoutRecipient1 = new("alice@email.com", "Alice");
+            PayoutRecipient payoutRecipient2 = new("bob@email.com", "Bob");
 
             return new PayoutRecipients(new List<PayoutRecipient> { payoutRecipient1, payoutRecipient2 });
     }

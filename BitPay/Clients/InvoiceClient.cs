@@ -263,6 +263,45 @@ namespace BitPay.Clients
                 throw;
             }
         }
+        
+        /// <summary>
+        ///     Cancel a BitPay invoice.
+        /// </summary>
+        /// <param name="guidId">The GUID of the invoice to cancel.</param>
+        /// <param name="forceCancel">
+        /// Parameter that will cancel the invoice even if no contact information is present.
+        /// Note: Canceling a paid invoice without contact information requires
+        /// a manual support process and is not recommended.
+        /// </param>
+        /// <returns>Cancelled invoice object.</returns>
+        /// <throws>InvoiceCancellationException InvoiceCancellationException class</throws>
+        public async Task<Invoice> CancelInvoiceByGuid(string guidId, Boolean forceCancel = true)
+        {
+            try
+            {
+                var parameters = ResourceClientUtil.InitParams();
+                parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
+                if (forceCancel)
+                {
+                    parameters.Add("forceCancel", true);
+                }
+
+                var response = await _bitPayClient.Delete("invoices/guid/" + guidId, parameters);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<Invoice>(responseString);
+            }
+            catch (BitPayException ex)
+            {
+                throw new InvoiceQueryException(ex, ex.GetApiCode());
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new InvoiceCancellationException(ex);
+
+                throw;
+            }
+        }
 
         /// <summary>
         ///     Request a webhook to be resent.

@@ -100,6 +100,7 @@ namespace BitPayIntegrationTest
             
             var getInvoiceEventToken = _client.GetInvoiceEventToken(invoiceId).Result;
             Assert.NotNull(getInvoiceEventToken.Token);
+            
             var updatedEmail = "updated@email.com";
             var updateInvoiceParameters = new Dictionary<string, dynamic> {{"buyerEmail", updatedEmail}};
             var updatedInvoice = _client.UpdateInvoice(invoiceId, updateInvoiceParameters).Result;
@@ -109,6 +110,10 @@ namespace BitPayIntegrationTest
             
             var cancelInvoice = _client.CancelInvoice(invoiceId).Result;
             Assert.True(cancelInvoice.IsCancelled);
+            
+            var invoiceToCancelByGuid = await _client.CreateInvoice(GetInvoiceExample());
+            var cancelInvoiceByGuid = _client.CancelInvoiceByGuid(invoiceToCancelByGuid.Guid).Result;
+            Assert.True(cancelInvoiceByGuid.IsCancelled);
         }
 
         /// <summary>
