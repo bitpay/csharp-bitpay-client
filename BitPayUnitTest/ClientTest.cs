@@ -686,11 +686,15 @@ namespace BitPayUnitTest
         public void it_should_retrieve_an_invoice_event_token()
         {
             // given
+            var expectedParameters = new Dictionary<string, dynamic>
+            {
+                {"token", MerchantToken}
+            };
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "getInvoiceEventToken.json"));
-            _bitPayClient.Setup(b => b.Post(
+            _bitPayClient.Setup(b => b.Get(
                 "invoices/GZRP3zgNHTDf8F5BmdChKz/events",
-            "{\"token\":\"merchantToken\"}",
-                false
+                It.Is<Dictionary<string, dynamic>>(d => Enumerable.SequenceEqual(expectedParameters, d)),
+            true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
 
             // when

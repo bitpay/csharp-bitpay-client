@@ -255,7 +255,7 @@ namespace BitPayIntegrationTest
         }
         
         /// <summary>
-        ///     Create payments before
+        ///     Create payments before start it.
         /// 
         ///     Tested ledgers requests:
         ///     - GetLedgers()
