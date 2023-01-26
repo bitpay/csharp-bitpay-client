@@ -2,8 +2,8 @@
 {
     public class MinerFeesItem
     {
-        public double SatoshisPerByte { get; set; }
-        public double TotalFee { get; set; }
-        public double? FiatAmount { get; set; }
+        public decimal SatoshisPerByte { get; set; }
+        public decimal TotalFee { get; set; }
+        public decimal? FiatAmount { get; set; }
     }
 }

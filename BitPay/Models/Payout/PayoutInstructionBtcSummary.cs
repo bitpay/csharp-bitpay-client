@@ -4,7 +4,7 @@ namespace BitPay.Models.Payout
 {
     public class PayoutInstructionBtcSummary
     {
-        public PayoutInstructionBtcSummary(double paid, double unpaid)
+        public PayoutInstructionBtcSummary(decimal paid, decimal unpaid)
         {
             Paid = paid;
             Unpaid = unpaid;
@@ -12,10 +12,10 @@ namespace BitPay.Models.Payout
 
         [JsonProperty(PropertyName = "paid")]
         [JsonConverter(typeof(Converters.BtcValueConverter))]
-        public double Paid { get; set; }
+        public decimal Paid { get; set; }
 
         [JsonProperty(PropertyName = "unpaid")]
         [JsonConverter(typeof(Converters.BtcValueConverter))]
-        public double Unpaid { get; set; }
+        public decimal Unpaid { get; set; }
     }
 }

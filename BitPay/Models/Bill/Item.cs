@@ -12,7 +12,7 @@ namespace BitPay.Models.Bill
         public string Description { get; set; }
 
         [JsonProperty(PropertyName = "price")]
-        public double Price { get; set; }
+        public decimal Price { get; set; }
 
         [JsonProperty(PropertyName = "quantity")]
         public int Quantity { get; set; }

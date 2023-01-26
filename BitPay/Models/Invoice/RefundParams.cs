@@ -14,7 +14,7 @@ namespace BitPay.Models.Invoice
         public string setRequesterEmail { get; set; }
 
         [JsonProperty(PropertyName = "amount")]
-        public double setAmount { get; set; }
+        public decimal setAmount { get; set; }
 
         [JsonProperty(PropertyName = "currency")]
         public string setCurrency { get; set; }

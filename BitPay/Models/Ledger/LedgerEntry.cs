@@ -28,7 +28,7 @@ namespace BitPay.Models.Ledger
 
         [JsonProperty(PropertyName = "buyerFields")] public Buyer Buyer { get; set; }
 
-        [JsonProperty(PropertyName = "invoiceAmount")] public double InvoiceAmount { get; set; }
+        [JsonProperty(PropertyName = "invoiceAmount")] public decimal InvoiceAmount { get; set; }
 
         [JsonProperty(PropertyName = "invoiceCurrency")] public string InvoiceCurrency { get; set; }
 

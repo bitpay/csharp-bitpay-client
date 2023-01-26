@@ -170,11 +170,11 @@ namespace BitPayUnitTest
             Assert.Equal("7HyKWn3d4xdhAMQYAEVxVq", result.Merchant);
             Assert.Equal("NV35GRWtrdB2cmGEjY4LKY", result.Items.First().Id);
             Assert.Equal("Test Item 1", result.Items.First().Description);
-            Assert.Equal(6.0, result.Items.First().Price);
+            Assert.Equal(6.0M, result.Items.First().Price);
             Assert.Equal(1, result.Items.First().Quantity);
             Assert.Equal("Apy3i2TpzHRYP8tJCkrZMT", result.Items.Last().Id);
             Assert.Equal("Test Item 2", result.Items.Last().Description);
-            Assert.Equal(4.0, result.Items.Last().Price);
+            Assert.Equal(4.0M, result.Items.Last().Price);
             Assert.Equal(1, result.Items.Last().Quantity);
         }
         
@@ -216,11 +216,11 @@ namespace BitPayUnitTest
             Assert.Equal("7HyKWn3d4xdhAMQYAEVxVq", result.Merchant);
             Assert.Equal("NV35GRWtrdB2cmGEjY4LKY", result.Items.First().Id);
             Assert.Equal("Test Item 1", result.Items.First().Description);
-            Assert.Equal(6.0, result.Items.First().Price);
+            Assert.Equal(6.0M, result.Items.First().Price);
             Assert.Equal(1, result.Items.First().Quantity);
             Assert.Equal("Apy3i2TpzHRYP8tJCkrZMT", result.Items.Last().Id);
             Assert.Equal("Test Item 2", result.Items.Last().Description);
-            Assert.Equal(4.0, result.Items.Last().Price);
+            Assert.Equal(4.0M, result.Items.Last().Price);
             Assert.Equal(1, result.Items.Last().Quantity);
         }
         
@@ -262,11 +262,11 @@ namespace BitPayUnitTest
             Assert.Equal("7HyKWn3d4xdhAMQYAEVxVq", result.First().Merchant);
             Assert.Equal("EL4vx41Nxc5RYhbqDthjE", result.First().Items.First().Id);
             Assert.Equal("Test Item 1", result.First().Items.First().Description);
-            Assert.Equal(6.0, result.First().Items.First().Price);
+            Assert.Equal(6.0M, result.First().Items.First().Price);
             Assert.Equal(1, result.First().Items.First().Quantity);
             Assert.Equal("6spPADZ2h6MfADvnhfsuBt", result.First().Items.Last().Id);
             Assert.Equal("Test Item 2", result.First().Items.Last().Description);
-            Assert.Equal(4.0, result.First().Items.Last().Price);
+            Assert.Equal(4.0M, result.First().Items.Last().Price);
             Assert.Equal(1, result.First().Items.Last().Quantity);
             Assert.Equal(2, result.Count);
         }
@@ -278,7 +278,7 @@ namespace BitPayUnitTest
             var billId = "3Zpmji8bRKxWJo2NJbWX5H";
             var testedClass = GetTestedClassAsMerchant();
 
-            var newItem = new Item {Description = "Test Item 3", Price = 5.00, Quantity = 1};
+            var newItem = new Item {Description = "Test Item 3", Price = 5.00M, Quantity = 1};
             var billToUpdate = GetBill();
             billToUpdate.Status = "draft";
             billToUpdate.Items.Add(newItem);
@@ -313,11 +313,11 @@ namespace BitPayUnitTest
             Assert.Equal("7HyKWn3d4xdhAMQYAEVxVq", result.Merchant);
             Assert.Equal("8vXbhqWDL1A9F66ZwJAiyJ", result.Items.First().Id);
             Assert.Equal("Test Item 1", result.Items.First().Description);
-            Assert.Equal(6.0, result.Items.First().Price);
+            Assert.Equal(6.0M, result.Items.First().Price);
             Assert.Equal(1, result.Items.First().Quantity);
             Assert.Equal("89xhSLYPnLDBczsQHCvJ2D", result.Items.Last().Id);
             Assert.Equal("Test Item 3", result.Items.Last().Description);
-            Assert.Equal(5.0, result.Items.Last().Price);
+            Assert.Equal(5.0M, result.Items.Last().Price);
             Assert.Equal(1, result.Items.Last().Quantity);
         }
 
@@ -762,8 +762,8 @@ namespace BitPayUnitTest
             Assert.Equal(3, result.Count);
             Assert.Equal("EUR", result.First().Currency);
             Assert.Equal("BTC", result.Last().Currency);
-            Assert.Equal(0.0, result.First().Balance);
-            Assert.Equal(0.000287, result.Last().Balance);
+            Assert.Equal(0.0M, result.First().Balance);
+            Assert.Equal(0.000287M, result.Last().Balance);
         }
 
         [Fact]
@@ -818,7 +818,7 @@ namespace BitPayUnitTest
             
             // then
             Assert.Null(result.Account);
-            Assert.Equal(10.0, result.Amount);
+            Assert.Equal(10.0M, result.Amount);
             Assert.Null(result.Btc);
             Assert.Equal("USD", result.Currency);
             Assert.Null(result.DateExecuted);
@@ -862,7 +862,7 @@ namespace BitPayUnitTest
             
             // then
             Assert.Null(result.Account);
-            Assert.Equal(10.0, result.Amount);
+            Assert.Equal(10.0M, result.Amount);
             Assert.Null(result.Btc);
             Assert.Equal("USD", result.Currency);
             Assert.Equal(DateTime.Parse("2021-05-27T09:00:00.000Z").ToUniversalTime(), result.DateExecuted);
@@ -931,7 +931,7 @@ namespace BitPayUnitTest
             
             //  then
             Assert.Null(result.First().Account);
-            Assert.Equal(10.0, result.First().Amount);
+            Assert.Equal(10.0M, result.First().Amount);
             Assert.Null(result.First().Btc);
             Assert.Equal("USD", result.First().Currency);
             Assert.Null(result.First().DateExecuted);
@@ -957,7 +957,7 @@ namespace BitPayUnitTest
             Assert.Equal("db53d7e2bf3385a31257ce09396202d9c2823370a5ca186db315c45e24594057", result.First().Transactions[0].Txid);
 
             Assert.Null(result[1].Account);
-            Assert.Equal(10.0, result[1].Amount);
+            Assert.Equal(10.0M, result[1].Amount);
             Assert.Null(result[1].Btc);
             Assert.Equal("USD", result[1].Currency);
             Assert.Null(result[1].DateExecuted);
@@ -1191,10 +1191,10 @@ namespace BitPayUnitTest
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "createRefundResponse.json"));
             _bitPayClient.Setup(b => b.Post(
                 "refunds",
-                "{\"token\":\"merchantToken\",\"amount\":10.0,\"preview\":false,\"immediate\":false,\"buyerPaysRefundFee\":false,\"guid\":\"37bd36bd-6fcb-409c-a907-47f9244302aa\"}",
+                "{\"token\":\"merchantToken\",\"amount\":10.00,\"preview\":false,\"immediate\":false,\"buyerPaysRefundFee\":false,\"guid\":\"37bd36bd-6fcb-409c-a907-47f9244302aa\"}",
                 true
             )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
-            var refund = new Refund {Invoice = "Hpqc63wvE1ZjzeeH4kEycF", Amount = 10.00};
+            var refund = new Refund {Invoice = "Hpqc63wvE1ZjzeeH4kEycF", Amount = 10.00M};
 
             // when
             var result = GetTestedClassAsMerchant().CreateRefund(refund).Result;
@@ -1208,7 +1208,7 @@ namespace BitPayUnitTest
             Assert.False(result.Immediate);
             Assert.False(result.BuyerPaysRefundFee);
             Assert.Equal("Test refund", result.Reference);
-            Assert.Equal(0.04, result.RefundFee);
+            Assert.Equal(0.04M, result.RefundFee);
             Assert.Equal(DateTime.Parse("2021-08-29T20:45:35.368Z").ToUniversalTime(), result.LastRefundNotification);
             Assert.Equal(0.000594M, result.TransactionAmount);
             Assert.Equal(0.0000020M, result.TransactionRefundFee);
@@ -1243,7 +1243,7 @@ namespace BitPayUnitTest
             Assert.False(result.Immediate);
             Assert.False(result.BuyerPaysRefundFee);
             Assert.Equal("Test refund", result.Reference);
-            Assert.Equal(0.04, result.RefundFee);
+            Assert.Equal(0.04M, result.RefundFee);
             Assert.Equal(DateTime.Parse("2021-08-29T20:45:35.368Z").ToUniversalTime(), result.LastRefundNotification);
             Assert.Equal(0.000594M, result.TransactionAmount);
             Assert.Equal(0.0000020M, result.TransactionRefundFee);
@@ -1278,7 +1278,7 @@ namespace BitPayUnitTest
             Assert.False(result.Immediate);
             Assert.False(result.BuyerPaysRefundFee);
             Assert.Equal("Test refund", result.Reference);
-            Assert.Equal(0.04, result.RefundFee);
+            Assert.Equal(0.04M, result.RefundFee);
             Assert.Equal(DateTime.Parse("2021-08-29T20:45:35.368Z").ToUniversalTime(), result.LastRefundNotification);
             Assert.Equal(0.000594M, result.TransactionAmount);
             Assert.Equal(0.0000020M, result.TransactionRefundFee);
@@ -1310,14 +1310,14 @@ namespace BitPayUnitTest
             // then
             Assert.Equal(2, result.Count);
             
-            Assert.Equal(5.0, result[0].Amount);
+            Assert.Equal(5.0M, result[0].Amount);
             Assert.Equal("USD", result[0].Currency);
             Assert.Equal("Hpqc63wvE1ZjzeeH4kEycF", result[0].Invoice);
             Assert.False(result[0].Preview);
             Assert.False(result[0].Immediate);
             Assert.False(result[0].BuyerPaysRefundFee);
             Assert.Equal("Test refund", result[0].Reference);
-            Assert.Equal(0.02, result[0].RefundFee);
+            Assert.Equal(0.02M, result[0].RefundFee);
             Assert.Equal(DateTime.Parse("2021-08-28T22:49:33.368Z").ToUniversalTime(), result[0].LastRefundNotification);
             Assert.Equal(0.000297M, result[0].TransactionAmount);
             Assert.Equal(0.0000010M, result[0].TransactionRefundFee);
@@ -1333,7 +1333,7 @@ namespace BitPayUnitTest
             Assert.False(result[1].Immediate);
             Assert.False(result[1].BuyerPaysRefundFee);
             Assert.Equal("Test refund 2", result[1].Reference);
-            Assert.Equal(0.04, result[1].RefundFee);
+            Assert.Equal(0.04M, result[1].RefundFee);
             Assert.Equal(DateTime.Parse("2021-08-29T20:45:35.368Z").ToUniversalTime(), result[1].LastRefundNotification);
             Assert.Equal(0.000594M, result[1].TransactionAmount);
             Assert.Equal(0.0000020M, result[1].TransactionRefundFee);
@@ -1419,7 +1419,7 @@ namespace BitPayUnitTest
             Assert.False(result.Immediate);
             Assert.False(result.BuyerPaysRefundFee);
             Assert.Equal("Test refund", result.Reference);
-            Assert.Equal(0.04, result.RefundFee);
+            Assert.Equal(0.04M, result.RefundFee);
             Assert.Equal(DateTime.Parse("2021-08-29T20:45:35.368Z").ToUniversalTime(), result.LastRefundNotification);
             Assert.Equal(0.000594M, result.TransactionAmount);
             Assert.Equal(0.0000020M, result.TransactionRefundFee);
@@ -1450,7 +1450,7 @@ namespace BitPayUnitTest
             Assert.False(result.Immediate);
             Assert.False(result.BuyerPaysRefundFee);
             Assert.Equal("Test refund", result.Reference);
-            Assert.Equal(0.04, result.RefundFee);
+            Assert.Equal(0.04M, result.RefundFee);
             Assert.Equal(DateTime.Parse("2021-08-29T20:45:35.368Z").ToUniversalTime(), result.LastRefundNotification);
             Assert.Equal(0.000594M, result.TransactionAmount);
             Assert.Equal(0.0000020M, result.TransactionRefundFee);
@@ -1663,10 +1663,10 @@ namespace BitPayUnitTest
             Item item1 = new();
             Item item2 = new();
             item1.Id = "Test Item 1";
-            item1.Price = 6.00;
+            item1.Price = 6.00M;
             item1.Quantity = 1;
             item2.Description = "Test Item 2";
-            item2.Price = 4.00;
+            item2.Price = 4.00M;
             item2.Quantity = 1;
             items.Add(item1);
             items.Add(item2);
@@ -1695,7 +1695,7 @@ namespace BitPayUnitTest
         
         private Invoice GetInvoiceExample()
         {
-            var invoice = new Invoice(10.0, "USD")
+            var invoice = new Invoice(10.0M, "USD")
             {
                 OrderId = ExampleGuid,
                 FullNotifications = true,
@@ -1728,7 +1728,7 @@ namespace BitPayUnitTest
         {
             Payout payout = new()
             {
-                Amount = 10.00,
+                Amount = 10.00M,
                 Currency = "USD",
                 LedgerCurrency = "GBP",
                 Reference = "payout_20210527",
