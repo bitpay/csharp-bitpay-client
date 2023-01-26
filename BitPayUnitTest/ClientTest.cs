@@ -1502,7 +1502,7 @@ namespace BitPayUnitTest
             Assert.Equal(1.27m, result[0].OpeningBalance);
             Assert.Equal(20.82m, result[0].LedgerEntriesSum);
             Assert.Empty(result[0].WithHoldings);
-            Assert.Equal(0, result[0].WithHoldingsSum);
+            Assert.Equal(590.08m, result[0].WithHoldingsSum);
             Assert.Equal(22.09m, result[0].TotalAmount);
             Assert.Null(result[0].LedgerEntries);
             Assert.Equal("2gBtViSiBWSEJGo1LfaMFHoaBRzE2jek2VitKAYeenj2SRiTVSCgRvs1WTN8w4w8Lc", result[0].Token);
