@@ -22,7 +22,7 @@ namespace BitPay.Models.Payout
          * @param methodValue string value for the choosen target method.
          * @throws PayoutCreationException BitPayException class
          */
-        public PayoutInstruction(double amount, int method, string methodValue)
+        public PayoutInstruction(decimal amount, int method, string methodValue)
         {
             try
             {
@@ -48,7 +48,7 @@ namespace BitPay.Models.Payout
         }
 
         [JsonProperty(PropertyName = "amount")]
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
 
         [JsonProperty(PropertyName = "email")]
         public string Email { get; set; }

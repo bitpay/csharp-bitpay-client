@@ -6,6 +6,6 @@ namespace BitPay.Models.Ledger
     {
         [JsonProperty(PropertyName = "currency")] public string Currency { get; set; }
         
-        [JsonProperty(PropertyName = "balance")] public double Balance { get; set; }
+        [JsonProperty(PropertyName = "balance")] public decimal Balance { get; set; }
     }
 }

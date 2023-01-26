@@ -138,7 +138,7 @@ namespace BitPayIntegrationTest
             var invoiceId = invoice.Id;
             await _client.PayInvoice(invoiceId);
             
-            var refundToCreateRequest = new Refund {InvoiceId = invoiceId, Amount = 10.0};
+            var refundToCreateRequest = new Refund {InvoiceId = invoiceId, Amount = 10.0M};
             var refund = await _client.CreateRefund(refundToCreateRequest);
             var refundId = refund.Id;
 
@@ -161,7 +161,7 @@ namespace BitPayIntegrationTest
             var retrieveRefundAfterCanceled = await _client.GetRefund(refundId);
             Assert.Equal("canceled", retrieveRefundAfterCanceled.Status);
 
-            var refundToCreateForCancelByGuid = new Refund {InvoiceId = invoiceId, Amount = 10.0};
+            var refundToCreateForCancelByGuid = new Refund {InvoiceId = invoiceId, Amount = 10.0M};
             var refundToCancelByGuid = await _client.CreateRefund(refundToCreateForCancelByGuid);
             var refundCanceledByGuid = await _client.CancelRefundByGuid(refundToCancelByGuid.Guid);
             Assert.Equal("canceled", refundCanceledByGuid.Status);
@@ -224,7 +224,7 @@ namespace BitPayIntegrationTest
 
             Payout payout = new Payout
             {
-                Amount = 10.00,
+                Amount = 10.00M,
                 Currency = "USD",
                 LedgerCurrency = "USD",
                 RecipientId = recipientId,
@@ -287,7 +287,7 @@ namespace BitPayIntegrationTest
         [Fact]
         public async Task it_should_test_bills_requests()
         {
-            Item item1 = new Item {Id = "Test Item 1", Price = 10.00, Quantity = 1};
+            Item item1 = new Item {Id = "Test Item 1", Price = 10.00M, Quantity = 1};
             List<Item> items = new List<Item> {item1};
             var requestedBill = new Bill
             {
@@ -315,7 +315,7 @@ namespace BitPayIntegrationTest
             var getBills = await _client.GetBills();
             Assert.NotEmpty(getBills);
 
-            Item itemUpdated = new Item {Id = "Test Item Updated", Price = 9.00, Quantity = 1};
+            Item itemUpdated = new Item {Id = "Test Item Updated", Price = 9.00M, Quantity = 1};
             List<Item> itemsUpdated = new List<Item> {itemUpdated};
             var updatedBillRequest = new Bill
             {
@@ -325,7 +325,7 @@ namespace BitPayIntegrationTest
                 Email = "john@doe.com"
             };
             var updatedBill = await _client.UpdateBill(updatedBillRequest, billId);
-            Assert.Equal(9.00, updatedBill.Items[0].Price);
+            Assert.Equal(9.00M, updatedBill.Items[0].Price);
 
             var deliverBill = await _client.DeliverBill(billId, createBill.Token);
             Assert.Equal("Success", deliverBill);
@@ -345,7 +345,7 @@ namespace BitPayIntegrationTest
 
         private Invoice GetInvoiceExample()
         {
-            var invoice = new Invoice(10.0, "USD")
+            var invoice = new Invoice(10.0M, "USD")
             {
                 FullNotifications = true,
                 ExtendedNotifications = true,

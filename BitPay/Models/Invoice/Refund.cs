@@ -30,7 +30,7 @@ namespace BitPay.Models.Invoice
         public string RefundEmail { get; set; }
 
         [JsonProperty(PropertyName = "amount")]
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
 
         [JsonProperty(PropertyName = "token")]
         public string Token { get; set; }
@@ -42,7 +42,7 @@ namespace BitPay.Models.Invoice
         //
 
         [JsonProperty(PropertyName = "refundFee")]
-        public double RefundFee { get; set; }
+        public decimal RefundFee { get; set; }
 
         [JsonProperty(PropertyName = "lastRefundNotification")]
         public DateTime LastRefundNotification { get; set; }

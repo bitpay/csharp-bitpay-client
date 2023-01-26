@@ -12,6 +12,6 @@ namespace BitPay.Models.Invoice
         public string Currency { get; set; }
         
         [JsonProperty(PropertyName = "amounts")]
-        public Dictionary<string, double> Amounts { get; set; }
+        public Dictionary<string, decimal> Amounts { get; set; }
     }
 }
