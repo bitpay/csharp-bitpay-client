@@ -225,6 +225,20 @@ namespace BitPay
         {
             return await CreateInvoiceClient().CancelInvoice(invoiceId);
         }
+        
+        /// <summary>
+        ///     Cancel a BitPay invoice.
+        /// </summary>
+        /// <param name="guid">The GUID of the invoice to cancel.</param>
+        /// Parameter that will cancel the invoice even if no contact information is present.
+        /// Note: Canceling a paid invoice without contact information requires
+        /// a manual support process and is not recommended.
+        /// <returns>Cancelled invoice object.</returns>
+        /// <throws>InvoiceCancellationException InvoiceCancellationException class</throws>
+        public async Task<Invoice> CancelInvoiceByGuid(string guid)
+        {
+            return await CreateInvoiceClient().CancelInvoiceByGuid(guid);
+        }
 
         /// <summary>
         ///     Request a webhook to be resent.
