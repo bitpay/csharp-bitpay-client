@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace BitPay.Models.Settlement
 {
@@ -17,8 +18,10 @@ namespace BitPay.Models.Settlement
         public DateTime ClosingDate { get; set; }
         public decimal OpeningBalance { get; set; }
         public decimal LedgerEntriesSum { get; set; }
-        public List<WithHoldings> WithHoldings { get; set; }
-        public decimal WithHoldingsSum { get; set; }
+        
+        [JsonProperty(PropertyName = "withholdings")] public List<WithHoldings> WithHoldings { get; set; }
+        [JsonProperty(PropertyName = "withholdingsSum")]  public decimal WithHoldingsSum { get; set; }
+        
         public decimal TotalAmount { get; set; }
         public List<SettlementLedgerEntry> LedgerEntries { get; set; }
         public string Token { get; set; }
