@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Math;
 
-namespace BitPaySDK
+namespace BitPay
 {
     public class KeyUtils
     {
@@ -49,7 +49,7 @@ namespace BitPaySDK
             return CreateEcKeyFromHexString(privateKey);
         }
 
-        public static async Task<EcKey> LoadEcKey()
+        public static EcKey LoadEcKey()
         {
             // using (var fs = File.OpenRead(PrivateKeyFile))
             // {

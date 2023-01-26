@@ -1,4 +1,4 @@
-﻿namespace BitPaySDK.Models.Invoice
+﻿namespace BitPay.Models.Invoice
 {
     public static class Status
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BitPaySDK.Exceptions
+namespace BitPay.Exceptions
 {
     /// <summary>
     ///     Provides an API specific exception handler.

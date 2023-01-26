@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace BitPaySDK.Exceptions
+namespace BitPay.Exceptions
 {
     public class PayoutException : BitPayException
     {
         private const string BitPayMessage = "An unexpected error occured while trying to manage the payout.";
         private readonly string _bitpayCode = "BITPAY-PAYOUT-GENERIC";
-        protected string ApiCode;
 
         public PayoutException() : base(BitPayMessage)
         {
@@ -26,11 +25,5 @@ namespace BitPaySDK.Exceptions
         {
             ApiCode = apiCode;
         }
-
-        public String GetApiCode()
-        {
-            return ApiCode;
-        }
-
     }
 }

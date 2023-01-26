@@ -1,22 +1,22 @@
 using System;
 using System.Linq;
 using Xunit;
-using BitPaySDK;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using BitPaySDK.Exceptions;
-using BitPaySDK.Models;
-using BitPaySDK.Models.Bill;
-using BitPaySDK.Models.Invoice;
-using BitPaySDK.Models.Payout;
-using BitPaySDK.Models.Wallet;
 using Microsoft.Extensions.Configuration;
-using Buyer = BitPaySDK.Models.Invoice.Buyer;
-using InvoiceStatus = BitPaySDK.Models.Invoice.Status;
-using BillStatus = BitPaySDK.Models.Bill.Status;
-using PayoutStatus = BitPaySDK.Models.Payout.Status;
+using Buyer = BitPay.Models.Invoice.Buyer;
+using InvoiceStatus = BitPay.Models.Invoice.Status;
+using BillStatus = BitPay.Models.Bill.Status;
+using PayoutStatus = BitPay.Models.Payout.Status;
 using System.IO;
+using BitPay;
+using BitPay.Exceptions;
+using BitPay.Models;
+using BitPay.Models.Bill;
+using BitPay.Models.Invoice;
+using BitPay.Models.Payout;
+using BitPay.Models.Wallet;
 
 namespace BitPayXUnitTest
 {

@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace BitPaySDK.Exceptions
+namespace BitPay.Exceptions
 {
     public class PayoutRecipientCancellationException : PayoutRecipientException
     {
         private const string BitPayCode = "BITPAY-PAYOUT-RECIPIENT-CANCELLATION";
         private const string BitPayMessage = "Failed to delete payout recipient.";
-        protected string ApiCode;
 
         public PayoutRecipientCancellationException() : base(BitPayCode, BitPayMessage)
         {
@@ -15,11 +14,6 @@ namespace BitPaySDK.Exceptions
         public PayoutRecipientCancellationException(Exception ex, string apiCode = "000000") : base(BitPayCode, BitPayMessage, ex)
         {
             ApiCode = apiCode;
-        }
-
-        public String GetApiCode()
-        {
-            return ApiCode;
         }
     }
 }

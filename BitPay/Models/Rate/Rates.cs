@@ -1,19 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using BitPay.Clients;
 
-namespace BitPaySDK.Models.Rate
+namespace BitPay.Models.Rate
 {
 	/// <summary>
 	///     Provides an interface to the BitPay server to obtain exchange rate information.
 	/// </summary>
 	public class Rates
     {
-        private readonly BitPay _bp;
         private List<Rate> _rates;
 
-        public Rates(List<Rate> rates, BitPay bp)
+        public Rates(List<Rate> rates)
         {
-            _bp = bp;
             _rates = rates;
         }
 
@@ -22,9 +21,9 @@ namespace BitPaySDK.Models.Rate
             return _rates;
         }
 
-        public async Task Update()
+        public async Task Update(RateClient rateClient)
         {
-            _rates = (await _bp.GetRates()).GetRates();
+            _rates = (await rateClient.GetRates()).GetRates();
         }
 
         public decimal GetRate(string currencyCode)

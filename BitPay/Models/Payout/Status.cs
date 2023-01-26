@@ -1,4 +1,4 @@
-﻿namespace BitPaySDK.Models.Payout
+﻿namespace BitPay.Models.Payout
 {
     public static class Status
     {
