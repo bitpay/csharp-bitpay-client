@@ -144,7 +144,7 @@ namespace BitPay.Models.Invoice
 
         public string Status { get; set; }
 
-        public string LowFeeDetected { get; set; }
+        public bool LowFeeDetected { get; set; }
 
         public long InvoiceTime { get; set; }
 
@@ -170,7 +170,7 @@ namespace BitPay.Models.Invoice
             set => _refundAddresses = JsonConvert.DeserializeObject(value.ToString(Formatting.None));
         }
 
-        public string RefundAddressRequestPending { get; set; }
+        public bool RefundAddressRequestPending { get; set; }
 
         public string BuyerProvidedEmail { get; set; }
 

@@ -10,11 +10,11 @@ namespace BitPay.Clients
 {
     public class InvoiceClient
     {
-        private readonly BitPayClient _bitPayClient;
+        private readonly IBitPayClient _bitPayClient;
         private readonly AccessTokens _accessTokens;
-        private readonly GuidGenerator _guidGenerator;
+        private readonly IGuidGenerator _guidGenerator;
 
-        public InvoiceClient(BitPayClient bitPayClient, AccessTokens accessTokens, GuidGenerator guidGenerator)
+        public InvoiceClient(IBitPayClient bitPayClient, AccessTokens accessTokens, IGuidGenerator guidGenerator)
         {
             _bitPayClient = bitPayClient ?? throw new MissingFieldException(nameof(bitPayClient));
             _accessTokens = accessTokens ?? throw new MissingFieldException(nameof(accessTokens));
@@ -40,7 +40,7 @@ namespace BitPay.Clients
                 invoice.Guid = guid ?? _guidGenerator.Execute();
                 var json = JsonConvert.SerializeObject(invoice);
                 var response = await _bitPayClient.Post("invoices", json, signRequest).ConfigureAwait(false);
-                var responseString = await _bitPayClient.ResponseToJsonString(response).ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 JsonConvert.PopulateObject(responseString, invoice);
             }
             catch (BitPayException ex)
@@ -94,7 +94,7 @@ namespace BitPay.Clients
                 }
 
                 var response = await _bitPayClient.Get("invoices/" + invoiceId, parameters, signRequest);
-                var responseString = await _bitPayClient.ResponseToJsonString(response);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<Invoice>(responseString);
             }
             catch (BitPayException ex)
@@ -143,7 +143,7 @@ namespace BitPay.Clients
                 }
 
                 var response = await _bitPayClient.Get("invoices/guid/" + guid, parameters, signRequest);
-                var responseString = await _bitPayClient.ResponseToJsonString(response);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<Invoice>(responseString);
             }
             catch (BitPayException ex)
@@ -180,7 +180,7 @@ namespace BitPay.Clients
                 parameters.Add("dateEnd", dateEnd.ToString("yyyy-MM-dd"));
 
                 var response = await _bitPayClient.Get("invoices", parameters);
-                var responseString = await _bitPayClient.ResponseToJsonString(response);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<List<Invoice>>(responseString);
             }
             catch (BitPayException ex)
@@ -213,7 +213,7 @@ namespace BitPay.Clients
 
                 var json = JsonConvert.SerializeObject(parameters);
                 var response = await _bitPayClient.Put("invoices/" + invoiceId, json).ConfigureAwait(false);
-                var responseString = await _bitPayClient.ResponseToJsonString(response).ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<Invoice>(responseString);
             }
             catch (Exception ex)
@@ -248,7 +248,7 @@ namespace BitPay.Clients
                 }
 
                 var response = await _bitPayClient.Delete("invoices/" + invoiceId, parameters);
-                var responseString = await _bitPayClient.ResponseToJsonString(response);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<Invoice>(responseString);
             }
             catch (BitPayException ex)
@@ -279,8 +279,8 @@ namespace BitPay.Clients
             var json = JsonConvert.SerializeObject(parameters);
 
             var response = await _bitPayClient.Post("invoices/" + invoiceId + "/notifications", json);
-            var responseString = await _bitPayClient.ResponseToJsonString(response).ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<bool>(responseString);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+            return responseString == "Success";
         }
 
         /// <summary>
@@ -295,11 +295,26 @@ namespace BitPay.Clients
 
             var parameters = ResourceClientUtil.InitParams();
             parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
+
+            var response = await _bitPayClient.Get("invoices/" + invoiceId + "/events", parameters);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+            return JsonConvert.DeserializeObject<InvoiceEventToken>(responseString);
+        }
+
+        public async Task<Invoice> PayInvoice(string invoiceId, string status)
+        {
+            if (invoiceId == null) throw new MissingFieldException(nameof(invoiceId));
+            if (status == null) throw new MissingFieldException(nameof(status));
+            
+            var parameters = ResourceClientUtil.InitParams();
+            parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
+            parameters.Add("status", status);
+            
             var json = JsonConvert.SerializeObject(parameters);
 
-            var response = await _bitPayClient.Post("invoices/" + invoiceId + "/events", json);
-            var responseString = await _bitPayClient.ResponseToJsonString(response).ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<InvoiceEventToken>(responseString);
+            var response = await _bitPayClient.Put("invoices/pay/" + invoiceId, json);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+            return JsonConvert.DeserializeObject<Invoice>(responseString);
         }
     }
 }

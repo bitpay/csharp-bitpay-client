@@ -20,9 +20,9 @@ namespace BitPay
 {
     public class Client
     {
-        private BitPayClient _bitPayClient;
+        private IBitPayClient _bitPayClient;
         private AccessTokens _accessTokens;
-        private GuidGenerator _guidGenerator;
+        private IGuidGenerator _guidGenerator;
         private string _identity;
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace BitPay
         /// <param name="environment">Environment</param>
         /// <param name="privateKey"></param>
         /// <param name="accessTokens"></param>
-        public Client(Environment environment, PrivateKey privateKey, AccessTokens accessTokens)
+        public Client(PrivateKey privateKey, AccessTokens accessTokens, Environment environment = Environment.Prod)
         {
             var ecKey = GetEcKey(privateKey);
             var baseUrl = GetBaseUrl(environment);
@@ -58,7 +58,7 @@ namespace BitPay
 
             _accessTokens = accessTokens;
             _bitPayClient = new BitPayClient(httpClient, baseUrl, ecKey);
-            _guidGenerator = new GuidGenerator();
+            _guidGenerator = new UuidGenerator();
             CreateIdentity(ecKey);
         }
 
@@ -66,21 +66,35 @@ namespace BitPay
         ///     Create Client class for Merchant/Payout by config file path.
         /// </summary>
         /// <param name="configFilePath">Config File Path</param>
-        public Client(ConfigFilePath configFilePath)
+        /// <param name="environment">Environment</param>
+        public Client(ConfigFilePath configFilePath, Environment environment = Environment.Prod)
         {
             IConfiguration config = BuildConfigFromFile(configFilePath);
             _accessTokens = new AccessTokens(config);
-            
-            var env = config.GetSection("BitPayConfiguration:Environment").Value;
-            
-            var ecKey = GetEcKey(config, env);
-            Enum.TryParse(env, out Environment environment);
+
+            var ecKey = GetEcKey(config, environment.ToString());
             var baseUrl = GetBaseUrl(environment);
             var httpClient = getHttpClient(baseUrl);
 
             _bitPayClient = new BitPayClient(httpClient, baseUrl, ecKey);
-            _guidGenerator = new GuidGenerator();
+            _guidGenerator = new UuidGenerator();
             CreateIdentity(ecKey);
+        }
+
+        /// <summary>
+        ///     Create Client class with all dependencies.
+        /// </summary>
+        /// <param name="bitPayClient">BitPayClient</param>
+        /// <param name="identity">Identity</param>
+        /// <param name="accessTokens">AccessTokens</param>
+        /// <param name="guidGenerator">GuidGenerator</param>
+        public Client(IBitPayClient bitPayClient, string identity, AccessTokens accessTokens,
+            IGuidGenerator guidGenerator)
+        {
+            _bitPayClient = bitPayClient;
+            _accessTokens = accessTokens;
+            _identity = identity;
+            _guidGenerator = guidGenerator;
         }
 
         /// <summary>
@@ -221,6 +235,16 @@ namespace BitPay
         public async Task<Boolean> RequestInvoiceWebhookToBeResent(string invoiceId)
         {
             return await CreateInvoiceClient().RequestInvoiceWebhookToBeResent(invoiceId);
+        }
+        
+        /// <summary>
+        ///     Pay invoice.
+        /// </summary>
+        /// <param name="invoiceId">Invoice ID.</param>
+        /// <param name="status">Status></param>
+        public async Task<Invoice> PayInvoice(string invoiceId, string status = "complete")
+        {
+            return await CreateInvoiceClient().PayInvoice(invoiceId, status);
         }
 
         /// <summary>
@@ -409,6 +433,19 @@ namespace BitPay
         {
             return await CreateBillClient().DeliverBill(billId, billToken);
         }
+        
+        /// <summary>
+        ///     Retrieve the rates for a cryptocurrency / fiat pair. See https://bitpay.com/bitcoin-exchange-rates.
+        /// </summary>
+        /// <param name="baseCurrency">
+        ///     The cryptocurrency for which you want to fetch the rates. Current supported values are BTC and BCH.
+        /// </param>
+        /// <param name="currency">The fiat currency for which you want to fetch the baseCurrency rates.</param>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<Rate> GetRate(string baseCurrency, string currency)
+        {
+            return await CreateRateClient().GetRate(baseCurrency, currency);
+        }
 
         /// <summary>
         ///     Retrieve the exchange rate table using the public facade.
@@ -419,6 +456,18 @@ namespace BitPay
         public async Task<Rates> GetRates()
         {
             return await CreateRateClient().GetRates();
+        }
+        
+        /// <summary>
+        ///     Retrieve the exchange rate table using the public facade.
+        /// </summary>
+        /// <param name="currency">The fiat currency for which you want to fetch the baseCurrency rates.</param>
+        /// <returns>The rate table as an object retrieved from the server.</returns>
+        /// <throws>RatesQueryException RatesQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
+        public async Task<Rates> GetRates(string currency)
+        {
+            return await CreateRateClient().GetRates(currency);
         }
 
         /// <summary>
@@ -490,7 +539,9 @@ namespace BitPay
         ///     Update a Payout Recipient.
         /// </summary>
         /// <param name="recipientId">The recipient id for the recipient to be updated.</param>
-        /// <param name="recipient">A PayoutRecipient object with updated parameters defined.</param>
+        /// <param name="recipient">A PayoutRecipient object with updated parameters defined.
+        ///     Available changes: label, token
+        /// </param>
         /// <returns>The updated recipient object.</returns>
         /// <throws>PayoutRecipientUpdateException PayoutRecipientUpdateException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
@@ -686,7 +737,7 @@ namespace BitPay
 
         private PayoutRecipientsClient CreatePayoutRecipientClient()
         {
-            return new PayoutRecipientsClient(_bitPayClient, _accessTokens);
+            return new PayoutRecipientsClient(_bitPayClient, _accessTokens, _guidGenerator);
         }
 
         private PayoutClient CreatePayoutClient()
@@ -724,6 +775,7 @@ namespace BitPay
         ///     Gets ECKey.
         /// </summary>
         /// <param name="privateKey">PrivateKey</param>
+        /// <exception cref="BitPayException"></exception>
         /// <returns>EcKey</returns>
         private EcKey GetEcKey(PrivateKey privateKey)
         {
@@ -739,7 +791,7 @@ namespace BitPay
                 }
                 catch (Exception)
                 {
-                    throw new Exception("Private Key file not found OR invalid key provided");
+                    throw new BitPayException( "Private Key file not found OR invalid key provided");
                 }
             }
         }
@@ -757,7 +809,7 @@ namespace BitPay
             _accessTokens = new AccessTokens();
             _accessTokens.AddPos(token.Value());
             _bitPayClient = new BitPayClient(httpClient, baseUrl, null);
-            _guidGenerator = new GuidGenerator();
+            _guidGenerator = new UuidGenerator();
         }
 
         private static HttpClient getHttpClient(string baseUrl)

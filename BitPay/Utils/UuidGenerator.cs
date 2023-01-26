@@ -1,12 +1,13 @@
-using System;
+﻿using System;
 
 namespace BitPay.Utils
 {
-    public class GuidGenerator
+    public class UuidGenerator : IGuidGenerator
     {
-        public string Execute() {
+        public string Execute()
+        {
             Guid guid = Guid.NewGuid();
-
+            
             return guid.ToString();
         }
     }

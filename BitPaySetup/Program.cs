@@ -385,9 +385,10 @@ namespace BitPaySetup
             {
                 try
                 {
+                    var clientEnv = env == Environment.Test.ToString() ? Environment.Test : Environment.Prod;
                     if (facade == Facade.Merchant )
                     {
-                        var bitpay = new Client(new ConfigFilePath(confFilePath));
+                        var bitpay = new Client(new ConfigFilePath(confFilePath), clientEnv);
 
                         mPairingCode = bitpay.CreatePairingCodeForFacade(facade).Result;
 
@@ -396,7 +397,7 @@ namespace BitPaySetup
                     }
                     else if (facade == Facade.Payout)
                     {
-                        var bitpay = new Client(new ConfigFilePath(confFilePath));
+                        var bitpay = new Client(new ConfigFilePath(confFilePath), clientEnv);
 
                         pPairingCode = bitpay.CreatePairingCodeForFacade(facade).Result;
 
@@ -405,7 +406,7 @@ namespace BitPaySetup
                     }
                     else
                     {
-                        var bitpay = new Client(new ConfigFilePath(confFilePath));
+                        var bitpay = new Client(new ConfigFilePath(confFilePath), clientEnv);
 
                         mPairingCode = bitpay.CreatePairingCodeForFacade(Facade.Merchant).Result;
                         apiTokens.merchant = bitpay.GetAccessToken(Facade.Merchant);

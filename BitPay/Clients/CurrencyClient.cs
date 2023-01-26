@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BitPay.Exceptions;
 using BitPay.Models;
+using BitPay.Utils;
 using Newtonsoft.Json;
 
 namespace BitPay.Clients
 {
     public class CurrencyClient
     {
-        private readonly BitPayClient _bitPayClient;
+        private readonly IBitPayClient _bitPayClient;
         private List<Currency> _currenciesInfo;
 
-        public CurrencyClient(BitPayClient bitPayClient)
+        public CurrencyClient(IBitPayClient bitPayClient)
         {
             _bitPayClient = bitPayClient ?? throw new MissingRequiredField("bitPayClient");
         }
@@ -37,7 +38,7 @@ namespace BitPay.Clients
         private async Task<List<Currency>> LoadCurrencies()
         {
             var response = await _bitPayClient.Get("currencies", null, false);
-            var responseString = await _bitPayClient.ResponseToJsonString(response);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response);
 
             return JsonConvert.DeserializeObject<List<Currency>>(responseString);
         }

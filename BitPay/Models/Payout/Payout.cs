@@ -129,24 +129,24 @@ namespace BitPay.Models.Payout
 
         public string Label { get; set; }
 
-        public double PercentFee { get; set; }
+        public double? PercentFee { get; set; }
 
-        public double Fee { get; set; }
+        public double? Fee { get; set; }
 
-        public double DepositTotal { get; set; }
+        public double? DepositTotal { get; set; }
 
-        public double Rate { get; set; }
+        public double? Rate { get; set; }
 
-        public double Btc { get; set; }
+        public double? Btc { get; set; }
 
         [JsonProperty(PropertyName = "message")]
         public string Message { get; set; }
 
         [JsonConverter(typeof(Converters.DateStringConverter))]
-        public DateTime RequestDate { get; set; }
+        public DateTime? RequestDate { get; set; }
 
         [JsonConverter(typeof(Converters.DateStringConverter))]
-        public DateTime DateExecuted { get; set; }
+        public DateTime? DateExecuted { get; set; }
 
         public dynamic ExchangeRates
         {
