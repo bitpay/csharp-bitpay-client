@@ -21,8 +21,11 @@ namespace BitPay.Clients
         public async Task<Currency> GetCurrencyInfo(string currencyCode)
         {
             if (currencyCode == null) throw new MissingFieldException(nameof(currencyCode));
-            
-            _currenciesInfo ??= await LoadCurrencies();
+
+            if (_currenciesInfo == null)
+            {
+                _currenciesInfo = await LoadCurrencies();
+            }
 
             foreach (var currency in _currenciesInfo)
             {

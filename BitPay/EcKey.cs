@@ -132,7 +132,7 @@ namespace BitPay
         {
             using (var baos = new MemoryStream(400))
             {
-                using (var encoder = new Asn1OutputStream(baos))
+                using (var encoder = Asn1OutputStream.Create(baos))
                 {
                     // ASN1_SEQUENCE(EC_PRIVATEKEY) = {
                     //   ASN1_SIMPLE(EC_PRIVATEKEY, version, LONG),
@@ -167,7 +167,7 @@ namespace BitPay
         /// <returns>The hash160 hash</returns>
         public static byte[] Sha256Hash160(byte[] input)
         {
-            var sha256 = new SHA256Managed().ComputeHash(input);
+            var sha256 = SHA256.Create().ComputeHash(input);
             var digest = new RipeMD160Digest();
             digest.BlockUpdate(sha256, 0, sha256.Length);
             var @out = new byte[20];
