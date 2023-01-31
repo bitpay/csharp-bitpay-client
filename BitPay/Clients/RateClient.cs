@@ -3,17 +3,50 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BitPay.Exceptions;
 using BitPay.Models.Rate;
+using BitPay.Utils;
 using Newtonsoft.Json;
 
 namespace BitPay.Clients
 {
     public class RateClient
     {
-        private readonly BitPayClient _bitPayClient;
+        private readonly IBitPayClient _bitPayClient;
 
-        public RateClient(BitPayClient bitPayClient, AccessTokens accessTokens)
+        public RateClient(IBitPayClient bitPayClient)
         {
             _bitPayClient = bitPayClient ?? throw new MissingRequiredField("bitPayClient");
+        }
+        
+        /// <summary>
+        ///     Retrieve the rates for a cryptocurrency / fiat pair. See https://bitpay.com/bitcoin-exchange-rates.
+        /// </summary>
+        /// <param name="baseCurrency">
+        ///     The cryptocurrency for which you want to fetch the rates. Current supported values are BTC and BCH.
+        /// </param>
+        /// <param name="currency">The fiat currency for which you want to fetch the baseCurrency rates.</param>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<Rate> GetRate(string baseCurrency, string currency)
+        {
+            if (baseCurrency == null) throw new MissingFieldException(nameof(baseCurrency));
+            if (currency == null) throw new MissingFieldException(nameof(currency));
+            
+            try
+            {
+                var response = await _bitPayClient.Get("rates/" + baseCurrency + "/" + currency, signatureRequired: false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<Rate>(responseString);
+            }
+            catch (BitPayException ex)
+            {
+                throw new RatesQueryException(ex, ex.GetApiCode());
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new RatesQueryException(ex);
+
+                throw;
+            }
         }
         
         /// <summary>
@@ -27,7 +60,36 @@ namespace BitPay.Clients
             try
             {
                 var response = await _bitPayClient.Get("rates", signatureRequired: false);
-                var responseString = await _bitPayClient.ResponseToJsonString(response);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
+                var rates = JsonConvert.DeserializeObject<List<Rate>>(responseString);
+                return new Rates(rates);
+            }
+            catch (BitPayException ex)
+            {
+                throw new RatesQueryException(ex, ex.GetApiCode());
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new RatesQueryException(ex);
+
+                throw;
+            }
+        }
+        
+        /// <summary>
+        ///     Retrieve the exchange rate table using the public facade.
+        /// </summary>
+        /// <param name="currency">The fiat currency for which you want to fetch the baseCurrency rates.</param>
+        /// <returns>The rate table as an object retrieved from the server.</returns>
+        /// <throws>RatesQueryException RatesQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
+        public async Task<Rates> GetRates(string currency)
+        {
+            try
+            {
+                var response = await _bitPayClient.Get("rates/" + currency, null, signatureRequired: false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
                 var rates = JsonConvert.DeserializeObject<List<Rate>>(responseString);
                 return new Rates(rates);
             }

@@ -6,7 +6,6 @@ namespace BitPay.Exceptions
     {
         private const string BitPayCode = "BITPAY-LEDGER-GET";
         private const string BitPayMessage = "Failed to retrieve ledger";
-        protected string ApiCode;
 
         public LedgerQueryException() : base(BitPayCode, BitPayMessage)
         {
@@ -15,11 +14,6 @@ namespace BitPay.Exceptions
         public LedgerQueryException(Exception ex, string apiCode = "000000") : base(BitPayCode, BitPayMessage, ex)
         {
             ApiCode = apiCode;
-        }
-
-        public String GetApiCode()
-        {
-            return ApiCode;
         }
     }
 }

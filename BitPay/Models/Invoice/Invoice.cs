@@ -18,7 +18,7 @@ namespace BitPay.Models.Invoice
         }
 
         // Creates a minimal invoice request object.
-        public Invoice(double price, string currency)
+        public Invoice(decimal price, string currency)
         {
             Price = price;
             Currency = currency;
@@ -34,7 +34,7 @@ namespace BitPay.Models.Invoice
         // Required fields
         //
 
-        [JsonProperty(PropertyName = "price")] public double Price { get; set; }
+        [JsonProperty(PropertyName = "price")] public decimal Price { get; set; }
 
         [JsonProperty(PropertyName = "currency")]
         public string Currency
@@ -144,7 +144,7 @@ namespace BitPay.Models.Invoice
 
         public string Status { get; set; }
 
-        public string LowFeeDetected { get; set; }
+        public bool LowFeeDetected { get; set; }
 
         public long InvoiceTime { get; set; }
 
@@ -170,7 +170,7 @@ namespace BitPay.Models.Invoice
             set => _refundAddresses = JsonConvert.DeserializeObject(value.ToString(Formatting.None));
         }
 
-        public string RefundAddressRequestPending { get; set; }
+        public bool RefundAddressRequestPending { get; set; }
 
         public string BuyerProvidedEmail { get; set; }
 
@@ -190,7 +190,7 @@ namespace BitPay.Models.Invoice
 
         public List<RefundInfo> RefundInfo { get; set; }
 
-        public double AmountPaid { get; set; }
+        public decimal AmountPaid { get; set; }
 
         public string DisplayAmountPaid { get; set; }
 

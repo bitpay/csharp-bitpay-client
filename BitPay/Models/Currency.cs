@@ -1,10 +1,30 @@
-﻿namespace BitPay.Models
+﻿using Newtonsoft.Json;
+
+namespace BitPay.Models
 {
     /// <summary>
     /// Model provided to avoid mistyping. Check the allowed currencies at: https://bitpay.com/currencies
     /// </summary>
     public class Currency
     {
+        [JsonProperty(PropertyName = "code")] public string Code { get; set; }
+        
+        [JsonProperty(PropertyName = "symbol")] public string Symbol { get; set; }
+        
+        [JsonProperty(PropertyName = "precision")] public int Precision { get; set; }
+        
+        [JsonProperty(PropertyName = "name")] public string Name { get; set; }
+        
+        [JsonProperty(PropertyName = "plural")] public string Plural { get; set; }
+        
+        [JsonProperty(PropertyName = "alts")] public string Alts { get; set; }
+        
+        [JsonProperty(PropertyName = "minimum")] public decimal Minimum { get; set; }
+        
+        [JsonProperty(PropertyName = "sanctioned")] public bool Sanctioned { get; set; }
+        
+        [JsonProperty(PropertyName = "decimals")] public decimal Decimals { get; set; }
+
         // Crypto
         public const string BCH  = "BCH";
         public const string BTC  = "BTC";

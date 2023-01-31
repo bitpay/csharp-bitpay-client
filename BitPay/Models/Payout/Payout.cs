@@ -18,7 +18,7 @@ namespace BitPay.Models.Payout
         /// </summary>
         public Payout()
         {
-            Amount = 0.0;
+            Amount = 0.0M;
             Currency = "USD";
             NotificationEmail = "";
             NotificationUrl = "";
@@ -43,7 +43,7 @@ namespace BitPay.Models.Payout
         ///     PAX, XRP, BUSD, DOGE, ETH, WBTC, DAI.
         /// </param>
 
-        public Payout(double amount, string currency, string ledgerCurrency) : this()
+        public Payout(decimal amount, string currency, string ledgerCurrency) : this()
         {
             Amount = amount;
             Currency = currency;
@@ -61,7 +61,7 @@ namespace BitPay.Models.Payout
         //
 
         [JsonProperty(PropertyName = "amount")]
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
 
         [JsonProperty(PropertyName = "currency")]
         public string Currency
@@ -129,24 +129,24 @@ namespace BitPay.Models.Payout
 
         public string Label { get; set; }
 
-        public double PercentFee { get; set; }
+        public decimal? PercentFee { get; set; }
 
-        public double Fee { get; set; }
+        public decimal? Fee { get; set; }
 
-        public double DepositTotal { get; set; }
+        public decimal? DepositTotal { get; set; }
 
-        public double Rate { get; set; }
+        public decimal? Rate { get; set; }
 
-        public double Btc { get; set; }
+        public decimal? Btc { get; set; }
 
         [JsonProperty(PropertyName = "message")]
         public string Message { get; set; }
 
         [JsonConverter(typeof(Converters.DateStringConverter))]
-        public DateTime RequestDate { get; set; }
+        public DateTime? RequestDate { get; set; }
 
         [JsonConverter(typeof(Converters.DateStringConverter))]
-        public DateTime DateExecuted { get; set; }
+        public DateTime? DateExecuted { get; set; }
 
         public dynamic ExchangeRates
         {

@@ -10,12 +10,12 @@ namespace BitPay.Clients
 {
     public class AuthorizationClient
     {
-        private readonly BitPayClient _bitPayClient;
-        private readonly GuidGenerator _guidGenerator;
+        private readonly IBitPayClient _bitPayClient;
+        private readonly IGuidGenerator _guidGenerator;
         private readonly AccessTokens _accessTokens;
         private readonly string _identity;
 
-        public AuthorizationClient(BitPayClient bitPayClient, GuidGenerator guidGenerator, AccessTokens accessTokens,
+        public AuthorizationClient(IBitPayClient bitPayClient, IGuidGenerator guidGenerator, AccessTokens accessTokens,
             string identity)
         {
             _bitPayClient = bitPayClient ?? throw new ArgumentNullException(nameof(bitPayClient));
@@ -34,7 +34,7 @@ namespace BitPay.Clients
                 };
                 var json = JsonConvert.SerializeObject(token);
                 var response = await _bitPayClient.Post("tokens", json);
-                var responseString = await _bitPayClient.ResponseToJsonString(response);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
                 var tokens = JsonConvert.DeserializeObject<List<Token>>(responseString);
                 foreach (var t in tokens) _accessTokens.AddToken(t.Facade, t.Value);
             }
@@ -66,7 +66,7 @@ namespace BitPay.Clients
                 };
                 var json = JsonConvert.SerializeObject(token);
                 var response = await _bitPayClient.Post("tokens", json).ConfigureAwait(false);
-                var responseString = await _bitPayClient.ResponseToJsonString(response).ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 var tokens = JsonConvert.DeserializeObject<List<Token>>(responseString);
                 _accessTokens.AddToken(tokens[0].Facade, tokens[0].Value);
 

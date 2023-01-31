@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using BitPay.Exceptions;
 using Microsoft.Extensions.Configuration;
 
@@ -18,12 +19,11 @@ namespace BitPay
             _data = new Dictionary<string, string>();
             var env = configuration.GetSection("BitPayConfiguration:Environment").Value;
 
-            var a = configuration.GetSection("BitPayConfiguration:EnvConfig:" + env + ":ApiTokens").Value;
-
-
-
-
-
+            var tokens = configuration.GetSection("BitPayConfiguration:EnvConfig:" + env + ":ApiTokens").GetChildren();
+            foreach (IConfigurationSection token in tokens)
+            {
+                _data[token.Key] = token.Value;
+            }
         }
 
         /// <summary>
@@ -63,12 +63,22 @@ namespace BitPay
             _data[facade] = token;
         }
 
-        public string GetAccessToken(string key)
+        public virtual string GetAccessToken(string key)
         {
             if (!_data.ContainsKey(key))
                 throw new TokenNotFoundException(key);
 
             return _data[key];
+        }
+
+        /// <summary>
+        ///     Specified whether the client has authorization (a token) for the specified facade.
+        /// </summary>
+        /// <param name="facade">The facade name for which authorization is tested.</param>
+        /// <returns>True if this client is authorized, false otherwise.</returns>
+        public virtual bool TokenExists(string facade)
+        {
+            return _data.ContainsKey(facade);
         }
     }
 }

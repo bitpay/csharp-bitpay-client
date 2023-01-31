@@ -6,7 +6,6 @@ namespace BitPay.Exceptions
     {
         private const string BitPayCode = "BITPAY-SETTLEMENT";
         private const string BitPayMessage = "Error when processing the settlement";
-        protected string ApiCode;
 
         public SettlementException() : base(BitPayCode, BitPayMessage)
         {
@@ -23,11 +22,6 @@ namespace BitPay.Exceptions
         public SettlementException(string bitpayCode, string message, Exception cause, string apiCode = "000000") : base(bitpayCode, message, cause, apiCode)
         {
             ApiCode = apiCode;
-        }
-
-        public String GetApiCode()
-        {
-            return ApiCode;
         }
     }
 }

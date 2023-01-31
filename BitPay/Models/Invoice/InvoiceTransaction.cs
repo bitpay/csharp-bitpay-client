@@ -10,7 +10,7 @@ namespace BitPay.Models.Invoice
         private dynamic _exchangeRates;
         
         [JsonProperty(PropertyName = "amount")]
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
 
         [JsonProperty(PropertyName = "confirmations")]
         public string Confirmations { get; set; }
@@ -25,7 +25,7 @@ namespace BitPay.Models.Invoice
         public string Txid { get; set; }
         
         [JsonProperty(PropertyName = "refundAmount")]
-        public double RefundAmount { get; set; }
+        public decimal RefundAmount { get; set; }
 
         [JsonProperty(PropertyName = "time")]
         public string Time { get; set; }

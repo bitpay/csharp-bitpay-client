@@ -3,19 +3,52 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BitPay.Exceptions;
 using BitPay.Models.Settlement;
+using BitPay.Utils;
 using Newtonsoft.Json;
 
 namespace BitPay.Clients
 {
     public class SettlementClient
     {
-        private readonly BitPayClient _bitPayClient;
+        private readonly IBitPayClient _bitPayClient;
         private readonly AccessTokens _accessTokens;
 
-        public SettlementClient(BitPayClient bitPayClient, AccessTokens accessTokens)
+        public SettlementClient(IBitPayClient bitPayClient, AccessTokens accessTokens)
         {
             _bitPayClient = bitPayClient ?? throw new MissingRequiredField("bitPayClient");
             _accessTokens = accessTokens ?? throw new MissingRequiredField("accessTokens");
+        }
+        
+        /// <summary>
+        ///     Retrieves a summary of the specified settlement.
+        /// </summary>
+        /// <param name="settlementId">Settlement Id</param>
+        /// <returns>A BitPay Settlement object.</returns>
+        /// <throws>SettlementQueryException SettlementQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
+        public async Task<Settlement> GetById(string settlementId)
+        {
+            if (settlementId == null) throw new MissingFieldException(nameof(settlementId));
+            try
+            {
+                var parameters = ResourceClientUtil.InitParams();
+                parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
+            
+                var response = await _bitPayClient.Get($"settlements/{settlementId}", parameters);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
+                return JsonConvert.DeserializeObject<Settlement>(responseString);
+            }
+            catch (BitPayException ex)
+            {
+                throw new SettlementQueryException(ex, ex.GetApiCode());
+            }
+            catch (Exception ex)
+            {
+                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
+                    throw new SettlementQueryException(ex);
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -38,40 +71,8 @@ namespace BitPay.Clients
                 filters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
                
                 var response = await _bitPayClient.Get("settlements", filters);
-                var responseString = await _bitPayClient.ResponseToJsonString(response);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<List<Settlement>>(responseString);
-            }
-            catch (BitPayException ex)
-            {
-                throw new SettlementQueryException(ex, ex.GetApiCode());
-            }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new SettlementQueryException(ex);
-
-                throw;
-            }
-        }
-
-        /// <summary>
-        ///     Retrieves a summary of the specified settlement.
-        /// </summary>
-        /// <param name="settlementId">Settlement Id</param>
-        /// <returns>A BitPay Settlement object.</returns>
-        /// <throws>SettlementQueryException SettlementQueryException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
-        public async Task<Settlement> GetById(string settlementId)
-        {
-            if (settlementId == null) throw new MissingFieldException(nameof(settlementId));
-            try
-            {
-                var parameters = ResourceClientUtil.InitParams();
-                parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
-            
-                var response = await _bitPayClient.Get($"settlements/{settlementId}", parameters);
-                var responseString = await _bitPayClient.ResponseToJsonString(response);
-                return JsonConvert.DeserializeObject<Settlement>(responseString);
             }
             catch (BitPayException ex)
             {
@@ -110,7 +111,7 @@ namespace BitPay.Clients
 
                 var response = await _bitPayClient.Get(
                     $"settlements/" + settlementId + "/reconciliationReport", parameters);
-                var responseString = await _bitPayClient.ResponseToJsonString(response);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response);
                 return JsonConvert.DeserializeObject<Settlement>(responseString);
             }
             catch (BitPayException ex)

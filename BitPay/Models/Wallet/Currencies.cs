@@ -18,7 +18,10 @@ namespace BitPay.Models.Wallet
 
         [JsonProperty(PropertyName = "payPro")]
         public bool PayPro { get; set; }
-        public CurrencyQr CurrencyQr { get; set; }
+        
+        public Qr Qr { get; set; }
+        
+        public string Image { get; set; }
 
         public bool ShouldSerializeCode()
         {
@@ -50,7 +53,7 @@ namespace BitPay.Models.Wallet
             return false;
         }
 
-        public bool ShouldSerializeCurrencyQr()
+        public bool ShouldSerializeQr()
         {
             return false;
         }
