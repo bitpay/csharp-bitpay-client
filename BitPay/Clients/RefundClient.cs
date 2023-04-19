@@ -27,7 +27,7 @@ namespace BitPay.Clients
         ///  </summary>
         ///  <param name="refundToCreate">
         ///     Available params: amount, invoiceId, token, preview, immediate, buyerPaysRefundFee, reference.
-        ///     See https://bitpay.com/api/#rest-api-resources-refunds-create-a-refund-request
+        ///     See https://bitpay.readme.io/reference/create-a-refund-request
         /// </param>
         ///  <returns>An updated Refund Object</returns> 
         /// <throws>RefundCreationException RefundCreationException class</throws> 
