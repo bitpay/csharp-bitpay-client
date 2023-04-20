@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Math;
+using BigInteger = Org.BouncyCastle.Math.BigInteger;
 
 namespace BitPay
 {
@@ -29,13 +31,7 @@ namespace BitPay
             //Default constructor uses SecureRandom numbers.
             return new EcKey();
         }
-
-        public static EcKey CreateEcKeyFromHexString(string privateKey)
-        {
-            var pkey = new BigInteger(privateKey, 16);
-            var key = new EcKey(pkey);
-            return key;
-        }
+        
         public static EcKey CreateEcKeyFromString(string privateKey)
         {
             var pkey = new BigInteger(privateKey);
@@ -64,16 +60,6 @@ namespace BitPay
             return key;
         }
 
-        public static string GetKeyStringFromFile(string filename)
-        {
-            using (var sr = new StreamReader(filename))
-            {
-                var line = sr.ReadToEnd();
-                sr.Close();
-                return line;
-            }
-        }
-
         public static async Task SaveEcKey(EcKey ecKey)
         {
             var bytes = ecKey.ToAsn1();
@@ -92,7 +78,7 @@ namespace BitPay
             if (_derivedSin != null) return _derivedSin;
             // Get sha256 hash and then the RIPEMD-160 hash of the public key (this call gets the result in one step).
             var pubKey = ecKey.PublicKey;
-            var hash = new SHA256Managed().ComputeHash(pubKey);
+            var hash = SHA256.Create().ComputeHash(pubKey);
             var ripeMd160Digest = new RipeMD160Digest();
             ripeMd160Digest.BlockUpdate(hash, 0, hash.Length);
             var output = new byte[20];
@@ -126,7 +112,7 @@ namespace BitPay
             return encoded;
         }
 
-        public static string Encode(byte[] input)
+        private static string Encode(byte[] input)
         {
             // TODO: This could be a lot more efficient.
             var bi = new BigInteger(1, input);
@@ -152,7 +138,7 @@ namespace BitPay
         /// <summary>
         ///     See <see cref="DoubleDigest(byte[], int, int)" />.
         /// </summary>
-        public static byte[] DoubleDigest(byte[] input)
+        private static byte[] DoubleDigest(byte[] input)
         {
             return DoubleDigest(input, 0, input.Length);
         }
@@ -161,9 +147,9 @@ namespace BitPay
         ///     Calculates the SHA-256 hash of the given byte range, and then hashes the resulting hash again. This is
         ///     standard procedure in BitCoin. The resulting hash is in big endian form.
         /// </summary>
-        public static byte[] DoubleDigest(byte[] input, int offset, int length)
+        private static byte[] DoubleDigest(byte[] input, int offset, int length)
         {
-            var algorithm = new SHA256Managed();
+            var algorithm = SHA256.Create();
             var first = algorithm.ComputeHash(input, offset, length);
             return algorithm.ComputeHash(first);
         }
@@ -182,6 +168,13 @@ namespace BitPay
             var signature = ecKey.Sign(hashBytes);
             var bytesHex = BytesToHex(signature);
             return bytesHex;
+        }
+        
+        private static EcKey CreateEcKeyFromHexString(string privateKey)
+        {
+            var pkey = new BigInteger(privateKey, 16);
+            var key = new EcKey(pkey);
+            return key;
         }
 
         private static string Sha256Hash(string value)
@@ -210,7 +203,7 @@ namespace BitPay
             return '0' <= chr && chr <= '9' || 'a' <= chr && chr <= 'f' || 'A' <= chr && chr <= 'F';
         }
 
-        public static byte[] HexToBytes(string hex)
+        private static byte[] HexToBytes(string hex)
         {
             if (hex == null)
                 throw new ArgumentNullException("hex");
@@ -234,6 +227,16 @@ namespace BitPay
             }
 
             return arr;
+        }
+        
+        private static string GetKeyStringFromFile(string filename)
+        {
+            using (var sr = new StreamReader(filename))
+            {
+                var line = sr.ReadToEnd();
+                sr.Close();
+                return line;
+            }
         }
 
         public static string BytesToHex(byte[] bytes)

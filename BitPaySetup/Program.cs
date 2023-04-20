@@ -68,6 +68,11 @@ namespace BitPaySetup
                     Console.WriteLine();
                     Console.Write(" > ");
                     var answer = Console.ReadLine();
+                    if (answer == null)
+                    {
+                        throw new Exception("Missing answer");
+                    }
+
                     while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
                         answer = Console.ReadLine();
 
@@ -160,6 +165,10 @@ namespace BitPaySetup
                         case '1':
 
                             ecKey = KeyUtils.CreateEcKey();
+                            if (ecKey == null)
+                            {
+                                throw new Exception("Invalid ecKey");
+                            }
 
                             if (ecKey != null && !String.IsNullOrEmpty(ecKey.PrivateKey.ToString()))
                             {
@@ -200,6 +209,11 @@ namespace BitPaySetup
                                 Console.WriteLine();
                                 Console.Write(" > ");
                                 var answer = Console.ReadLine();
+                                if (answer == null)
+                                {
+                                    throw new Exception("Missing answer");
+                                }
+                                
                                 while (answer.ToLower() != "yes" && answer.ToLower() != "no" &&
                                        answer.ToLower() != "")
                                     answer = Console.ReadLine();
@@ -249,6 +263,11 @@ namespace BitPaySetup
                                 }
 
                                 ecKey = KeyUtils.CreateEcKey();
+                                if (ecKey == null)
+                                {
+                                    throw new Exception("Invalid ecKey");
+                                }
+                                
                                 KeyUtils.PrivateKeyExists(ecKeyFilePath);
                                 KeyUtils.SaveEcKey(ecKey);
 
@@ -284,6 +303,11 @@ namespace BitPaySetup
                                     Console.WriteLine();
                                     Console.Write(" > ");
                                     var answer = Console.ReadLine();
+                                    if (answer == null)
+                                    {
+                                        throw new Exception("Missing answer");
+                                    }
+                                    
                                     while (answer.ToLower() != "yes" && answer.ToLower() != "no" &&
                                            answer.ToLower() != "")
                                         answer = Console.ReadLine();
@@ -296,6 +320,11 @@ namespace BitPaySetup
                                 try
                                 {
                                     ecKey = KeyUtils.CreateEcKey();
+                                    if (ecKey == null)
+                                    {
+                                        throw new Exception("Invalid ecKey");
+                                    }
+                                    
                                     KeyUtils.PrivateKeyExists(ecKeyFilePath);
                                     KeyUtils.SaveEcKey(ecKey);
 
@@ -359,6 +388,11 @@ namespace BitPaySetup
             Console.WriteLine();
             Console.Write(" > ");
             var answer = Console.ReadLine().Trim().ToLower();
+            if (answer == null)
+            {
+                throw new Exception("Missing answer");
+            }
+            
             while (answer != "yes" && answer != "no" && answer != "")
                 answer = Console.ReadLine();
 
@@ -735,6 +769,11 @@ namespace BitPaySetup
                         Console.WriteLine();
                         Console.Write(" > ");
                         var answer = Console.ReadLine();
+                        if (answer == null)
+                        {
+                            throw new Exception("Missing answer");
+                        }
+                        
                         while (answer.ToLower() != "yes" && answer.ToLower() != "no" && answer.ToLower() != "")
                             answer = Console.ReadLine();
 
