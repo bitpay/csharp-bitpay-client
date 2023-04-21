@@ -35,9 +35,7 @@ namespace BitPay.Clients
         public async Task<List<LedgerEntry>> GetLedgerEntries(string currency, DateTime dateStart, DateTime dateEnd)
         {
             if (currency == null) throw new MissingFieldException(nameof(currency));
-            if (dateStart == null) throw new MissingFieldException(nameof(dateStart));
-            if (dateEnd == null) throw new MissingFieldException(nameof(dateEnd));
-            
+
             try
             {
                 var parameters = ResourceClientUtil.InitParams();

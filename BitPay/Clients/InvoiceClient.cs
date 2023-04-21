@@ -179,7 +179,11 @@ namespace BitPay.Clients
         public async Task<List<Invoice>> GetInvoices(DateTime dateStart, DateTime dateEnd,
             Dictionary<string, dynamic> parameters = null)
         {
-            parameters ??= ResourceClientUtil.InitParams();
+            if (parameters == null)
+            {
+                parameters = ResourceClientUtil.InitParams();
+            }
+            
             try
             {
                 // UTC date, ISO-8601 format yyyy-mm-dd.

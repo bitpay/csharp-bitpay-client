@@ -1,15 +1,15 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BitPay", "BitPay\BitPay.csproj", "{D88A49C3-0280-4320-B120-AE519B2DB219}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPay", "BitPay\BitPay.csproj", "{50F6A0C3-111E-437B-BCB6-714F1315EF97}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPaySetup", "BitPaySetup\BitPaySetup.csproj", "{70047B2C-381E-458B-B76C-940120AE0E08}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BitPayUnitTest", "BitPayUnitTest\BitPayUnitTest.csproj", "{564B8CE1-5A60-402A-B4F4-39A3778BDED9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPayFunctionalTest", "BitPayFunctionalTest\BitPayFunctionalTest.csproj", "{47312DA5-8665-44B1-BEBF-1D2DBA15FE47}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BitPayIntegrationTest", "BitPayIntegrationTest\BitPayIntegrationTest.csproj", "{47312DA5-8665-44B1-BEBF-1D2DBA15FE47}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D88A49C3-0280-4320-B120-AE519B2DB219}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D88A49C3-0280-4320-B120-AE519B2DB219}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D88A49C3-0280-4320-B120-AE519B2DB219}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D88A49C3-0280-4320-B120-AE519B2DB219}.Release|Any CPU.Build.0 = Release|Any CPU
 		{70047B2C-381E-458B-B76C-940120AE0E08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{70047B2C-381E-458B-B76C-940120AE0E08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70047B2C-381E-458B-B76C-940120AE0E08}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +29,10 @@ Global
 		{47312DA5-8665-44B1-BEBF-1D2DBA15FE47}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47312DA5-8665-44B1-BEBF-1D2DBA15FE47}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47312DA5-8665-44B1-BEBF-1D2DBA15FE47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50F6A0C3-111E-437B-BCB6-714F1315EF97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50F6A0C3-111E-437B-BCB6-714F1315EF97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50F6A0C3-111E-437B-BCB6-714F1315EF97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50F6A0C3-111E-437B-BCB6-714F1315EF97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
