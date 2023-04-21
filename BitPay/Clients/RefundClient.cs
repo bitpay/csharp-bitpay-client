@@ -1,9 +1,14 @@
+// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using BitPay.Exceptions;
 using BitPay.Models.Invoice;
 using BitPay.Utils;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -39,7 +44,7 @@ namespace BitPay.Clients
             
             try
             {
-                refundToCreate.Guid = refundToCreate.Guid ?? _guidGenerator.Execute();
+                refundToCreate.ResourceGuid = refundToCreate.ResourceGuid ?? _guidGenerator.Execute();
                 var parameters = ResourceClientUtil.InitParams();
                 parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
                 parameters.Add("amount", refundToCreate.Amount);
@@ -49,11 +54,11 @@ namespace BitPay.Clients
                 parameters.Add("immediate", refundToCreate.Immediate);
                 parameters.Add("buyerPaysRefundFee", refundToCreate.BuyerPaysRefundFee);
                 if (refundToCreate.Reference != null) parameters.Add("reference", refundToCreate.Reference);
-                parameters.Add("guid", refundToCreate.Guid);
+                parameters.Add("guid", refundToCreate.ResourceGuid);
              
  
                 var json = JsonConvert.SerializeObject(parameters);
-                var response = await _bitPayClient.Post("refunds", json, true);
+                var response = await _bitPayClient.Post("refunds", json, true).ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<Refund>(responseString);
             }
@@ -80,8 +85,9 @@ namespace BitPay.Clients
                 var parameters = ResourceClientUtil.InitParams();
                 parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
 
-                var response = await _bitPayClient.Get("refunds/" + refundId, parameters, true);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response);
+                var response = await _bitPayClient.Get("refunds/" + refundId, parameters)
+                    .ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<Refund>(responseString);
             }
             catch (Exception ex)
@@ -96,19 +102,20 @@ namespace BitPay.Clients
         /// <summary>
         ///     Retrieve a previously made refund request on a BitPay invoice.
         /// </summary>
-        ///<param name="guid"></param>The BitPay guid.
+        ///<param name="refundGuid">The GUID of the refund request for which you want to receive.</param>
         ///<returns>A BitPay Refund object with the associated Refund object.</returns> 
         ///<throws>RefundQueryException RefundQueryException class</throws> 
-        public async Task<Refund> GetByGuid(string guid)
+        public async Task<Refund> GetByGuid(string refundGuid)
         {
-            if (guid == null) throw new MissingFieldException(nameof(guid));
+            if (refundGuid == null) throw new MissingFieldException(nameof(refundGuid));
             try
             {
                 var parameters = ResourceClientUtil.InitParams();
                 parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
 
-                var response = await _bitPayClient.Get("refunds/guid/" + guid, parameters, true);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response);
+                var response = await _bitPayClient.Get("refunds/guid/" + refundGuid, parameters)
+                    .ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<Refund>(responseString);
             }
             catch (Exception ex)
@@ -135,8 +142,9 @@ namespace BitPay.Clients
                 parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
                 parameters.Add("invoiceId", invoiceId);
                
-                var response = await _bitPayClient.Get("refunds", parameters, true);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response);
+                var response = await _bitPayClient.Get("refunds", parameters)
+                    .ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<List<Refund>>(responseString);
             }
             catch (Exception ex)
@@ -183,13 +191,13 @@ namespace BitPay.Clients
         /// <summary>
         ///     Update the status of a BitPay invoice.
         /// </summary>
-        ///<param name="guid">A BitPay Guid.</param>
+        ///<param name="refundGuid">The GUID of the refund request for which you want to update.</param>
         ///<param name="status">The new status for the refund to be updated.</param>   
         /// <returns>A BitPay generated Refund object.</returns>
         ///<throws>RefundUpdateException class</throws> 
-        public async Task<Refund> UpdateByGuid(string guid, string status)
+        public async Task<Refund> UpdateByGuid(string refundGuid, string status)
         {
-            if (guid == null) throw new MissingFieldException(nameof(guid));
+            if (refundGuid == null) throw new MissingFieldException(nameof(refundGuid));
             if (status == null) throw new MissingFieldException(nameof(status));
 
             try
@@ -199,7 +207,7 @@ namespace BitPay.Clients
                 parameters.Add("status", status);
 
                 var json = JsonConvert.SerializeObject(parameters);
-                var response = await _bitPayClient.Put("refunds/guid/" + guid, json).ConfigureAwait(false);
+                var response = await _bitPayClient.Put("refunds/guid/" + refundGuid, json).ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<Refund>(responseString);
             }
@@ -228,13 +236,13 @@ namespace BitPay.Clients
                 var parameters = ResourceClientUtil.InitParams();
                 parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
 
-                var response = await _bitPayClient.Delete("refunds/" + refundId, parameters);
+                var response = await _bitPayClient.Delete("refunds/" + refundId, parameters).ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<Refund>(responseString);
             }
             catch (BitPayException ex)
             {
-                throw new RefundCancellationException(ex, ex.GetApiCode());
+                throw new RefundCancellationException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {
@@ -248,26 +256,26 @@ namespace BitPay.Clients
         /// <summary>
         ///     Cancel a previously submitted refund request.
         /// </summary>
-        /// <param name="guid">The GUID of the refund request for which you want to cancel.</param>
+        /// <param name="refundGuid">The GUID of the refund request for which you want to cancel.</param>
         /// <returns>Refund object.</returns>
         /// <throws>RefundCancellationException RefundCancellationException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<Refund> CancelByGuid(string guid)
+        public async Task<Refund> CancelByGuid(string refundGuid)
         {
-            if (guid == null) throw new ArgumentNullException(nameof(guid));
+            if (refundGuid == null) throw new ArgumentNullException(nameof(refundGuid));
             
             try
             {
                 var parameters = ResourceClientUtil.InitParams();
                 parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
 
-                var response = await _bitPayClient.Delete("refunds/guid/" + guid, parameters);
+                var response = await _bitPayClient.Delete("refunds/guid/" + refundGuid, parameters).ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<Refund>(responseString);
             }
             catch (BitPayException ex)
             {
-                throw new RefundCancellationException(ex, ex.GetApiCode());
+                throw new RefundCancellationException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {
@@ -295,10 +303,15 @@ namespace BitPay.Clients
                 parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
 
                 var json = JsonConvert.SerializeObject(parameters);
-                var response = await _bitPayClient.Post("refunds/" + refundId + "/notifications", json, true);
+                var response = await _bitPayClient.Post("refunds/" + refundId + "/notifications", json, true)
+                    .ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
-                return responseObject.GetValue("status").ToString() == "success";
+
+                return "success".Equals(
+                    responseObject.GetValue("status", StringComparison.Ordinal).ToString(),
+                    StringComparison.OrdinalIgnoreCase
+                    );
             }
             catch (Exception ex)
             {

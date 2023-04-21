@@ -1,4 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using BitPay.Converters;
+
+using Newtonsoft.Json;
 
 namespace BitPay.Models.Payout
 {
@@ -11,11 +16,11 @@ namespace BitPay.Models.Payout
         }
 
         [JsonProperty(PropertyName = "paid")]
-        [JsonConverter(typeof(Converters.BtcValueConverter))]
+        [JsonConverter(typeof(BtcValueConverter))]
         public decimal Paid { get; set; }
 
         [JsonProperty(PropertyName = "unpaid")]
-        [JsonConverter(typeof(Converters.BtcValueConverter))]
+        [JsonConverter(typeof(BtcValueConverter))]
         public decimal Unpaid { get; set; }
     }
 }

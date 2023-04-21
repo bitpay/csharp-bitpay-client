@@ -1,26 +1,25 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
+// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
 using BitPay;
 using BitPay.Models;
 using BitPay.Models.Bill;
 using BitPay.Models.Invoice;
 using BitPay.Models.Payout;
-using BitPay.Utils;
-using Xunit;
+
 using Xunit.Abstractions;
+
 using Environment = BitPay.Environment;
 using SystemEnvironment = System.Environment;
 
-namespace BitPayIntegrationTest
+namespace BitPayFunctionalTest
 {
-    public class BitPayIntegrationTest
+    public class BitPayFunctionalTest
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private static DateTime today = DateTime.Now;
-        private static DateTime tomorrow = today.AddDays(1);
-        private static DateTime yesterday = today.AddDays(-1);
+        private static readonly DateTime Today = DateTime.Now;
+        private static readonly DateTime Tomorrow = Today.AddDays(1);
+        private static readonly DateTime Yesterday = Today.AddDays(-1);
         
         private readonly Client _client;
         
@@ -31,7 +30,7 @@ namespace BitPayIntegrationTest
         ///     to "email.txt" file in this directory. It's required for submit requests.
         ///     It's impossible to test settlements in test environment.
         /// </summary>
-        public BitPayIntegrationTest(ITestOutputHelper testOutputHelper)
+        public BitPayFunctionalTest(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
             string path = GetBitPayUnitTestPath() + Path.DirectorySeparatorChar + "BitPay.config.json";
@@ -91,10 +90,10 @@ namespace BitPayIntegrationTest
             var invoiceGet = _client.GetInvoice(invoiceId).Result;
             Assert.Equal(invoiceToken, invoiceGet.Token);
             
-            var invoiceGetByGuid = _client.GetInvoiceByGuid(invoice.Guid).Result;
+            var invoiceGetByGuid = _client.GetInvoiceByGuid(invoice.ResourceGuid).Result;
             Assert.Equal(invoiceToken, invoiceGetByGuid.Token);
             
-            var invoices = _client.GetInvoices(yesterday, tomorrow).Result;
+            var invoices = _client.GetInvoices(Yesterday, Tomorrow).Result;
             Assert.NotEmpty(invoices);
             invoices.Exists(invoiceList => invoiceList.Token == invoiceToken);
             
@@ -112,7 +111,7 @@ namespace BitPayIntegrationTest
             Assert.True(cancelInvoice.IsCancelled);
             
             var invoiceToCancelByGuid = await _client.CreateInvoice(GetInvoiceExample());
-            var cancelInvoiceByGuid = _client.CancelInvoiceByGuid(invoiceToCancelByGuid.Guid).Result;
+            var cancelInvoiceByGuid = _client.CancelInvoiceByGuid(invoiceToCancelByGuid.ResourceGuid).Result;
             Assert.True(cancelInvoiceByGuid.IsCancelled);
         }
 
@@ -146,7 +145,7 @@ namespace BitPayIntegrationTest
             Assert.Equal(refundId, retrieveRefund.Id);
             Assert.NotNull(retrieveRefund.Invoice);
 
-            var retrieveRefundByGuid = await _client.GetRefundByGuid(refund.Guid);
+            var retrieveRefundByGuid = await _client.GetRefundByGuid(refund.ResourceGuid);
             Assert.Equal(refundId, retrieveRefundByGuid.Id);
 
             var retrieveRefundByInvoiceId = await _client.GetRefunds(invoiceId);
@@ -163,7 +162,7 @@ namespace BitPayIntegrationTest
 
             var refundToCreateForCancelByGuid = new Refund {InvoiceId = invoiceId, Amount = 10.0M};
             var refundToCancelByGuid = await _client.CreateRefund(refundToCreateForCancelByGuid);
-            var refundCanceledByGuid = await _client.CancelRefundByGuid(refundToCancelByGuid.Guid);
+            var refundCanceledByGuid = await _client.CancelRefundByGuid(refundToCancelByGuid.ResourceGuid);
             Assert.Equal("canceled", refundCanceledByGuid.Status);
         }
 
@@ -230,7 +229,7 @@ namespace BitPayIntegrationTest
                 RecipientId = recipientId,
                 NotificationEmail = email,
                 Email = email,
-                Reference = "Integration Test " + Guid.NewGuid().ToString(),
+                Reference = "Integration Test " + Guid.NewGuid(),
                 NotificationUrl = "https://somenotiticationURL.com"
             };
 
@@ -244,8 +243,8 @@ namespace BitPayIntegrationTest
             
             var getPayoutsFilters = new Dictionary<string, dynamic>
             {
-                { "startDate", yesterday.ToString("yyyy-MM-dd") },
-                { "endDate", tomorrow.ToString("yyyy-MM-dd") }
+                { "startDate", Yesterday.ToString("yyyy-MM-dd") },
+                { "endDate", Tomorrow.ToString("yyyy-MM-dd") }
             };
             
             var getPayouts = _client.GetPayouts(getPayoutsFilters).Result;
@@ -272,7 +271,7 @@ namespace BitPayIntegrationTest
             var ledgers = await _client.GetLedgers();
             Assert.NotEmpty(ledgers);
 
-            var ledgersEntries = await _client.GetLedgerEntries("USD", today.AddDays(-31), today);
+            var ledgersEntries = await _client.GetLedgerEntries("USD", Today.AddDays(-31), Today);
             Assert.NotEmpty(ledgersEntries);
         }
         
@@ -309,7 +308,7 @@ namespace BitPayIntegrationTest
             var createBill = await _client.CreateBill(requestedBill);
             var billId = createBill.Id;
 
-            var getBill = await _client.GetBill(billId.ToString());
+            var getBill = await _client.GetBill(billId);
             Assert.Equal(billId, getBill.Id);
 
             var getBills = await _client.GetBills();

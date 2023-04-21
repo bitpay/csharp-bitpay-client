@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPaySetup", "BitPaySetup\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BitPayUnitTest", "BitPayUnitTest\BitPayUnitTest.csproj", "{564B8CE1-5A60-402A-B4F4-39A3778BDED9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPayIntegrationTest", "BitPayIntegrationTest\BitPayIntegrationTest.csproj", "{47312DA5-8665-44B1-BEBF-1D2DBA15FE47}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitPayFunctionalTest", "BitPayFunctionalTest\BitPayFunctionalTest.csproj", "{47312DA5-8665-44B1-BEBF-1D2DBA15FE47}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

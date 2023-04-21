@@ -1,13 +1,14 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Models.Invoice
 {
     public class Refund
     {
-        public Refund() {
-        }
-
         // Request fields
         //
 
@@ -24,7 +25,7 @@ namespace BitPay.Models.Invoice
         public bool BuyerPaysRefundFee { get; set; }
 
         [JsonProperty(PropertyName = "guid")]
-        public string Guid { get; set; }
+        public string ResourceGuid { get; set; }
 
         [JsonProperty(PropertyName = "refundEmail")]
         public string RefundEmail { get; set; }

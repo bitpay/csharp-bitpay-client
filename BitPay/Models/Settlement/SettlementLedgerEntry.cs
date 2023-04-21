@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
 
 namespace BitPay.Models.Settlement
 {

@@ -1,24 +1,12 @@
-﻿/*
- * Copyright 2011 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Sec;
 using Org.BouncyCastle.Crypto.Digests;
@@ -47,7 +35,9 @@ namespace BitPay
         [NonSerialized] private byte[] _pubKeyHash;
 
         private string _publicKeyHexBytes;
+        private byte[] _publicKey;
 
+#pragma warning disable CA1810
         static EcKey()
         {
             // All clients must agree on the curve to use by agreement. BitCoin uses secp256k1.
@@ -55,6 +45,7 @@ namespace BitPay
             EcParams = new ECDomainParameters(ecParameters.Curve, ecParameters.G, ecParameters.N, ecParameters.H);
             SecureRandom = new SecureRandom();
         }
+#pragma warning restore CA1810
 
         /// <summary>
         ///     Generates an entirely new keypair.
@@ -69,7 +60,7 @@ namespace BitPay
             var pubParams = (ECPublicKeyParameters) keypair.Public;
             _privateKey = privateKeyParams.D;
             // The public key is an encoded point on the elliptic curve. It has no meaning independent of the curve.
-            PublicKey = pubParams.Q.GetEncoded();
+            _publicKey = pubParams.Q.GetEncoded();
         }
 
         /// <summary>
@@ -79,7 +70,7 @@ namespace BitPay
         public EcKey(BigInteger privateKey)
         {
             _privateKey = privateKey;
-            PublicKey = PublicKeyFromPrivate(privateKey);
+            _publicKey = PublicKeyFromPrivate(privateKey);
         }
 
         public BigInteger PrivateKey
@@ -97,19 +88,26 @@ namespace BitPay
         /// <summary>
         ///     Gets the hash160 form of the public key (as seen in addresses).
         /// </summary>
-        public byte[] PubKeyHash => _pubKeyHash ?? (_pubKeyHash = Sha256Hash160(PublicKey));
+        public byte[] GetPubKeyHash()
+        {
+            _pubKeyHash ??= Sha256Hash160(GetPublicKey());
+            
+            return (byte[])_pubKeyHash.Clone();
+        }
 
         /// <summary>
         ///     Gets the raw public key value. This appears in transaction scriptSigs. Note that this is <b>not</b> the same
         ///     as the pubKeyHash/address.
         /// </summary>
-        public byte[] PublicKey { get; }
+        public byte[] GetPublicKey() {
+            return (byte[])_publicKey.Clone();
+        }
 
         public string PublicKeyHexBytes
         {
             get
             {
-                if (_publicKeyHexBytes == null) _publicKeyHexBytes = KeyUtils.BytesToHex(PublicKey);
+                if (_publicKeyHexBytes == null) _publicKeyHexBytes = KeyUtils.BytesToHex(GetPublicKey());
 
                 return _publicKeyHexBytes;
             }
@@ -144,7 +142,7 @@ namespace BitPay
                     seq.AddObject(new DerInteger(1)); // version
                     seq.AddObject(new DerOctetString(_privateKey.ToByteArray()));
                     seq.AddObject(new DerTaggedObject(0, SecNamedCurves.GetByName("secp256k1").ToAsn1Object()));
-                    seq.AddObject(new DerTaggedObject(1, new DerBitString(PublicKey)));
+                    seq.AddObject(new DerTaggedObject(1, new DerBitString(GetPublicKey())));
                     seq.Close();
                 }
 
@@ -167,7 +165,8 @@ namespace BitPay
         /// <returns>The hash160 hash</returns>
         public static byte[] Sha256Hash160(byte[] input)
         {
-            var sha256 = new SHA256Managed().ComputeHash(input);
+            using var sha256Managed = new SHA256Managed();
+            var sha256 = sha256Managed.ComputeHash(input);
             var digest = new RipeMD160Digest();
             digest.BlockUpdate(sha256, 0, sha256.Length);
             var @out = new byte[20];
@@ -177,6 +176,11 @@ namespace BitPay
 
         public static string BytesToHexString(byte[] bytes)
         {
+            if (bytes == null)
+            {
+                throw new ArgumentNullException(nameof(bytes));
+            }
+
             var buf = new StringBuilder(bytes.Length * 2);
             foreach (var b in bytes)
             {
@@ -192,7 +196,7 @@ namespace BitPay
         public override string ToString()
         {
             var b = new StringBuilder();
-            b.Append("pub:").Append(BytesToHexString(PublicKey));
+            b.Append("pub:").Append(BytesToHexString(GetPublicKey()));
             // maybe we don't want to show the private key wherever we call this method from...
             //b.Append(" priv:").Append(BytesToHexString(_privateKey.ToByteArray()));
             return b.ToString();
@@ -200,6 +204,16 @@ namespace BitPay
 
         protected virtual BigInteger CalculateE(BigInteger n, byte[] message)
         {
+            if (n == null)
+            {
+                throw new ArgumentNullException(nameof(n));
+            }
+
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
             var messageBitLength = message.Length * 8;
             var trunc = new BigInteger(1, message);
 
@@ -258,7 +272,7 @@ namespace BitPay
         /// <param name="signature">ASN.1 encoded signature.</param>
         public bool Verify(byte[] data, byte[] signature)
         {
-            return Verify(data, signature, PublicKey);
+            return Verify(data, signature, GetPublicKey());
         }
 
         private static BigInteger ExtractPrivateKeyFromAsn1(byte[] asn1PrivKey)

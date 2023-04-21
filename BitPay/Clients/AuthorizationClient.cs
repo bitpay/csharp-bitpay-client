@@ -1,10 +1,15 @@
+// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+
+using BitPay.Exceptions;
 using BitPay.Models;
 using BitPay.Utils;
+
 using Newtonsoft.Json;
-using System.Threading.Tasks;
-using BitPay.Exceptions;
 
 namespace BitPay.Clients
 {
@@ -30,11 +35,11 @@ namespace BitPay.Clients
             {
                 Token token = new Token
                 {
-                    Id = _identity, Guid = _guidGenerator.Execute(), PairingCode = pairingCode
+                    Id = _identity, ResourceGuid = _guidGenerator.Execute(), PairingCode = pairingCode
                 };
                 var json = JsonConvert.SerializeObject(token);
-                var response = await _bitPayClient.Post("tokens", json);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response);
+                var response = await _bitPayClient.Post("tokens", json).ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 var tokens = JsonConvert.DeserializeObject<List<Token>>(responseString);
                 foreach (var t in tokens) _accessTokens.AddToken(t.Facade, t.Value);
             }
@@ -61,7 +66,7 @@ namespace BitPay.Clients
                 var token = new Token
                 {
                     Id = _identity,
-                    Guid = _guidGenerator.Execute(),
+                    ResourceGuid = _guidGenerator.Execute(),
                     Facade = facade
                 };
                 var json = JsonConvert.SerializeObject(token);
@@ -74,7 +79,7 @@ namespace BitPay.Clients
             }
             catch (BitPayException ex)
             {
-                throw new ClientAuthorizationException(ex, ex.GetApiCode());
+                throw new ClientAuthorizationException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {

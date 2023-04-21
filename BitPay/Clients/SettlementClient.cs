@@ -1,9 +1,13 @@
+// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using BitPay.Exceptions;
 using BitPay.Models.Settlement;
-using BitPay.Utils;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Clients
@@ -34,13 +38,14 @@ namespace BitPay.Clients
                 var parameters = ResourceClientUtil.InitParams();
                 parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
             
-                var response = await _bitPayClient.Get($"settlements/{settlementId}", parameters);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response);
+                var response = await _bitPayClient.Get($"settlements/{settlementId}", parameters)
+                    .ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<Settlement>(responseString);
             }
             catch (BitPayException ex)
             {
-                throw new SettlementQueryException(ex, ex.GetApiCode());
+                throw new SettlementQueryException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {
@@ -70,13 +75,13 @@ namespace BitPay.Clients
             {
                 filters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
                
-                var response = await _bitPayClient.Get("settlements", filters);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response);
+                var response = await _bitPayClient.Get("settlements", filters).ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<List<Settlement>>(responseString);
             }
             catch (BitPayException ex)
             {
-                throw new SettlementQueryException(ex, ex.GetApiCode());
+                throw new SettlementQueryException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {
@@ -109,14 +114,14 @@ namespace BitPay.Clients
                 var parameters = ResourceClientUtil.InitParams();
                 parameters.Add("token", token);
 
-                var response = await _bitPayClient.Get(
-                    $"settlements/" + settlementId + "/reconciliationReport", parameters);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response);
+                var response = await _bitPayClient.Get("settlements/" + settlementId + "/reconciliationReport", parameters)
+                    .ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<Settlement>(responseString);
             }
             catch (BitPayException ex)
             {
-                throw new SettlementQueryException(ex, ex.GetApiCode());
+                throw new SettlementQueryException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {
