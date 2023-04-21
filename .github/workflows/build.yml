@@ -9,23 +9,37 @@ on:
     branches-ignore:
       - 'master'
 
-jobs:
+jobs:  
   build-and-test:
-    runs-on: windows-latest
-    
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: [ '4.5.2' ]
+        dotnet-version: [ '6.0', '7.0' ]
     
     steps:
       - uses: actions/checkout@v3
-      - name: Install .NET Framework 4.5.2
-        run: |
-          Invoke-WebRequest https://download.microsoft.com/download/4/3/B/43B61315-B2CE-4F5B-9E32-34CCA07B2F0E/NDP452-KB2901951-x86-x64-DevPack.exe
-          .\NDP452-KB2901951-x86-x64-DevPack.exe /q
+      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
       - name: Install dependencies
         run: dotnet restore
       - name: Build
         run: dotnet build --no-restore
       - name: Test
-        run: dotnet test BitPayUnitTest --no-restore --verbosity n
+        run: dotnet test BitPayUnitTest --no-restore --verbosity n -f net${{ matrix.dotnet-version }}
+  
+  build-and-test-48:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup MSBuild path
+        uses: microsoft/setup-msbuild@v1.0.2
+        with:
+          dotNetVersion: '4.8.x'
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        run: dotnet test BitPayUnitTest --no-restore --verbosity n -f net48

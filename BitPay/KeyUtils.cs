@@ -3,13 +3,11 @@
 
 using System;
 using System.IO;
-using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
 using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Math;
 using BigInteger = Org.BouncyCastle.Math.BigInteger;
 
 namespace BitPay
@@ -94,8 +92,9 @@ namespace BitPay
 
             if (_derivedSin != null) return _derivedSin;
             // Get sha256 hash and then the RIPEMD-160 hash of the public key (this call gets the result in one step).
-            var pubKey = ecKey.PublicKey;
-            var hash = SHA256.Create().ComputeHash(pubKey);
+            var pubKey = ecKey.GetPublicKey();
+            using var sha256Managed = SHA256.Create();
+            var hash = sha256Managed.ComputeHash(pubKey);
             var ripeMd160Digest = new RipeMD160Digest();
             ripeMd160Digest.BlockUpdate(hash, 0, hash.Length);
             var output = new byte[20];
@@ -176,7 +175,7 @@ namespace BitPay
         /// </summary>
         private static byte[] DoubleDigest(byte[] input, int offset, int length)
         {
-            var algorithm = SHA256.Create();
+            using var algorithm = SHA256.Create();
             var first = algorithm.ComputeHash(input, offset, length);
             return algorithm.ComputeHash(first);
         }

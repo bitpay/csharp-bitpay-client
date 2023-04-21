@@ -5,6 +5,10 @@ using BitPay;
 
 using BitPaySetup.Models;
 
+using Newtonsoft.Json;
+
+using Environment = BitPay.Environment;
+
 namespace BitPaySetup
 {
     internal class Program

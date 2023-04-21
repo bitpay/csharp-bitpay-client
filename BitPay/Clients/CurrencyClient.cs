@@ -26,10 +26,7 @@ namespace BitPay.Clients
         {
             if (currencyCode == null) throw new MissingFieldException(nameof(currencyCode));
 
-            if (_currenciesInfo == null)
-            {
-                _currenciesInfo = await LoadCurrencies();
-            }
+            _currenciesInfo ??= await LoadCurrencies().ConfigureAwait(false);
 
             foreach (var currency in _currenciesInfo)
             {

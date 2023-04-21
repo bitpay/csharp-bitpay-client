@@ -79,10 +79,6 @@ namespace BitPay
             {
                 return _privateKey;
             }
-            set
-            {
-
-            }
         }
 
         /// <summary>
@@ -165,7 +161,8 @@ namespace BitPay
         /// <returns>The hash160 hash</returns>
         public static byte[] Sha256Hash160(byte[] input)
         {
-            var sha256 = SHA256.Create().ComputeHash(input);
+            using var sha256Managed = SHA256.Create();
+            var sha256 = sha256Managed.ComputeHash(input);
             var digest = new RipeMD160Digest();
             digest.BlockUpdate(sha256, 0, sha256.Length);
             var @out = new byte[20];
