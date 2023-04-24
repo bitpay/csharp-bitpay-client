@@ -131,7 +131,7 @@ namespace BitPay.Clients
         /// </summary>
         /// <param name="filters">
         /// Filters available: startDate, endDate, status, reference, limit, offset.
-        /// See https://bitpay.com/api/#rest-api-resources-payouts-retrieve-payouts-filtered-by-query
+        /// See https://bitpay.readme.io/reference/retrieve-payouts-filtered-by-query
         /// </param>
         /// <returns>A list of BitPay Payout objects.</returns>
         /// <throws>PayoutQueryException PayoutQueryException class</throws>
