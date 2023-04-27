@@ -63,7 +63,7 @@ namespace BitPay.Clients
         /// <param name="filters">
         ///     Available filters: startDate (Format YYYY-MM-DD), endDate (Format YYYY-MM-DD), status, currency,
         ///     limit, offset.
-        ///     See https://bitpay.com/api/#rest-api-resources-settlements-retrieve-settlements
+        ///     See https://bitpay.readme.io/reference/retrieve-settlements
         /// </param>
         /// <returns>A list of BitPay Settlement objects</returns>
         /// <throws>SettlementQueryException SettlementQueryException class</throws>

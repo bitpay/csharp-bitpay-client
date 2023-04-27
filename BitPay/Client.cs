@@ -302,7 +302,7 @@ namespace BitPay
         ///  </summary>
         ///  <param name="refundToCreate">
         ///     Available params: amount, invoiceId, token, preview, immediate, buyerPaysRefundFee, reference.
-        ///     See https://bitpay.com/api/#rest-api-resources-refunds-create-a-refund-request
+        ///     See https://bitpay.readme.io/reference/create-a-refund-request
         /// </param>
         ///  <returns>An updated Refund Object</returns> 
         /// <throws>RefundCreationException RefundCreationException class</throws> 
@@ -656,7 +656,7 @@ namespace BitPay
         /// </summary>
         /// <param name="filters">
         /// Filters available: startDate, endDate, status, reference, limit, offset.
-        /// See https://bitpay.com/api/#rest-api-resources-payouts-retrieve-payouts-filtered-by-query
+        /// See https://bitpay.readme.io/reference/retrieve-payouts-filtered-by-query
         /// </param>
         /// <returns>A list of BitPay Payout objects.</returns>
         /// <throws>PayoutQueryException PayoutQueryException class</throws>
@@ -697,7 +697,7 @@ namespace BitPay
         /// <param name="filters">
         ///     Available filters: startDate (Format YYYY-MM-DD), endDate (Format YYYY-MM-DD), status, currency,
         ///     limit, offset.
-        ///     See https://bitpay.com/api/#rest-api-resources-settlements-retrieve-settlements
+        ///     See https://bitpay.readme.io/reference/retrieve-settlements
         /// </param>
         /// <returns>A list of BitPay Settlement objects</returns>
         /// <throws>SettlementQueryException SettlementQueryException class</throws>
