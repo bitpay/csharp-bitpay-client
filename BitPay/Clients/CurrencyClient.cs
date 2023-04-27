@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using BitPay.Exceptions;
@@ -15,11 +16,11 @@ namespace BitPay.Clients
     public class CurrencyClient
     {
         private readonly IBitPayClient _bitPayClient;
-        private List<Currency> _currenciesInfo;
+        private List<Currency>? _currenciesInfo;
 
         public CurrencyClient(IBitPayClient bitPayClient)
         {
-            _bitPayClient = bitPayClient ?? throw new MissingRequiredField("bitPayClient");
+            _bitPayClient = bitPayClient;
         }
 
         public async Task<Currency> GetCurrencyInfo(string currencyCode)
@@ -28,15 +29,12 @@ namespace BitPay.Clients
 
             _currenciesInfo ??= await LoadCurrencies().ConfigureAwait(false);
 
-            foreach (var currency in _currenciesInfo)
+            foreach (var currency in _currenciesInfo.Where(currency => currency.Code == currencyCode))
             {
-                if (currency.Code == currencyCode)
-                {
-                    return currency;
-                }
+                return currency;
             }
 
-            throw new BitPayException(null, "missing currency");
+            throw new BitPayException("missing currency");
         }
 
         private async Task<List<Currency>> LoadCurrencies()
@@ -46,7 +44,7 @@ namespace BitPay.Clients
             var responseString = await HttpResponseParser.ResponseToJsonString(response)
                 .ConfigureAwait(false);
 
-            return JsonConvert.DeserializeObject<List<Currency>>(responseString);
+            return JsonConvert.DeserializeObject<List<Currency>>(responseString)!;
         }
     }
 }

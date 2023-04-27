@@ -121,7 +121,7 @@ namespace BitPay.Clients
         /// <returns>A list of bill objects.</returns>
         /// <throws>BillQueryException BillQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<Bill>> GetBills(string status = null)
+        public async Task<List<Bill>> GetBills(string? status = null)
         {
             try
             {

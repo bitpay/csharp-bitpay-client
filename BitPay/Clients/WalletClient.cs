@@ -34,7 +34,7 @@ namespace BitPay.Clients
                     .ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response)
                     .ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<List<Wallet>>(responseString);
+                return JsonConvert.DeserializeObject<List<Wallet>>(responseString)!;
             }
             catch (Exception ex)
             {

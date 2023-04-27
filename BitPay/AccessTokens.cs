@@ -12,17 +12,15 @@ namespace BitPay
 {
     public class AccessTokens
     {
-        private Dictionary<string, string> _data;
+        private readonly Dictionary<string, string?> _data = new();
 
         public AccessTokens()
         {
-            _data = new Dictionary<string, string>();
         }
 
         public AccessTokens(IConfiguration configuration)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
-            _data = new Dictionary<string, string>();
             var env = configuration.GetSection("BitPayConfiguration:Environment").Value;
 
             var tokens = configuration.GetSection("BitPayConfiguration:EnvConfig:" + env + ":ApiTokens").GetChildren();
@@ -74,7 +72,11 @@ namespace BitPay
             if (!_data.ContainsKey(key))
                 throw new TokenNotFoundException(key);
 
-            return _data[key];
+            var token = _data[key];
+            if (token == null)
+                throw new TokenNotFoundException(key);
+            
+            return token;
         }
 
         /// <summary>

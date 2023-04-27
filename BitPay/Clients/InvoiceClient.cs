@@ -37,7 +37,7 @@ namespace BitPay.Clients
         /// <throws>InvoiceCreationException InvoiceCreationException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Invoice> CreateInvoice(Invoice invoice, string facade = Facade.Merchant,
-            bool signRequest = true, string invoiceGuid = null)
+            bool signRequest = true, string? invoiceGuid = null)
         {
             if (invoice == null) throw new ArgumentNullException(nameof(invoice));
             
@@ -177,7 +177,7 @@ namespace BitPay.Clients
         /// <throws>InvoiceQueryException InvoiceQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<Invoice>> GetInvoices(DateTime dateStart, DateTime dateEnd,
-            Dictionary<string, dynamic> parameters = null)
+            Dictionary<string, dynamic>? parameters = null)
         {
             if (parameters == null)
             {

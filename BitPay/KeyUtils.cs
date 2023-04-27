@@ -93,12 +93,14 @@ namespace BitPay
             if (_derivedSin != null) return _derivedSin;
             // Get sha256 hash and then the RIPEMD-160 hash of the public key (this call gets the result in one step).
             var pubKey = ecKey.GetPublicKey();
-            using var sha256Managed = SHA256.Create();
-            var hash = sha256Managed.ComputeHash(pubKey);
-            var ripeMd160Digest = new RipeMD160Digest();
-            ripeMd160Digest.BlockUpdate(hash, 0, hash.Length);
             var output = new byte[20];
-            ripeMd160Digest.DoFinal(output, 0);
+            using (var sha256Managed = SHA256.Create())
+            {
+                var hash = sha256Managed.ComputeHash(pubKey);
+                var ripeMd160Digest = new RipeMD160Digest();
+                ripeMd160Digest.BlockUpdate(hash, 0, hash.Length);
+                ripeMd160Digest.DoFinal(output, 0);
+            }
 
             var pubKeyHash = output;
 
@@ -175,9 +177,11 @@ namespace BitPay
         /// </summary>
         private static byte[] DoubleDigest(byte[] input, int offset, int length)
         {
-            using var algorithm = SHA256.Create();
-            var first = algorithm.ComputeHash(input, offset, length);
-            return algorithm.ComputeHash(first);
+            using (var algorithm = SHA256.Create())
+            {
+                var first = algorithm.ComputeHash(input, offset, length);
+                return algorithm.ComputeHash(first);
+            }
         }
 
         /// <summary>

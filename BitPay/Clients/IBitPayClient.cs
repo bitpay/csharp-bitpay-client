@@ -16,7 +16,7 @@ namespace BitPay.Clients
         /// <param name="parameters">The request parameters</param>
         /// <param name="signatureRequired">Required signature</param>
         /// <returns>The HttpResponseMessage of the request</returns>
-        public Task<HttpResponseMessage> Get(string uri, Dictionary<string, dynamic> parameters = null,
+        Task<HttpResponseMessage> Get(string uri, Dictionary<string, dynamic>? parameters = null,
             bool signatureRequired = true);
 
         /// <summary>
@@ -25,10 +25,10 @@ namespace BitPay.Clients
         /// <param name="uri">The URI to request</param>
         /// <param name="parameters">The parameters of the request</param>
         /// <returns>The HttpResponseMessage of the request</returns>
-        public Task<HttpResponseMessage> Delete(string uri, Dictionary<string, dynamic> parameters = null);
+        Task<HttpResponseMessage> Delete(string uri, Dictionary<string, dynamic>? parameters = null);
 
-        public Task<HttpResponseMessage> Post(string uri, string json, bool signatureRequired = false);
+        Task<HttpResponseMessage> Post(string uri, string json, bool signatureRequired = false);
 
-        public Task<HttpResponseMessage> Put(string uri, string json);
+        Task<HttpResponseMessage> Put(string uri, string json);
     }
 }

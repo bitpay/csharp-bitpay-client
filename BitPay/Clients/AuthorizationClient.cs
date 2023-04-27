@@ -40,7 +40,7 @@ namespace BitPay.Clients
                 var json = JsonConvert.SerializeObject(token);
                 var response = await _bitPayClient.Post("tokens", json).ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                var tokens = JsonConvert.DeserializeObject<List<Token>>(responseString);
+                var tokens = JsonConvert.DeserializeObject<List<Token>>(responseString)!;
                 foreach (var t in tokens) _accessTokens.AddToken(t.Facade, t.Value);
             }
             catch (Exception ex)

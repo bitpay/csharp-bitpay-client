@@ -28,7 +28,7 @@ namespace BitPay
     {
         private static readonly ECDomainParameters EcParams;
 
-        private static readonly SecureRandom SecureRandom;
+        private static readonly SecureRandom SecureRandom = new();
 
         private readonly BigInteger _privateKey;
 
@@ -43,7 +43,6 @@ namespace BitPay
             // All clients must agree on the curve to use by agreement. BitCoin uses secp256k1.
             var ecParameters = SecNamedCurves.GetByName("secp256k1");
             EcParams = new ECDomainParameters(ecParameters.Curve, ecParameters.G, ecParameters.N, ecParameters.H);
-            SecureRandom = new SecureRandom();
         }
 #pragma warning restore CA1810
 
@@ -86,8 +85,8 @@ namespace BitPay
         /// </summary>
         public byte[] GetPubKeyHash()
         {
-            _pubKeyHash ??= Sha256Hash160(GetPublicKey());
-            
+            if (_pubKeyHash == null) _pubKeyHash = Sha256Hash160(GetPublicKey());
+
             return (byte[])_pubKeyHash.Clone();
         }
 
@@ -161,12 +160,15 @@ namespace BitPay
         /// <returns>The hash160 hash</returns>
         public static byte[] Sha256Hash160(byte[] input)
         {
-            using var sha256Managed = SHA256.Create();
-            var sha256 = sha256Managed.ComputeHash(input);
-            var digest = new RipeMD160Digest();
-            digest.BlockUpdate(sha256, 0, sha256.Length);
             var @out = new byte[20];
-            digest.DoFinal(@out, 0);
+            using (var sha256Managed = SHA256.Create())
+            {
+                var sha256 = sha256Managed.ComputeHash(input);
+                var digest = new RipeMD160Digest();
+                digest.BlockUpdate(sha256, 0, sha256.Length);
+                digest.DoFinal(@out, 0);
+            }
+
             return @out;
         }
 

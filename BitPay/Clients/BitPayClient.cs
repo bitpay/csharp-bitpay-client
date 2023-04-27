@@ -32,7 +32,7 @@ namespace BitPay.Clients
         /// <param name="parameters">The request parameters</param>
         /// <param name="signatureRequired">Required signature</param>
         /// <returns>The HttpResponseMessage of the request</returns>
-        public async Task<HttpResponseMessage> Get(string uri, Dictionary<string, dynamic> parameters = null,
+        public async Task<HttpResponseMessage> Get(string uri, Dictionary<string, dynamic>? parameters = null,
             bool signatureRequired = true)
         {
             try
@@ -72,7 +72,7 @@ namespace BitPay.Clients
         /// <param name="uri">The URI to request</param>
         /// <param name="parameters">The parameters of the request</param>
         /// <returns>The HttpResponseMessage of the request</returns>
-        public async Task<HttpResponseMessage> Delete(string uri, Dictionary<string, dynamic> parameters = null)
+        public async Task<HttpResponseMessage> Delete(string uri, Dictionary<string, dynamic>? parameters = null)
         {
             try
             {
@@ -106,21 +106,23 @@ namespace BitPay.Clients
         {
             try
             {
-                using var bodyContent = new StringContent(UnicodeToAscii(json));
-                httpClient.DefaultRequestHeaders.Clear();
-                httpClient.DefaultRequestHeaders.Add("x-accept-version", Config.BitPayApiVersion);
-                httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", Config.BitPayPluginInfo);
-                httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame", Config.BitPayApiFrame);
-                httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame-version", Config.BitPayApiFrameVersion);
-                bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                if (signatureRequired)
+                using (var bodyContent = new StringContent(UnicodeToAscii(json)))
                 {
-                    var signature = KeyUtils.Sign(ecKey, baseUrl + uri + json);
-                    httpClient.DefaultRequestHeaders.Add("x-signature", signature);
-                    httpClient.DefaultRequestHeaders.Add("x-identity", ecKey?.PublicKeyHexBytes);
-                }
+                    httpClient.DefaultRequestHeaders.Clear();
+                    httpClient.DefaultRequestHeaders.Add("x-accept-version", Config.BitPayApiVersion);
+                    httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", Config.BitPayPluginInfo);
+                    httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame", Config.BitPayApiFrame);
+                    httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame-version", Config.BitPayApiFrameVersion);
+                    bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                    if (signatureRequired)
+                    {
+                        var signature = KeyUtils.Sign(ecKey, baseUrl + uri + json);
+                        httpClient.DefaultRequestHeaders.Add("x-signature", signature);
+                        httpClient.DefaultRequestHeaders.Add("x-identity", ecKey?.PublicKeyHexBytes);
+                    }
 
-                return await httpClient.PostAsync(new Uri(baseUrl + uri), bodyContent).ConfigureAwait(false);
+                    return await httpClient.PostAsync(new Uri(baseUrl + uri), bodyContent).ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
@@ -132,19 +134,21 @@ namespace BitPay.Clients
         {
             try
             {
-                using var bodyContent = new StringContent(UnicodeToAscii(json));
-                httpClient.DefaultRequestHeaders.Clear();
-                httpClient.DefaultRequestHeaders.Add("x-accept-version", Config.BitPayApiVersion);
-                httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", Config.BitPayPluginInfo);
-                httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame", Config.BitPayApiFrame);
-                httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame-version", Config.BitPayApiFrameVersion);
-                bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                using (var bodyContent = new StringContent(UnicodeToAscii(json)))
+                {
+                    httpClient.DefaultRequestHeaders.Clear();
+                    httpClient.DefaultRequestHeaders.Add("x-accept-version", Config.BitPayApiVersion);
+                    httpClient.DefaultRequestHeaders.Add("x-bitpay-plugin-info", Config.BitPayPluginInfo);
+                    httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame", Config.BitPayApiFrame);
+                    httpClient.DefaultRequestHeaders.Add("x-bitpay-api-frame-version", Config.BitPayApiFrameVersion);
+                    bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                var signature = KeyUtils.Sign(ecKey, baseUrl + uri + json);
-                httpClient.DefaultRequestHeaders.Add("x-signature", signature);
-                httpClient.DefaultRequestHeaders.Add("x-identity", ecKey?.PublicKeyHexBytes);
+                    var signature = KeyUtils.Sign(ecKey, baseUrl + uri + json);
+                    httpClient.DefaultRequestHeaders.Add("x-signature", signature);
+                    httpClient.DefaultRequestHeaders.Add("x-identity", ecKey?.PublicKeyHexBytes);
 
-                return await httpClient.PutAsync(new Uri(baseUrl + uri), bodyContent).ConfigureAwait(false);
+                    return await httpClient.PutAsync(new Uri(baseUrl + uri), bodyContent).ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {

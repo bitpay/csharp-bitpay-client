@@ -7,8 +7,20 @@ namespace BitPay.Models.Wallet
 {
     public class Currencies
     {
+        public Currencies(string code, string? withdrawalFee, bool p2P, bool dappBrowser, bool walletConnect, bool payPro, Qr qr, string image)
+        {
+            Code = code;
+            WithdrawalFee = withdrawalFee;
+            P2P = p2P;
+            DappBrowser = dappBrowser;
+            WalletConnect = walletConnect;
+            PayPro = payPro;
+            Qr = qr;
+            Image = image;
+        }
+
         public string Code { get; set; }
-        public string WithdrawalFee { get; set; }
+        public string? WithdrawalFee { get; set; }
 
         [JsonProperty(PropertyName = "p2p")]
         public bool P2P { get; set; }

@@ -4,17 +4,19 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace BitPay.Exceptions;
-
-[Serializable]
-public class ConfigurationException : Exception
+namespace BitPay.Exceptions
 {
-    public ConfigurationException(string message) : base(message)
-    {
-    }
 
-    protected ConfigurationException(SerializationInfo serializationInfo, StreamingContext streamingContext)
-        : base(serializationInfo, streamingContext)
+    [Serializable]
+    public class ConfigurationException : Exception
     {
+        public ConfigurationException(string message) : base(message)
+        {
+        }
+
+        protected ConfigurationException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
+        {
+        }
     }
 }

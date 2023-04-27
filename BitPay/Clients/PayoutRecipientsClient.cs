@@ -115,7 +115,7 @@ namespace BitPay.Clients
         /// <returns>A list of BitPayRecipient objects.</returns>
         /// <throws>PayoutRecipientQueryException PayoutRecipientQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<PayoutRecipient>> GetByFilters(string status, int limit, int offset)
+        public async Task<List<PayoutRecipient>> GetByFilters(string? status, int limit, int offset)
         {
             try
             {
