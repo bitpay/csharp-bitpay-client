@@ -8,7 +8,7 @@ Full implementation of the BitPay Payment Gateway. This library implements BitPa
 
 ## Getting Started
 
-To get up and running with our C# library quickly, follow [The GUIDE](https://github.com/bitpay/csharp-bitpay-client/blob/master/GUIDE.md)
+To get up and running with our C# library quickly, follow [The GUIDE](https://bitpay.readme.io/reference/c-full-sdk-overview)
 
 ## Support
 
