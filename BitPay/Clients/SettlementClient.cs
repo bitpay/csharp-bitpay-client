@@ -41,7 +41,7 @@ namespace BitPay.Clients
                 var response = await _bitPayClient.Get($"settlements/{settlementId}", parameters)
                     .ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Settlement>(responseString);
+                return JsonConvert.DeserializeObject<Settlement>(responseString)!;
             }
             catch (BitPayException ex)
             {
@@ -68,7 +68,7 @@ namespace BitPay.Clients
         /// <returns>A list of BitPay Settlement objects</returns>
         /// <throws>SettlementQueryException SettlementQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<Settlement>> GetByFilters(Dictionary<string, dynamic> filters)
+        public async Task<List<Settlement>> GetByFilters(Dictionary<string, dynamic?> filters)
         {
             if (filters == null) throw new MissingFieldException(nameof(filters));
             try
@@ -77,7 +77,7 @@ namespace BitPay.Clients
                
                 var response = await _bitPayClient.Get("settlements", filters).ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<List<Settlement>>(responseString);
+                return JsonConvert.DeserializeObject<List<Settlement>>(responseString)!;
             }
             catch (BitPayException ex)
             {
@@ -117,7 +117,7 @@ namespace BitPay.Clients
                 var response = await _bitPayClient.Get("settlements/" + settlementId + "/reconciliationReport", parameters)
                     .ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Settlement>(responseString);
+                return JsonConvert.DeserializeObject<Settlement>(responseString)!;
             }
             catch (BitPayException ex)
             {

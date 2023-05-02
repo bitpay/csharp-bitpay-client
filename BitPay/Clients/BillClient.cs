@@ -30,7 +30,7 @@ namespace BitPay.Clients
         /// <param name="bill">An invoice request object.</param>
         /// <param name="facade">The facade to create the invoice against</param>
         /// <param name="signRequest">Allow unsigned request</param>
-        /// <returns>A new bill object returned from the server.</returns
+        /// <returns>A new bill object returned from the server.</returns>
         /// <throws>BillCreationException BillCreationException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Bill> CreateBill(Bill bill, string facade = Facade.Merchant, bool signRequest = true)
@@ -76,7 +76,7 @@ namespace BitPay.Clients
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Bill> GetBill(string billId, string facade = Facade.Merchant, bool signRequest = true)
         {
-            Dictionary<string, dynamic> parameters = null;
+            Dictionary<string, dynamic?>? parameters = null;
            
             try
             {
@@ -99,7 +99,7 @@ namespace BitPay.Clients
                 var response = await _bitPayClient.Get("bills/" + billId, parameters, signRequest)
                     .ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Bill>(responseString);
+                return JsonConvert.DeserializeObject<Bill>(responseString)!;
             }
             catch (BitPayException ex)
             {
@@ -127,13 +127,13 @@ namespace BitPay.Clients
             {
                 // Provide the merchant token when the merchant facade is being used.
                 // GET/invoices expects the merchant token and not the merchant/invoice token.
-                Dictionary<string, dynamic> parameters = ResourceClientUtil.InitParams();
+                Dictionary<string, dynamic?>? parameters = ResourceClientUtil.InitParams();
                 try
                 {
                     parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
                     if (!String.IsNullOrEmpty(status))
                     {
-                        parameters.Add("status", status);
+                        parameters.Add("status", status!);
                     }
                 }
                 catch (BitPayException)
@@ -144,7 +144,7 @@ namespace BitPay.Clients
 
                 var response = await _bitPayClient.Get("bills", parameters).ConfigureAwait(false);
                 var responseString =await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<List<Bill>>(responseString);
+                return JsonConvert.DeserializeObject<List<Bill>>(responseString)!;
             }
             catch (BitPayException ex)
             {
@@ -204,7 +204,7 @@ namespace BitPay.Clients
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<string> DeliverBill(string billId, string billToken, bool signRequest = true)
         {
-            var responseString = "";
+            string responseString;
             try
             {
                 var json = JsonConvert.SerializeObject(new Dictionary<string, string> {{"token", billToken}});

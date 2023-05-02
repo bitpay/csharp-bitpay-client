@@ -15,6 +15,10 @@ namespace BitPay.Exceptions
         public RefundCreationException() : base(BitPayCode, BitPayMessage)
         {
         }
+        
+        public RefundCreationException(string message) : base(BitPayCode, message)
+        {
+        }
 
         public RefundCreationException(Exception ex, string apiCode = "000000") : base(BitPayCode, BitPayMessage, ex, apiCode)
         {

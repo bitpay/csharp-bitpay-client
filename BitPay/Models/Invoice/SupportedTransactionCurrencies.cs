@@ -11,5 +11,22 @@ namespace BitPay.Models.Invoice
         public SupportedTransactionCurrency Usdc { get; set; }
         public SupportedTransactionCurrency Gusd { get; set; }
         public SupportedTransactionCurrency Pax { get; set; }
+
+        public SupportedTransactionCurrencies(
+            SupportedTransactionCurrency btc,
+            SupportedTransactionCurrency bch,
+            SupportedTransactionCurrency eth,
+            SupportedTransactionCurrency usdc,
+            SupportedTransactionCurrency gusd,
+            SupportedTransactionCurrency pax
+        )
+        {
+            Btc = btc;
+            Bch = bch;
+            Eth = eth;
+            Usdc = usdc;
+            Gusd = gusd;
+            Pax = pax;
+        }
     }
 }

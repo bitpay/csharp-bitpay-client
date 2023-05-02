@@ -12,16 +12,9 @@ namespace BitPay.Models.Invoice
     public class Invoice
     {
         private string _currency = "";
-        private dynamic _exchangeRates;
-        private dynamic _refundAddresses;
-
-        /// <summary>
-        ///     Creates an uninitialized invoice request object.
-        /// </summary>
-        public Invoice()
-        {
-        }
-
+        private dynamic? _exchangeRates;
+        private dynamic? _refundAddresses;
+        
         // Creates a minimal invoice request object.
         public Invoice(decimal price, string currency)
         {
@@ -32,9 +25,9 @@ namespace BitPay.Models.Invoice
         // API fields
         //
 
-        [JsonProperty(PropertyName = "guid")] public string ResourceGuid { get; set; }
+        [JsonProperty(PropertyName = "guid")] public string? ResourceGuid { get; set; }
 
-        [JsonProperty(PropertyName = "token")] public string Token { get; set; }
+        [JsonProperty(PropertyName = "token")] public string? Token { get; set; }
 
         // Required fields
         //
@@ -58,22 +51,22 @@ namespace BitPay.Models.Invoice
         //
 
         [JsonProperty(PropertyName = "orderId")]
-        public string OrderId { get; set; }
+        public string? OrderId { get; set; }
 
         [JsonProperty(PropertyName = "itemDesc")]
-        public string ItemDesc { get; set; }
+        public string? ItemDesc { get; set; }
 
         [JsonProperty(PropertyName = "itemCode")]
-        public string ItemCode { get; set; }
+        public string? ItemCode { get; set; }
 
         [JsonProperty(PropertyName = "posData")]
-        public string PosData { get; set; }
+        public string? PosData { get; set; }
 
         [JsonProperty(PropertyName = "notificationURL")]
-        public string NotificationUrl { get; set; }
+        public string? NotificationUrl { get; set; }
 
         [JsonProperty(PropertyName = "transactionSpeed")]
-        public string TransactionSpeed { get; set; }
+        public string? TransactionSpeed { get; set; }
 
         [JsonProperty(PropertyName = "fullNotifications")]
         public bool FullNotifications { get; set; }
@@ -91,48 +84,48 @@ namespace BitPay.Models.Invoice
         public bool ExtendedNotifications { get; set; }
 
         [JsonProperty(PropertyName = "notificationEmail")]
-        public string NotificationEmail { get; set; }
+        public string? NotificationEmail { get; set; }
 
         [JsonProperty(PropertyName = "redirectURL")]
-        public string RedirectUrl { get; set; }
+        public string? RedirectUrl { get; set; }
 
         [JsonProperty(PropertyName = "physical")]
         public bool Physical { get; set; }
 
         [JsonProperty(PropertyName = "paymentCurrencies")]
-        public List<string> PaymentCurrencies { get; set; }
+        public List<string>? PaymentCurrencies { get; set; }
 
         [JsonProperty(PropertyName = "paymentString")]
-        public string PaymentString { get; set; }
+        public string? PaymentString { get; set; }
 
         [JsonProperty(PropertyName = "verificationLink")]
-        public string VerificationLink { get; set; }
+        public string? VerificationLink { get; set; }
 
         [JsonProperty(PropertyName = "acceptanceWindow")]
         public long AcceptanceWindow { get; set; }
 
         [JsonProperty(PropertyName = "forcedBuyerSelectedTransactionCurrency")]
-        public string ForcedBuyerSelectedTransactionCurrency { get; set; }
+        public string? ForcedBuyerSelectedTransactionCurrency { get; set; }
 
         [JsonProperty(PropertyName = "forcedBuyerSelectedWallet")]
-        public string ForcedBuyerSelectedWallet { get; set; }
+        public string? ForcedBuyerSelectedWallet { get; set; }
 
         [JsonProperty(PropertyName = "buyerEmail")]
-        public string BuyerEmail { get; set; }
+        public string? BuyerEmail { get; set; }
 
         // Buyer data
         //
 
-        [JsonProperty(PropertyName = "buyer")] public Buyer Buyer { get; set; }
+        [JsonProperty(PropertyName = "buyer")] public Buyer? Buyer { get; set; }
 
         // Response fields
         //
 
         [JsonProperty(PropertyName = "merchantName")]
-        public string MerchantName { get; set; }
+        public string? MerchantName { get; set; }
 
         [JsonProperty(PropertyName = "selectedWallet")]
-        public string SelectedWallet { get; set; }
+        public string? SelectedWallet { get; set; }
 
         [JsonProperty(PropertyName = "bitpayIdRequired")]
         public bool BitpayIdRequired { get; set; }
@@ -143,11 +136,11 @@ namespace BitPay.Models.Invoice
         [JsonProperty(PropertyName = "isCancelled")]
         public bool IsCancelled { get; set; }
 
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
-        public string Url { get; set; }
+        public string? Url { get; set; }
 
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
         public bool LowFeeDetected { get; set; }
 
@@ -163,48 +156,48 @@ namespace BitPay.Models.Invoice
 
         public int OverpaidAmount { get; set; }
 
-        public List<InvoiceTransaction> Transactions { get; set; }
+        public List<InvoiceTransaction>? Transactions { get; set; }
 
-        public List<ItemizedDetails> ItemizedDetails { get; set; }
+        public List<ItemizedDetails>? ItemizedDetails { get; set; }
 
-        public string ExceptionStatus { get; set; }
+        public string? ExceptionStatus { get; set; }
 
-        public dynamic RefundAddresses
+        public dynamic? RefundAddresses
         {
             get => _refundAddresses;
-            set => _refundAddresses = JsonConvert.DeserializeObject(value.ToString(Formatting.None));
+            set => _refundAddresses = JsonConvert.DeserializeObject(value?.ToString(Formatting.None));
         }
 
         public bool RefundAddressRequestPending { get; set; }
 
-        public string BuyerProvidedEmail { get; set; }
+        public string? BuyerProvidedEmail { get; set; }
 
-        public InvoiceBuyerProvidedInfo BuyerProvidedInfo { get; set; }
+        public InvoiceBuyerProvidedInfo? BuyerProvidedInfo { get; set; }
 
-        public UniversalCodes UniversalCodes { get; set; }
+        public UniversalCodes? UniversalCodes { get; set; }
 
-        public SupportedTransactionCurrencies SupportedTransactionCurrencies { get; set; }
+        public SupportedTransactionCurrencies? SupportedTransactionCurrencies { get; set; }
 
-        public Shopper Shopper { get; set; }
+        public Shopper? Shopper { get; set; }
 
-        public MinerFees MinerFees { get; set; }
+        public MinerFees? MinerFees { get; set; }
 
-        public string TransactionCurrency { get; set; }
+        public string? TransactionCurrency { get; set; }
 
-        public string BillId { get; set; }
+        public string? BillId { get; set; }
 
-        public List<RefundInfo> RefundInfo { get; set; }
+        public List<RefundInfo>? RefundInfo { get; set; }
 
         public decimal AmountPaid { get; set; }
 
-        public string DisplayAmountPaid { get; set; }
+        public string? DisplayAmountPaid { get; set; }
 
-        public string CloseURL { get; set; }
+        public string? CloseURL { get; set; }
 
-        public dynamic ExchangeRates
+        public dynamic? ExchangeRates
         {
             get => _exchangeRates;
-            set => _exchangeRates = JsonConvert.DeserializeObject(value.ToString(Formatting.None));
+            set => _exchangeRates = JsonConvert.DeserializeObject(value?.ToString(Formatting.None));
         }
 
         public bool ShouldSerializeOrderId()

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <!-- version numbers will be updated by build -->
     <AssemblyVersion>5.0.0.0</AssemblyVersion>
-    <FileVersion>5.0.0-beta1</FileVersion>
+    <FileVersion>5.0.0</FileVersion>
     <VersionPrefix>5.0.0-beta1</VersionPrefix>
     <Version>5.0.0-beta1</Version>
     <Authors>Antonio Buedo</Authors>

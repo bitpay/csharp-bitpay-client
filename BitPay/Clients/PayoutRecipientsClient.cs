@@ -53,7 +53,7 @@ namespace BitPay.Clients
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
-                    });
+                    })!;
             }
             catch (BitPayException ex)
             {
@@ -91,7 +91,7 @@ namespace BitPay.Clients
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
-                    });
+                    })!;
             }
             catch (BitPayException ex)
             {
@@ -122,7 +122,7 @@ namespace BitPay.Clients
                 var parameters = ResourceClientUtil.InitParams();
                 if (!string.IsNullOrEmpty(status))
                 {
-                    parameters.Add("status", status);
+                    parameters.Add("status", status!);
                 }
                 parameters.Add("limit", limit.ToString());
                 parameters.Add("offset", offset.ToString());
@@ -134,7 +134,7 @@ namespace BitPay.Clients
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
-                    });
+                    })!;
             }
             catch (BitPayException ex)
             {
@@ -175,7 +175,7 @@ namespace BitPay.Clients
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
-                    });
+                    })!;
             }
             catch (BitPayException ex)
             {
@@ -207,9 +207,9 @@ namespace BitPay.Clients
                 
                 var response = await _bitPayClient.Delete("recipients/" + recipientId, parameters).ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
+                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString)!;
                 return "success".Equals(
-                    responseObject.GetValue("status", StringComparison.Ordinal).ToString(),
+                    responseObject.GetValue("status", StringComparison.Ordinal)?.ToString(),
                     StringComparison.OrdinalIgnoreCase
                 );
             }
@@ -244,9 +244,9 @@ namespace BitPay.Clients
                 var response = await _bitPayClient.Post("recipients/" + recipientId + "/notifications", json, true)
                     .ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
+                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString)!;
                 return "success".Equals(
-                    responseObject.GetValue("status", StringComparison.Ordinal).ToString(),
+                    responseObject.GetValue("status", StringComparison.Ordinal)?.ToString(),
                     StringComparison.OrdinalIgnoreCase
                     );
            }

@@ -27,7 +27,7 @@ namespace BitPay.Models.Wallet
         [JsonProperty(PropertyName = "payPro")]
         public bool PayPro { get; set; }
 
-        public List<Currencies> Currencies { get; set; } = new();
+        public List<Currencies>? Currencies { get; set; }
 
         public bool ShouldSerializeKey()
         {

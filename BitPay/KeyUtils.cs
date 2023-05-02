@@ -14,15 +14,20 @@ namespace BitPay
 {
     public static class KeyUtils
     {
-        private static string PrivateKeyFile;
+        private static string? PrivateKeyFile;
         private const string Alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
         private static readonly char[] HexArray = "0123456789abcdef".ToCharArray();
 
-        private static string _derivedSin;
+        private static string? _derivedSin;
         private static readonly BigInteger Base = BigInteger.ValueOf(58);
 
-        public static bool PrivateKeyExists(string privateKeyFile)
+        public static bool PrivateKeyExists(string? privateKeyFile)
         {
+            if (privateKeyFile == null)
+            {
+                return false;
+            }
+            
             PrivateKeyFile = privateKeyFile;
             
             return File.Exists(privateKeyFile);
@@ -34,8 +39,13 @@ namespace BitPay
             return new EcKey();
         }
         
-        public static EcKey CreateEcKeyFromString(string privateKey)
+        public static EcKey CreateEcKeyFromString(string? privateKey)
         {
+            if (privateKey == null)
+            { 
+                throw new ArgumentNullException(nameof(privateKey));
+            }
+            
             var pkey = new BigInteger(privateKey);
             var key = new EcKey(pkey);
             return key;
@@ -57,6 +67,11 @@ namespace BitPay
             //     return key;
             // }
                 
+            if (PrivateKeyFile == null)
+            { 
+                throw new ArgumentNullException(nameof(PrivateKeyFile));
+            }
+            
             byte[] file = File.ReadAllBytes(PrivateKeyFile);
             var key = EcKey.FromAsn1(file);
             return key;
@@ -72,9 +87,9 @@ namespace BitPay
             var bytes = ecKey.ToAsn1();
             if (!string.IsNullOrEmpty(Path.GetDirectoryName(PrivateKeyFile)) && !Directory.Exists(Path.GetDirectoryName(PrivateKeyFile)))
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(PrivateKeyFile));
+                Directory.CreateDirectory(Path.GetDirectoryName(PrivateKeyFile)!);
             }
-            using (var fs = new FileStream(PrivateKeyFile, FileMode.Create, FileAccess.Write))
+            using (var fs = new FileStream(PrivateKeyFile!, FileMode.Create, FileAccess.Write))
             {
 #pragma warning disable CA1835
                 await fs.WriteAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
@@ -190,7 +205,7 @@ namespace BitPay
         /// <param name="ecKey">The key object to sign with</param>
         /// <param name="input">The string to be signed</param>
         /// <returns>The signature</returns>
-        public static string Sign(EcKey ecKey, string input)
+        public static string Sign(EcKey? ecKey, string input)
         {
             if (ecKey == null)
             {
@@ -276,7 +291,7 @@ namespace BitPay
             }
         }
 
-        public static string BytesToHex(byte[] bytes)
+        public static string BytesToHex(byte[]? bytes)
         {
             if (bytes == null)
             {

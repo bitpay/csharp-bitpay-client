@@ -7,13 +7,6 @@ namespace BitPay.Models.Payout
 {
     public class PayoutRecipient
     {
-        /// <summary>
-        ///     Constructor, create an empty PayoutRecipient object.
-        /// </summary>
-        public PayoutRecipient()
-        {
-        }
-        
         /**
          * Constructor, create a minimal Recipient object.
          *
@@ -38,18 +31,18 @@ namespace BitPay.Models.Payout
         public string Label { get; set; }
 
         [JsonProperty(PropertyName = "notificationURL")]
-        public string NotificationURL { get; set; }
+        public string? NotificationURL { get; set; }
 
         // Response fields
         //
 
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
-        public string ShopperId { get; set; }
+        public string? ShopperId { get; set; }
 
-        [JsonProperty(PropertyName = "token")] public string Token { get; set; }
+        [JsonProperty(PropertyName = "token")] public string? Token { get; set; }
 
         public bool ShouldSerializeEmail()
         {

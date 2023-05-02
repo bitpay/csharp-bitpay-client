@@ -32,9 +32,9 @@ namespace BitPay
 
         private readonly BigInteger _privateKey;
 
-        [NonSerialized] private byte[] _pubKeyHash;
+        [NonSerialized] private byte[]? _pubKeyHash;
 
-        private string _publicKeyHexBytes;
+        private string? _publicKeyHexBytes;
         private byte[] _publicKey;
 
 #pragma warning disable CA1810

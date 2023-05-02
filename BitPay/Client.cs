@@ -221,7 +221,7 @@ namespace BitPay
         /// <throws>InvoiceQueryException InvoiceQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<Invoice>> GetInvoices(DateTime dateStart, DateTime dateEnd,
-            Dictionary<string, dynamic>? parameters = null)
+            Dictionary<string, dynamic?>? parameters = null)
         {
             return await CreateInvoiceClient().GetInvoices(dateStart, dateEnd, parameters).ConfigureAwait(false);
         }
@@ -233,7 +233,7 @@ namespace BitPay
         /// <param name="parameters">Available parameters: buyerEmail, buyerSms, smsCode, autoVerify</param>
         /// <returns>A BitPay updated Invoice object.</returns>
         /// <throws>InvoiceUpdateException InvoiceUpdateException class</throws>
-        public async Task<Invoice> UpdateInvoice(string invoiceId, Dictionary<string, dynamic> parameters)
+        public async Task<Invoice> UpdateInvoice(string invoiceId, Dictionary<string, dynamic?> parameters)
         {
             return await CreateInvoiceClient().UpdateInvoice(invoiceId, parameters).ConfigureAwait(false);
         }
@@ -662,7 +662,7 @@ namespace BitPay
         /// <returns>A list of BitPay Payout objects.</returns>
         /// <throws>PayoutQueryException PayoutQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<Payout>> GetPayouts(Dictionary<string, dynamic> filters)
+        public async Task<List<Payout>> GetPayouts(Dictionary<string, dynamic?> filters)
         {
             return await CreatePayoutClient().GetPayouts(filters).ConfigureAwait(false);
         }
@@ -703,7 +703,7 @@ namespace BitPay
         /// <returns>A list of BitPay Settlement objects</returns>
         /// <throws>SettlementQueryException SettlementQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<Settlement>> GetSettlements(Dictionary<string, dynamic> filters)
+        public async Task<List<Settlement>> GetSettlements(Dictionary<string, dynamic?> filters)
         {
             return await CreateSettlementClient().GetByFilters(filters).ConfigureAwait(false);
         }
