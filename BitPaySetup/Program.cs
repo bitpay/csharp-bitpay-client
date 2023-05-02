@@ -1,8 +1,12 @@
-using System;
-using System.IO;
+// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
 using BitPay;
+
 using BitPaySetup.Models;
+
 using Newtonsoft.Json;
+
 using Environment = BitPay.Environment;
 
 namespace BitPaySetup

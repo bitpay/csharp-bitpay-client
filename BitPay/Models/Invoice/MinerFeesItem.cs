@@ -1,4 +1,7 @@
-﻿namespace BitPay.Models.Invoice
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+namespace BitPay.Models.Invoice
 {
     public class MinerFeesItem
     {

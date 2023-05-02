@@ -1,5 +1,10 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System.Collections.Generic;
+
 using BitPay.Exceptions;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Models.Invoice
@@ -27,7 +32,7 @@ namespace BitPay.Models.Invoice
         // API fields
         //
 
-        [JsonProperty(PropertyName = "guid")] public string Guid { get; set; }
+        [JsonProperty(PropertyName = "guid")] public string ResourceGuid { get; set; }
 
         [JsonProperty(PropertyName = "token")] public string Token { get; set; }
 

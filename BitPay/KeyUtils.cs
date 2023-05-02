@@ -1,16 +1,18 @@
-﻿using System;
+// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
 using System.IO;
-using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+
 using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Math;
 using BigInteger = Org.BouncyCastle.Math.BigInteger;
 
 namespace BitPay
 {
-    public class KeyUtils
+    public static class KeyUtils
     {
         private static string PrivateKeyFile;
         private const string Alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -55,13 +57,18 @@ namespace BitPay
             //     return key;
             // }
                 
-            byte[] file = System.IO.File.ReadAllBytes(PrivateKeyFile);
+            byte[] file = File.ReadAllBytes(PrivateKeyFile);
             var key = EcKey.FromAsn1(file);
             return key;
         }
 
         public static async Task SaveEcKey(EcKey ecKey)
         {
+            if (ecKey == null)
+            {
+                throw new ArgumentNullException(nameof(ecKey));
+            }
+
             var bytes = ecKey.ToAsn1();
             if (!string.IsNullOrEmpty(Path.GetDirectoryName(PrivateKeyFile)) && !Directory.Exists(Path.GetDirectoryName(PrivateKeyFile)))
             {
@@ -69,16 +76,25 @@ namespace BitPay
             }
             using (var fs = new FileStream(PrivateKeyFile, FileMode.Create, FileAccess.Write))
             {
-                await fs.WriteAsync(bytes, 0, bytes.Length);
+#pragma warning disable CA1835
+                await fs.WriteAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
+#pragma warning restore CA1835
+
             }
         }
 
         public static string DeriveSin(EcKey ecKey)
         {
+            if (ecKey == null)
+            {
+                throw new ArgumentNullException(nameof(ecKey));
+            }
+
             if (_derivedSin != null) return _derivedSin;
             // Get sha256 hash and then the RIPEMD-160 hash of the public key (this call gets the result in one step).
-            var pubKey = ecKey.PublicKey;
-            var hash = SHA256.Create().ComputeHash(pubKey);
+            var pubKey = ecKey.GetPublicKey();
+            using var sha256Managed = SHA256.Create();
+            var hash = sha256Managed.ComputeHash(pubKey);
             var ripeMd160Digest = new RipeMD160Digest();
             ripeMd160Digest.BlockUpdate(hash, 0, hash.Length);
             var output = new byte[20];
@@ -114,6 +130,11 @@ namespace BitPay
 
         private static string Encode(byte[] input)
         {
+            if (input == null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+
             // TODO: This could be a lot more efficient.
             var bi = new BigInteger(1, input);
             var s = new StringBuilder();
@@ -140,6 +161,11 @@ namespace BitPay
         /// </summary>
         private static byte[] DoubleDigest(byte[] input)
         {
+            if (input == null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+
             return DoubleDigest(input, 0, input.Length);
         }
 
@@ -149,7 +175,7 @@ namespace BitPay
         /// </summary>
         private static byte[] DoubleDigest(byte[] input, int offset, int length)
         {
-            var algorithm = SHA256.Create();
+            using var algorithm = SHA256.Create();
             var first = algorithm.ComputeHash(input, offset, length);
             return algorithm.ComputeHash(first);
         }
@@ -162,6 +188,11 @@ namespace BitPay
         /// <returns>The signature</returns>
         public static string Sign(EcKey ecKey, string input)
         {
+            if (ecKey == null)
+            {
+                throw new ArgumentNullException(nameof(ecKey));
+            }
+
             // return ecKey.Sign(input);
             var hash = Sha256Hash(input);
             var hashBytes = HexToBytes(hash);
@@ -186,7 +217,9 @@ namespace BitPay
                 var result = hash.ComputeHash(enc.GetBytes(value));
 
                 foreach (var b in result)
+#pragma warning disable CA1305
                     sb.Append(b.ToString("x2"));
+#pragma warning restore CA1305
             }
 
             return sb.ToString();
@@ -206,11 +239,11 @@ namespace BitPay
         private static byte[] HexToBytes(string hex)
         {
             if (hex == null)
-                throw new ArgumentNullException("hex");
+                throw new ArgumentNullException(nameof(hex));
             if (hex.Length % 2 == 1)
                 throw new FormatException("The binary key cannot have an odd number of digits");
 
-            if (hex == string.Empty)
+            if (hex.Length == 0)
                 return new byte[0];
 
             var arr = new byte[hex.Length >> 1];
@@ -241,6 +274,11 @@ namespace BitPay
 
         public static string BytesToHex(byte[] bytes)
         {
+            if (bytes == null)
+            {
+                throw new ArgumentNullException(nameof(bytes));
+            }
+
             var hexChars = new char[bytes.Length * 2];
             for (var j = 0; j < bytes.Length; j++)
             {

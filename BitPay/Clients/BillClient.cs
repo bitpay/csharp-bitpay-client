@@ -1,9 +1,13 @@
+// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using BitPay.Exceptions;
 using BitPay.Models.Bill;
-using BitPay.Utils;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Clients
@@ -31,6 +35,11 @@ namespace BitPay.Clients
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Bill> CreateBill(Bill bill, string facade = Facade.Merchant, bool signRequest = true)
         {
+            if (bill == null)
+            {
+                throw new ArgumentNullException(nameof(bill));
+            }
+
             try
             {
                 bill.Token = _accessTokens.GetAccessToken(facade);
@@ -43,7 +52,7 @@ namespace BitPay.Clients
             }
             catch (BitPayException ex)
             {
-                throw new BillCreationException(ex, ex.GetApiCode());
+                throw new BillCreationException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {
@@ -87,13 +96,14 @@ namespace BitPay.Clients
                     }
                 }
 
-                var response = await _bitPayClient.Get("bills/" + billId, parameters, signRequest);
-                var responseString =await HttpResponseParser.ResponseToJsonString(response);
+                var response = await _bitPayClient.Get("bills/" + billId, parameters, signRequest)
+                    .ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<Bill>(responseString);
             }
             catch (BitPayException ex)
             {
-                throw new BillQueryException(ex, ex.GetApiCode());
+                throw new BillQueryException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {
@@ -132,13 +142,13 @@ namespace BitPay.Clients
                     parameters = null;
                 }
 
-                var response = await _bitPayClient.Get("bills", parameters);
-                var responseString =await HttpResponseParser.ResponseToJsonString(response);
+                var response = await _bitPayClient.Get("bills", parameters).ConfigureAwait(false);
+                var responseString =await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<List<Bill>>(responseString);
             }
             catch (BitPayException ex)
             {
-                throw new BillQueryException(ex, ex.GetApiCode());
+                throw new BillQueryException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {
@@ -170,7 +180,7 @@ namespace BitPay.Clients
             }
             catch (BitPayException ex)
             {
-                throw new BillUpdateException(ex, ex.GetApiCode());
+                throw new BillUpdateException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {
@@ -203,7 +213,7 @@ namespace BitPay.Clients
             }
             catch (BitPayException ex)
             {
-                throw new BillDeliveryException(ex, ex.GetApiCode());
+                throw new BillDeliveryException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {

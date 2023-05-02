@@ -1,0 +1,45 @@
+name: Build
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+  push:
+    branches-ignore:
+      - 'master'
+
+jobs:  
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: [ '6.0', '7.0' ]
+    
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        run: dotnet test BitPayUnitTest --no-restore --verbosity n -f net${{ matrix.dotnet-version }}
+  
+  build-and-test-48:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup MSBuild path
+        uses: microsoft/setup-msbuild@v1.0.2
+        with:
+          dotNetVersion: '4.8.x'
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        run: dotnet test BitPayUnitTest --no-restore --verbosity n -f net48

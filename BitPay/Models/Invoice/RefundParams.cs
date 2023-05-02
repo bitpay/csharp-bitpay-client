@@ -1,12 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using Newtonsoft.Json;
 
 namespace BitPay.Models.Invoice
 {
     public class RefundParams
     {
-        public RefundParams() {
-        }
-
         [JsonProperty(PropertyName = "requesterType")]
         public string setRequesterType { get; set; }
 

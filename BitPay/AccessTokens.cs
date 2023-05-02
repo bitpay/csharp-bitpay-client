@@ -1,6 +1,11 @@
+// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
+
 using BitPay.Exceptions;
+
 using Microsoft.Extensions.Configuration;
 
 namespace BitPay
@@ -16,6 +21,7 @@ namespace BitPay
 
         public AccessTokens(IConfiguration configuration)
         {
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
             _data = new Dictionary<string, string>();
             var env = configuration.GetSection("BitPayConfiguration:Environment").Value;
 

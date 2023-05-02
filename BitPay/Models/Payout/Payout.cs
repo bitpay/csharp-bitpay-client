@@ -1,6 +1,12 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
 using System.Collections.Generic;
+
+using BitPay.Converters;
 using BitPay.Exceptions;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Models.Payout
@@ -90,7 +96,7 @@ namespace BitPay.Models.Payout
         }
 
         [JsonProperty(PropertyName = "effectiveDate")]
-        [JsonConverter(typeof(Converters.DateStringConverter))]
+        [JsonConverter(typeof(DateStringConverter))]
         public DateTime? EffectiveDate { get; set; }
 
         [JsonProperty(PropertyName = "transactions")]
@@ -142,10 +148,10 @@ namespace BitPay.Models.Payout
         [JsonProperty(PropertyName = "message")]
         public string Message { get; set; }
 
-        [JsonConverter(typeof(Converters.DateStringConverter))]
+        [JsonConverter(typeof(DateStringConverter))]
         public DateTime? RequestDate { get; set; }
 
-        [JsonConverter(typeof(Converters.DateStringConverter))]
+        [JsonConverter(typeof(DateStringConverter))]
         public DateTime? DateExecuted { get; set; }
 
         public dynamic ExchangeRates

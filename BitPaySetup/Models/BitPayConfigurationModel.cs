@@ -1,4 +1,7 @@
-﻿namespace BitPaySetup.Models
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+namespace BitPaySetup.Models
 {
     public class BitPayConfigurationModel
     {

@@ -1,9 +1,13 @@
+// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using BitPay.Exceptions;
 using BitPay.Models.Rate;
-using BitPay.Utils;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Clients
@@ -32,13 +36,14 @@ namespace BitPay.Clients
             
             try
             {
-                var response = await _bitPayClient.Get("rates/" + baseCurrency + "/" + currency, signatureRequired: false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response);
+                var response = await _bitPayClient.Get("rates/" + baseCurrency + "/" + currency, signatureRequired: false)
+                    .ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<Rate>(responseString);
             }
             catch (BitPayException ex)
             {
-                throw new RatesQueryException(ex, ex.GetApiCode());
+                throw new RatesQueryException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {
@@ -59,14 +64,15 @@ namespace BitPay.Clients
         {
             try
             {
-                var response = await _bitPayClient.Get("rates", signatureRequired: false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response);
+                var response = await _bitPayClient.Get("rates", signatureRequired: false).ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response)
+                    .ConfigureAwait(false);
                 var rates = JsonConvert.DeserializeObject<List<Rate>>(responseString);
                 return new Rates(rates);
             }
             catch (BitPayException ex)
             {
-                throw new RatesQueryException(ex, ex.GetApiCode());
+                throw new RatesQueryException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {
@@ -88,14 +94,15 @@ namespace BitPay.Clients
         {
             try
             {
-                var response = await _bitPayClient.Get("rates/" + currency, null, signatureRequired: false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response);
+                var response = await _bitPayClient.Get("rates/" + currency, signatureRequired: false)
+                    .ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 var rates = JsonConvert.DeserializeObject<List<Rate>>(responseString);
                 return new Rates(rates);
             }
             catch (BitPayException ex)
             {
-                throw new RatesQueryException(ex, ex.GetApiCode());
+                throw new RatesQueryException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {

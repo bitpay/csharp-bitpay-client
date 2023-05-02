@@ -1,5 +1,10 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System.Collections.Generic;
+
 using BitPay.Exceptions;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Models.Bill

@@ -1,9 +1,13 @@
-﻿using System;
+// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using BitPay.Exceptions;
 using BitPay.Models;
-using BitPay.Utils;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Clients
@@ -22,10 +26,7 @@ namespace BitPay.Clients
         {
             if (currencyCode == null) throw new MissingFieldException(nameof(currencyCode));
 
-            if (_currenciesInfo == null)
-            {
-                _currenciesInfo = await LoadCurrencies();
-            }
+            _currenciesInfo ??= await LoadCurrencies().ConfigureAwait(false);
 
             foreach (var currency in _currenciesInfo)
             {
@@ -40,8 +41,10 @@ namespace BitPay.Clients
 
         private async Task<List<Currency>> LoadCurrencies()
         {
-            var response = await _bitPayClient.Get("currencies", null, false);
-            var responseString = await HttpResponseParser.ResponseToJsonString(response);
+            var response = await _bitPayClient.Get("currencies", null, false)
+                .ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response)
+                .ConfigureAwait(false);
 
             return JsonConvert.DeserializeObject<List<Currency>>(responseString);
         }

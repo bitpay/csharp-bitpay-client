@@ -4,10 +4,10 @@
     <TargetFrameworks>netstandard2.0;net48;net6.0;net7.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <!-- version numbers will be updated by build -->
-    <AssemblyVersion>4.4.2203.0</AssemblyVersion>
-    <FileVersion>4.4.2203</FileVersion>
-    <VersionPrefix>4.4.2203</VersionPrefix>
-    <Version>4.4.2203</Version>
+    <AssemblyVersion>5.0.0.0</AssemblyVersion>
+    <FileVersion>5.0.0-beta1</FileVersion>
+    <VersionPrefix>5.0.0-beta1</VersionPrefix>
+    <Version>5.0.0-beta1</Version>
     <Authors>Antonio Buedo</Authors>
     <Company>BitPay Inc.</Company>
     <Owners>BitPay, Inc.</Owners>
@@ -27,6 +27,10 @@
     <PackageDescription>This library is a simple way to integrate your application with BitPay along with your BitPay account for taking Bitcoin and Bitcoin Cash payments. It exposes six basic functions, creating and retrieving invoices, creating, retrieving and delivering bills and retrieving rates. It is not meant as a replacement for the entire BitPay API.</PackageDescription>
     <RepositoryUrl>https://github.com/bitpay/csharp-bitpay-client</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <NoWarn>CA1724</NoWarn>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
   </PropertyGroup>
 
   <!-- Conditionally obtain references for the .NET Framework 4.8 target -->
