@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 
+using BitPay.Converters;
 using BitPay.Exceptions;
 
 using Newtonsoft.Json;
@@ -175,7 +176,8 @@ namespace BitPay.Models.Invoice
         public InvoiceBuyerProvidedInfo? BuyerProvidedInfo { get; set; }
 
         public UniversalCodes? UniversalCodes { get; set; }
-
+        
+        [JsonConverter(typeof(SupportedTransactionCurrenciesConverter))]
         public SupportedTransactionCurrencies? SupportedTransactionCurrencies { get; set; }
 
         public Shopper? Shopper { get; set; }
