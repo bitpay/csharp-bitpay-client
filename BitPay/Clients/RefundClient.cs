@@ -40,7 +40,7 @@ namespace BitPay.Clients
         public async Task<Refund> Create(Refund refundToCreate)
         {
             if (refundToCreate == null) throw new MissingFieldException(nameof(refundToCreate));
-            if (refundToCreate.Amount == 0) throw new RefundCreationException(null, "Wrong refund Amount");
+            if (refundToCreate.Amount == 0) throw new RefundCreationException("Wrong refund Amount");
             
             try
             {
@@ -60,7 +60,7 @@ namespace BitPay.Clients
                 var json = JsonConvert.SerializeObject(parameters);
                 var response = await _bitPayClient.Post("refunds", json, true).ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Refund>(responseString);
+                return JsonConvert.DeserializeObject<Refund>(responseString)!;
             }
             catch (Exception ex)
             {
@@ -88,7 +88,7 @@ namespace BitPay.Clients
                 var response = await _bitPayClient.Get("refunds/" + refundId, parameters)
                     .ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Refund>(responseString);
+                return JsonConvert.DeserializeObject<Refund>(responseString)!;
             }
             catch (Exception ex)
             {
@@ -116,7 +116,7 @@ namespace BitPay.Clients
                 var response = await _bitPayClient.Get("refunds/guid/" + refundGuid, parameters)
                     .ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Refund>(responseString);
+                return JsonConvert.DeserializeObject<Refund>(responseString)!;
             }
             catch (Exception ex)
             {
@@ -145,7 +145,7 @@ namespace BitPay.Clients
                 var response = await _bitPayClient.Get("refunds", parameters)
                     .ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<List<Refund>>(responseString);
+                return JsonConvert.DeserializeObject<List<Refund>>(responseString)!;
             }
             catch (Exception ex)
             {
@@ -177,7 +177,7 @@ namespace BitPay.Clients
                 var json = JsonConvert.SerializeObject(parameters);
                 var response = await _bitPayClient.Put("refunds/" + refundId, json).ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Refund>(responseString);
+                return JsonConvert.DeserializeObject<Refund>(responseString)!;
             }
             catch (Exception ex)
             {
@@ -209,7 +209,7 @@ namespace BitPay.Clients
                 var json = JsonConvert.SerializeObject(parameters);
                 var response = await _bitPayClient.Put("refunds/guid/" + refundGuid, json).ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Refund>(responseString);
+                return JsonConvert.DeserializeObject<Refund>(responseString)!;
             }
             catch (Exception ex)
             {
@@ -238,7 +238,7 @@ namespace BitPay.Clients
 
                 var response = await _bitPayClient.Delete("refunds/" + refundId, parameters).ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Refund>(responseString);
+                return JsonConvert.DeserializeObject<Refund>(responseString)!;
             }
             catch (BitPayException ex)
             {
@@ -271,7 +271,7 @@ namespace BitPay.Clients
 
                 var response = await _bitPayClient.Delete("refunds/guid/" + refundGuid, parameters).ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Refund>(responseString);
+                return JsonConvert.DeserializeObject<Refund>(responseString)!;
             }
             catch (BitPayException ex)
             {
@@ -306,10 +306,10 @@ namespace BitPay.Clients
                 var response = await _bitPayClient.Post("refunds/" + refundId + "/notifications", json, true)
                     .ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
+                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString)!;
 
                 return "success".Equals(
-                    responseObject.GetValue("status", StringComparison.Ordinal).ToString(),
+                    responseObject.GetValue("status", StringComparison.Ordinal)?.ToString(),
                     StringComparison.OrdinalIgnoreCase
                     );
             }

@@ -6,29 +6,40 @@ using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace BitPay.Converters;
-
-public class DateStringConverter : DateTimeConverterBase
+namespace BitPay.Converters
 {
-    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    public class DateStringConverter : DateTimeConverterBase
     {
-        if (writer == null)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            throw new ArgumentNullException(nameof(writer));
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            if (value == null)
+            {
+                writer.WriteNull();
+                return;
+            }
+
+            var date = ((DateTime)value).ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffffffzzz");
+            writer.WriteRawValue($"\"{date}\"");
         }
 
-        var date = ((DateTime)value).ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffffffzzz");
-        writer.WriteRawValue($"\"{date}\"");
-    }
-
-    public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
-        JsonSerializer serializer)
-    {
-        if (reader == null)
+        public override object? ReadJson(
+            JsonReader reader,
+            Type objectType,
+            object? existingValue,
+            JsonSerializer serializer
+        )
         {
-            throw new ArgumentNullException(nameof(reader));
-        }
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
 
-        return (DateTime?)reader.Value;
+            return (DateTime?)reader.Value;
+        }
     }
 }

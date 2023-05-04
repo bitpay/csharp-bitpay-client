@@ -16,7 +16,7 @@ namespace BitPay.Exceptions
         {
         }
 
-        public ClientAuthorizationException(Exception ex, string apiCode = "000000")
+        public ClientAuthorizationException(Exception ex, string? apiCode = "000000")
             : base(BitPayCode, BitPayMessage, ex, apiCode)
         {
         }

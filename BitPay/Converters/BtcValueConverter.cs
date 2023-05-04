@@ -5,29 +5,34 @@ using System;
 
 using Newtonsoft.Json;
 
-namespace BitPay.Converters;
-
-public class BtcValueConverter : JsonConverter
+namespace BitPay.Converters
 {
-    public override bool CanConvert(Type objectType)
+    public class BtcValueConverter : JsonConverter
     {
-        return true;
-    }
-
-    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
-        JsonSerializer serializer)
-    {
-        if (reader == null)
+        public override bool CanConvert(Type objectType)
         {
-            throw new ArgumentNullException(nameof(reader));
+            return true;
         }
 
-        // When the server returns null write a 0.
-        return reader.Value == null ? 0.0 : Convert.ToDouble(reader.Value);
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object ReadJson(
+            JsonReader reader,
+            Type objectType,
+            object? existingValue,
+            JsonSerializer serializer
+        )
+        {
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            // When the server returns null write a 0.
+            return reader.Value == null ? 0.0 : Convert.ToDouble(reader.Value);
+        }
     }
 }

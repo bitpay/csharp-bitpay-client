@@ -14,15 +14,20 @@ namespace BitPay
 {
     public static class KeyUtils
     {
-        private static string PrivateKeyFile;
+        private static string? PrivateKeyFile;
         private const string Alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
         private static readonly char[] HexArray = "0123456789abcdef".ToCharArray();
 
-        private static string _derivedSin;
+        private static string? _derivedSin;
         private static readonly BigInteger Base = BigInteger.ValueOf(58);
 
-        public static bool PrivateKeyExists(string privateKeyFile)
+        public static bool PrivateKeyExists(string? privateKeyFile)
         {
+            if (privateKeyFile == null)
+            {
+                return false;
+            }
+            
             PrivateKeyFile = privateKeyFile;
             
             return File.Exists(privateKeyFile);
@@ -34,8 +39,13 @@ namespace BitPay
             return new EcKey();
         }
         
-        public static EcKey CreateEcKeyFromString(string privateKey)
+        public static EcKey CreateEcKeyFromString(string? privateKey)
         {
+            if (privateKey == null)
+            { 
+                throw new ArgumentNullException(nameof(privateKey));
+            }
+            
             var pkey = new BigInteger(privateKey);
             var key = new EcKey(pkey);
             return key;
@@ -57,6 +67,11 @@ namespace BitPay
             //     return key;
             // }
                 
+            if (PrivateKeyFile == null)
+            { 
+                throw new ArgumentNullException(nameof(PrivateKeyFile));
+            }
+            
             byte[] file = File.ReadAllBytes(PrivateKeyFile);
             var key = EcKey.FromAsn1(file);
             return key;
@@ -72,9 +87,9 @@ namespace BitPay
             var bytes = ecKey.ToAsn1();
             if (!string.IsNullOrEmpty(Path.GetDirectoryName(PrivateKeyFile)) && !Directory.Exists(Path.GetDirectoryName(PrivateKeyFile)))
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(PrivateKeyFile));
+                Directory.CreateDirectory(Path.GetDirectoryName(PrivateKeyFile)!);
             }
-            using (var fs = new FileStream(PrivateKeyFile, FileMode.Create, FileAccess.Write))
+            using (var fs = new FileStream(PrivateKeyFile!, FileMode.Create, FileAccess.Write))
             {
 #pragma warning disable CA1835
                 await fs.WriteAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
@@ -93,12 +108,14 @@ namespace BitPay
             if (_derivedSin != null) return _derivedSin;
             // Get sha256 hash and then the RIPEMD-160 hash of the public key (this call gets the result in one step).
             var pubKey = ecKey.GetPublicKey();
-            using var sha256Managed = SHA256.Create();
-            var hash = sha256Managed.ComputeHash(pubKey);
-            var ripeMd160Digest = new RipeMD160Digest();
-            ripeMd160Digest.BlockUpdate(hash, 0, hash.Length);
             var output = new byte[20];
-            ripeMd160Digest.DoFinal(output, 0);
+            using (var sha256Managed = SHA256.Create())
+            {
+                var hash = sha256Managed.ComputeHash(pubKey);
+                var ripeMd160Digest = new RipeMD160Digest();
+                ripeMd160Digest.BlockUpdate(hash, 0, hash.Length);
+                ripeMd160Digest.DoFinal(output, 0);
+            }
 
             var pubKeyHash = output;
 
@@ -175,9 +192,11 @@ namespace BitPay
         /// </summary>
         private static byte[] DoubleDigest(byte[] input, int offset, int length)
         {
-            using var algorithm = SHA256.Create();
-            var first = algorithm.ComputeHash(input, offset, length);
-            return algorithm.ComputeHash(first);
+            using (var algorithm = SHA256.Create())
+            {
+                var first = algorithm.ComputeHash(input, offset, length);
+                return algorithm.ComputeHash(first);
+            }
         }
 
         /// <summary>
@@ -186,7 +205,7 @@ namespace BitPay
         /// <param name="ecKey">The key object to sign with</param>
         /// <param name="input">The string to be signed</param>
         /// <returns>The signature</returns>
-        public static string Sign(EcKey ecKey, string input)
+        public static string Sign(EcKey? ecKey, string input)
         {
             if (ecKey == null)
             {
@@ -272,7 +291,7 @@ namespace BitPay
             }
         }
 
-        public static string BytesToHex(byte[] bytes)
+        public static string BytesToHex(byte[]? bytes)
         {
             if (bytes == null)
             {

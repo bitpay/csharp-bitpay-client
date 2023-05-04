@@ -45,7 +45,7 @@ namespace BitPay.Clients
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
-                    });
+                    })!;
             }
             catch (BitPayException ex)
             {
@@ -84,7 +84,7 @@ namespace BitPay.Clients
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
-                    });
+                    })!;
             }
             catch (BitPayException ex)
             {
@@ -117,9 +117,9 @@ namespace BitPay.Clients
                 var response = await _bitPayClient.Delete("payouts/" + payoutId, parameters)
                     .ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
+                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString)!;
                 return "success".Equals(
-                    responseObject.GetValue("status", StringComparison.Ordinal).ToString(),
+                    responseObject.GetValue("status", StringComparison.Ordinal)?.ToString(),
                     StringComparison.OrdinalIgnoreCase
                 ) ;
             }
@@ -146,7 +146,7 @@ namespace BitPay.Clients
         /// <returns>A list of BitPay Payout objects.</returns>
         /// <throws>PayoutQueryException PayoutQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<Payout>> GetPayouts(Dictionary<string, dynamic> filters)
+        public async Task<List<Payout>> GetPayouts(Dictionary<string, dynamic?> filters)
         {
             if (filters == null) throw new MissingFieldException(nameof(filters));
             
@@ -160,7 +160,7 @@ namespace BitPay.Clients
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
-                    });
+                    })!;
             }
             catch (BitPayException ex)
             {
@@ -194,9 +194,9 @@ namespace BitPay.Clients
                 var response = await _bitPayClient.Post("payouts/" + payoutId + "/notifications", json, true)
                     .ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString);
+                JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString)!;
                 return "success".Equals(
-                    responseObject.GetValue("status", StringComparison.Ordinal).ToString(),
+                    responseObject.GetValue("status", StringComparison.Ordinal)?.ToString(),
                     StringComparison.OrdinalIgnoreCase
                     ) ;
             }

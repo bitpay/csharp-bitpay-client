@@ -17,7 +17,7 @@ namespace BitPay.Models.Payout
 
         private string _currency = "";
         private string _ledgerCurrency = "";
-        private dynamic _exchangeRates;
+        private dynamic? _exchangeRates;
 
         /// <summary>
         ///     Constructor, create an empty Payout object.
@@ -61,7 +61,7 @@ namespace BitPay.Models.Payout
 
         //[JsonProperty(PropertyName = "guid")] public string Guid { get; set; }
 
-        [JsonProperty(PropertyName = "token")] public string Token { get; set; }
+        [JsonProperty(PropertyName = "token")] public string? Token { get; set; }
 
         // Required fields
         //
@@ -100,13 +100,13 @@ namespace BitPay.Models.Payout
         public DateTime? EffectiveDate { get; set; }
 
         [JsonProperty(PropertyName = "transactions")]
-        public List<PayoutInstructionTransaction> Transactions { get; set; }
+        public List<PayoutInstructionTransaction>? Transactions { get; set; }
 
         // Optional fields
         //
 
         [JsonProperty(PropertyName = "reference")]
-        public string Reference { get; set; }
+        public string? Reference { get; set; }
 
         [JsonProperty(PropertyName = "notificationEmail")]
         public string NotificationEmail { get; set; }
@@ -117,23 +117,23 @@ namespace BitPay.Models.Payout
         // Response fields
         //
 
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty(PropertyName = "recipientId")]
-        public string RecipientId { get; set; }
+        public string? RecipientId { get; set; }
 
         [JsonProperty(PropertyName = "shopperId")]
-        public string ShopperId { get; set; }
+        public string? ShopperId { get; set; }
 
-        public string Account { get; set; }
+        public string? Account { get; set; }
 
-        public string SupportPhone { get; set; }
+        public string? SupportPhone { get; set; }
 
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
-        public string Label { get; set; }
+        public string? Label { get; set; }
 
         public decimal? PercentFee { get; set; }
 
@@ -146,7 +146,7 @@ namespace BitPay.Models.Payout
         public decimal? Btc { get; set; }
 
         [JsonProperty(PropertyName = "message")]
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
         [JsonConverter(typeof(DateStringConverter))]
         public DateTime? RequestDate { get; set; }
@@ -154,10 +154,10 @@ namespace BitPay.Models.Payout
         [JsonConverter(typeof(DateStringConverter))]
         public DateTime? DateExecuted { get; set; }
 
-        public dynamic ExchangeRates
+        public dynamic? ExchangeRates
         {
             get => _exchangeRates;
-            set => _exchangeRates = JsonConvert.DeserializeObject(value.ToString(Formatting.None));
+            set => _exchangeRates = JsonConvert.DeserializeObject(value?.ToString(Formatting.None));
         }
 
         // Private methods

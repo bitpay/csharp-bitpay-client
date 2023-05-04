@@ -21,9 +21,9 @@ namespace BitPay.Models.Payout
         // API fields
         //
 
-        [JsonProperty(PropertyName = "guid")] public string ResourceGuid { get; set; }
+        [JsonProperty(PropertyName = "guid")] public string? ResourceGuid { get; set; }
 
-        [JsonProperty(PropertyName = "token")] public string Token { get; set; }
+        [JsonProperty(PropertyName = "token")] public string? Token { get; set; }
 
         // Required fields
         //

@@ -48,7 +48,7 @@ namespace BitPay.Clients
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
-                    });
+                    })!;
                 return entries;
             }
             catch (BitPayException ex)
@@ -84,7 +84,7 @@ namespace BitPay.Clients
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
-                    });
+                    })!;
                 return ledgers;
             }
             catch (BitPayException ex)

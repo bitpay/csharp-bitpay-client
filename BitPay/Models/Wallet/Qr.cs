@@ -12,6 +12,12 @@ namespace BitPay.Models.Wallet
         [JsonProperty(PropertyName = "collapsed")]
         public bool Collapsed { get; set; }
 
+        public Qr(string type, bool collapsed)
+        {
+            Type = type;
+            Collapsed = collapsed;
+        }
+
         public bool ShouldSerializeType()
         {
             return !string.IsNullOrEmpty(Type); 

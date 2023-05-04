@@ -15,7 +15,7 @@ namespace BitPay.Clients
 {
     public static class HttpResponseParser
     {
-        public static async Task<string> ResponseToJsonString(HttpResponseMessage response)
+        public static async Task<string> ResponseToJsonString(HttpResponseMessage? response)
         {
             if (response == null)
                 throw new BitPayApiCommunicationException(new ArgumentNullException(nameof(response)));
@@ -41,8 +41,8 @@ namespace BitPay.Clients
                 else
                     jObj = new JObject();
 
-                JToken value;
-                JToken code;
+                JToken? value;
+                JToken? code;
 
                 if (jObj.TryGetValue("status", out value))
                 {
@@ -50,7 +50,12 @@ namespace BitPay.Clients
                    {
                        jObj.TryGetValue("code", out code);
                        jObj.TryGetValue("message", out value);
-                       throw new BitPayApiCommunicationException(code.ToString(), value.ToString());
+                       if (code == null)
+                       {
+                           throw new BitPayApiCommunicationException(value!.ToString());
+                       }
+                       
+                       throw new BitPayApiCommunicationException(code.ToString(), value!.ToString());
                    }
                 }
 
@@ -72,7 +77,7 @@ namespace BitPay.Clients
                     foreach (var errorItem in errors)
                     {
                         var error = errorItem.ToObject<JProperty>();
-                        message += "\n" + error.Name + ": " + error.Value;
+                        message += "\n" + error?.Name + ": " + error?.Value;
                     }
 
                     throw new BitPayApiCommunicationException(message);
