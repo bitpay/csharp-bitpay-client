@@ -9,7 +9,7 @@ namespace BitPay.Models.Invoice
     {
         public int? Amount { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [JsonProperty(PropertyName = "isFee")]
         public bool? IsFee { get; set; }

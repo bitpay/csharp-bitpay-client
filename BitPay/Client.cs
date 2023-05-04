@@ -25,10 +25,10 @@ namespace BitPay
 {
     public class Client
     {
-        private IBitPayClient _bitPayClient;
-        private AccessTokens _accessTokens;
-        private IGuidGenerator _guidGenerator;
-        private string _identity;
+        private readonly IBitPayClient _bitPayClient;
+        private readonly AccessTokens _accessTokens;
+        private readonly IGuidGenerator _guidGenerator = new UuidGenerator();
+        private string? _identity;
 
         /// <summary>
         ///     Create Client class for POS.
@@ -38,7 +38,8 @@ namespace BitPay
         {
             if (token == null) throw new ArgumentNullException(nameof(token));
             
-            InitPosClient(token, Environment.Prod);
+            _accessTokens = GetAccessTokens(token);
+            _bitPayClient = GetDefaultBitPayClient(Environment.Prod);
         }
 
         /// <summary>
@@ -50,7 +51,9 @@ namespace BitPay
         {
             if (token == null) 
                 throw new ArgumentNullException(nameof(token));
-            InitPosClient(token, environment);
+
+            _accessTokens = GetAccessTokens(token);
+            _bitPayClient = GetDefaultBitPayClient(environment);
         }
 
         /// <summary>
@@ -77,7 +80,6 @@ namespace BitPay
 
             _accessTokens = accessTokens;
             _bitPayClient = new BitPayClient(httpClient, baseUrl, ecKey);
-            _guidGenerator = new UuidGenerator();
             CreateIdentity(ecKey);
         }
 
@@ -101,7 +103,6 @@ namespace BitPay
             var httpClient = GetHttpClient(baseUrl);
 
             _bitPayClient = new BitPayClient(httpClient, baseUrl, ecKey);
-            _guidGenerator = new UuidGenerator();
             CreateIdentity(ecKey);
         }
 
@@ -170,7 +171,7 @@ namespace BitPay
         /// <returns>A new invoice object returned from the server.</returns>
         /// <throws>InvoiceCreationException InvoiceCreationException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<Invoice> CreateInvoice(Invoice invoice, string invoiceGuid = null)
+        public async Task<Invoice> CreateInvoice(Invoice invoice, string? invoiceGuid = null)
         {
             var invoiceClient = CreateInvoiceClient();
             var facade = GetFacadeBasedOnAccessToken();
@@ -220,7 +221,7 @@ namespace BitPay
         /// <throws>InvoiceQueryException InvoiceQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<Invoice>> GetInvoices(DateTime dateStart, DateTime dateEnd,
-            Dictionary<string, dynamic> parameters = null)
+            Dictionary<string, dynamic?>? parameters = null)
         {
             return await CreateInvoiceClient().GetInvoices(dateStart, dateEnd, parameters).ConfigureAwait(false);
         }
@@ -232,7 +233,7 @@ namespace BitPay
         /// <param name="parameters">Available parameters: buyerEmail, buyerSms, smsCode, autoVerify</param>
         /// <returns>A BitPay updated Invoice object.</returns>
         /// <throws>InvoiceUpdateException InvoiceUpdateException class</throws>
-        public async Task<Invoice> UpdateInvoice(string invoiceId, Dictionary<string, dynamic> parameters)
+        public async Task<Invoice> UpdateInvoice(string invoiceId, Dictionary<string, dynamic?> parameters)
         {
             return await CreateInvoiceClient().UpdateInvoice(invoiceId, parameters).ConfigureAwait(false);
         }
@@ -442,7 +443,7 @@ namespace BitPay
         /// <returns>A list of bill objects.</returns>
         /// <throws>BillQueryException BillQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<Bill>> GetBills(string status = null)
+        public async Task<List<Bill>> GetBills(string? status = null)
         {
             return await CreateBillClient().GetBills(status).ConfigureAwait(false);
         }
@@ -568,7 +569,7 @@ namespace BitPay
         /// <returns>A list of BitPayRecipient objects.</returns>
         /// <throws>PayoutRecipientQueryException PayoutRecipientQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<PayoutRecipient>> GetPayoutRecipients(string status = null, int limit = 100,
+        public async Task<List<PayoutRecipient>> GetPayoutRecipients(string? status = null, int limit = 100,
             int offset = 0)
         {
             return await CreatePayoutRecipientClient().GetByFilters(status, limit, offset).ConfigureAwait(false);
@@ -661,7 +662,7 @@ namespace BitPay
         /// <returns>A list of BitPay Payout objects.</returns>
         /// <throws>PayoutQueryException PayoutQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<Payout>> GetPayouts(Dictionary<string, dynamic> filters)
+        public async Task<List<Payout>> GetPayouts(Dictionary<string, dynamic?> filters)
         {
             return await CreatePayoutClient().GetPayouts(filters).ConfigureAwait(false);
         }
@@ -702,7 +703,7 @@ namespace BitPay
         /// <returns>A list of BitPay Settlement objects</returns>
         /// <throws>SettlementQueryException SettlementQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<Settlement>> GetSettlements(Dictionary<string, dynamic> filters)
+        public async Task<List<Settlement>> GetSettlements(Dictionary<string, dynamic?> filters)
         {
             return await CreateSettlementClient().GetByFilters(filters).ConfigureAwait(false);
         }
@@ -839,16 +840,20 @@ namespace BitPay
         {
             _identity = KeyUtils.DeriveSin(ecKey);
         }
+        
+        private AccessTokens GetAccessTokens(PosToken token)
+        {
+            var accessTokens = new AccessTokens();
+            accessTokens.AddPos(token.Value());
+            
+            return accessTokens;
+        }
 
-        private void InitPosClient(PosToken token, Environment environment)
+        private IBitPayClient GetDefaultBitPayClient(Environment environment)
         {
             var baseUrl = GetBaseUrl(environment);
             var httpClient = GetHttpClient(baseUrl);
-
-            _accessTokens = new AccessTokens();
-            _accessTokens.AddPos(token.Value());
-            _bitPayClient = new BitPayClient(httpClient, baseUrl, null);
-            _guidGenerator = new UuidGenerator();
+            return new BitPayClient(httpClient, baseUrl, null);
         }
 
         private static HttpClient GetHttpClient(string baseUrl)

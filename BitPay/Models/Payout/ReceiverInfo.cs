@@ -7,7 +7,6 @@ namespace BitPay.Models.Payout
 {
     public class ReceiverInfo
     {
-   
         [JsonProperty(PropertyName = "name")]
         public string Name { get; set; }
 
@@ -34,5 +33,28 @@ namespace BitPay.Models.Payout
 
         [JsonProperty(PropertyName = "phone")]
         public string Phone { get; set; }
+        
+        public ReceiverInfo(
+            string name,
+            string address1,
+            string address2,
+            string locality,
+            string region,
+            string postalCode,
+            string country,
+            string email,
+            string phone
+        )
+        {
+            Name = name;
+            Address1 = address1;
+            Address2 = address2;
+            Locality = locality;
+            Region = region;
+            PostalCode = postalCode;
+            Country = country;
+            Email = email;
+            Phone = phone;
+        }
     }
 }

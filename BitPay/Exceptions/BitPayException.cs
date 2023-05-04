@@ -14,7 +14,7 @@ namespace BitPay.Exceptions
     {
         private const string BitPayMessage = "Unexpected Bitpay exeption";
         private readonly string _bitPayCode = "BITPAY-GENERIC";
-        private readonly string _apiCode;
+        private readonly string? _apiCode;
 
         protected string BitPayCode
         {
@@ -24,7 +24,7 @@ namespace BitPay.Exceptions
             }
         }
 
-        public string ApiCode
+        public string? ApiCode
         {
             get
             {
@@ -32,7 +32,7 @@ namespace BitPay.Exceptions
             }
         }
 #pragma warning disable CA1711
-        public Exception Ex { get; }
+        public Exception? Ex { get; }
 #pragma warning restore CA1711
 
         public BitPayException() : base(BitPayMessage)
@@ -64,7 +64,7 @@ namespace BitPay.Exceptions
         /// <param name="message">The message text for the exception.</param>
         /// <param name="cause">The root cause of this exception.</param>
         /// <param name="apiCode">The API exception code to throw.</param>
-        public BitPayException(string bitPayCode, string message, Exception cause, string apiCode) : base(message, cause)
+        public BitPayException(string bitPayCode, string message, Exception cause, string? apiCode) : base(message, cause)
         {
             _bitPayCode = bitPayCode;
             _apiCode = apiCode;
@@ -89,8 +89,8 @@ namespace BitPay.Exceptions
         protected BitPayException(SerializationInfo serializationInfo, StreamingContext streamingContext) 
             : base(serializationInfo, streamingContext)
         {
-            _bitPayCode = (string)serializationInfo.GetValue(nameof(_bitPayCode), typeof(int));
-            _apiCode = (string)serializationInfo.GetValue(nameof(_apiCode), typeof(int));
+            _bitPayCode = (string)serializationInfo.GetValue(nameof(_bitPayCode), typeof(int))!;
+            _apiCode = (string?)serializationInfo.GetValue(nameof(_apiCode), typeof(int));
         }
     }
 }

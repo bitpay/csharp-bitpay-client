@@ -16,7 +16,7 @@ namespace BitPay.Exceptions
         {
         }
 
-        public PayoutNotificationException(Exception ex, string apiCode = "000000") 
+        public PayoutNotificationException(Exception ex, string? apiCode = "000000") 
             : base(BitPayCode, BitPayMessage, ex, apiCode)
         {
         }

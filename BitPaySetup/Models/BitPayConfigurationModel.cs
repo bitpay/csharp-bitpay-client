@@ -21,8 +21,8 @@ namespace BitPaySetup.Models
             payout = "";
         }
 
-        public string merchant { get; set; }
-        public string payout { get; set; }
+        public string? merchant { get; set; }
+        public string? payout { get; set; }
     }
 
     public class Test

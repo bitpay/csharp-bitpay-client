@@ -213,6 +213,29 @@ namespace BitPay.Models
         public const string ZMW = "ZMW";
         public const string ZWL = "ZWL";
 
+        public Currency(
+            string code,
+            string symbol,
+            int precision,
+            string name,
+            string plural,
+            string alts,
+            decimal minimum,
+            bool sanctioned,
+            decimal decimals
+        )
+        {
+            Code = code;
+            Symbol = symbol;
+            Precision = precision;
+            Name = name;
+            Plural = plural;
+            Alts = alts;
+            Minimum = minimum;
+            Sanctioned = sanctioned;
+            Decimals = decimals;
+        }
+
         public static bool isValid(string value)
         {
             return typeof(Currency).GetMember(value).Length > 0;

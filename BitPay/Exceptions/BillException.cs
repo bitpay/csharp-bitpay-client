@@ -24,7 +24,7 @@ namespace BitPay.Exceptions
         {
         }
 
-        public BillException(string bitPayCode, string message, Exception cause, string apiCode = "000000")
+        public BillException(string bitPayCode, string message, Exception cause, string? apiCode = "000000")
             : base(bitPayCode, message, cause, apiCode)
         {
         }

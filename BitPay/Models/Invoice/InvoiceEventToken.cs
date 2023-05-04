@@ -17,5 +17,12 @@ namespace BitPay.Models.Invoice
         
         [JsonProperty(PropertyName = "actions")]
         public List<string> Actions { get; set; }
+
+        public InvoiceEventToken(string token, List<string> events, List<string> actions)
+        {
+            Token = token;
+            Events = events;
+            Actions = actions;
+        }
     }
 }
