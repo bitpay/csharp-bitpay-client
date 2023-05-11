@@ -1,0 +1,15 @@
+{
+  "name": "BitPay",
+  "entrypoint": "/bin/bash",
+  "commands": {
+    "setup": [
+      "dotnet run --project BitPaySetup --framework net7.0"
+    ],
+    "setup-6": [
+      "dotnet run --project BitPaySetup --framework net6.0"
+    ],
+    "setup-48": [
+      "dotnet run --project BitPaySetup --framework net48"
+    ]
+  }
+}
