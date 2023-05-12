@@ -32,12 +32,11 @@ namespace BitPay.Clients
         /// <param name="invoice">An invoice request object.</param>
         /// <param name="facade">The facade to create the invoice against</param>
         /// <param name="signRequest">Allow unsigned request</param>
-        /// <param name="invoiceGuid">The guid for the requested invoice.</param>
         /// <returns>A new invoice object returned from the server.</returns>
         /// <throws>InvoiceCreationException InvoiceCreationException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Invoice> CreateInvoice(Invoice invoice, string facade = Facade.Merchant,
-            bool signRequest = true, string? invoiceGuid = null)
+            bool signRequest = true)
         {
             if (invoice == null)
             {
@@ -52,7 +51,7 @@ namespace BitPay.Clients
             try
             {
                 invoice.Token = _accessTokens.GetAccessToken(facade);
-                invoice.ResourceGuid = invoiceGuid ?? _guidGenerator.Execute();
+                invoice.ResourceGuid ??= _guidGenerator.Execute();
                 var json = JsonConvert.SerializeObject(invoice);
                 var response = await _bitPayClient.Post("invoices", json, signRequest).ConfigureAwait(false);
                 var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
