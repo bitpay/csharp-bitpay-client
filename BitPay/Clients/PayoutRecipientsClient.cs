@@ -40,10 +40,7 @@ namespace BitPay.Clients
             try
             {
                 recipients.Token = _accessTokens.GetAccessToken(Facade.Payout);
-                if (recipients.ResourceGuid == null)
-                {
-                    recipients.ResourceGuid = _guidGenerator.Execute();
-                }
+                recipients.ResourceGuid ??= _guidGenerator.Execute();
 
                 var json = JsonConvert.SerializeObject(recipients);
                 var response = await _bitPayClient.Post("recipients", json, true)

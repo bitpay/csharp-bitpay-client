@@ -167,17 +167,31 @@ namespace BitPay
         ///     Create an invoice using the specified facade.
         /// </summary>
         /// <param name="invoice">An invoice request object.</param>
-        /// <param name="invoiceGuid">The guid for the requested invoice.</param>
         /// <returns>A new invoice object returned from the server.</returns>
         /// <throws>InvoiceCreationException InvoiceCreationException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<Invoice> CreateInvoice(Invoice invoice, string? invoiceGuid = null)
+        public async Task<Invoice> CreateInvoice(Invoice invoice)
         {
             var invoiceClient = CreateInvoiceClient();
             var facade = GetFacadeBasedOnAccessToken();
             var signRequest = IsSignRequestFacade(facade);
 
-            return await invoiceClient.CreateInvoice(invoice, facade, signRequest, invoiceGuid)
+            return await invoiceClient.CreateInvoice(invoice, facade, signRequest)
+                .ConfigureAwait(false);
+        }
+        
+        /// <summary>
+        ///     Create an invoice using the specified facade.
+        /// </summary>
+        /// <param name="invoice">An invoice request object.</param>
+        /// <param name="facade">The facade to create the invoice against</param>
+        /// <param name="signRequest">Allow unsigned request</param>
+        /// <returns>A new invoice object returned from the server.</returns>
+        /// <throws>InvoiceCreationException InvoiceCreationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
+        public async Task<Invoice> CreateInvoice(Invoice invoice, string facade, bool signRequest)
+        {
+            return await CreateInvoiceClient().CreateInvoice(invoice, facade, signRequest)
                 .ConfigureAwait(false);
         }
 
@@ -195,6 +209,20 @@ namespace BitPay
 
             return await CreateInvoiceClient().GetInvoice(invoiceId, facade, signRequest).ConfigureAwait(false);
         }
+        
+        /// <summary>
+        ///     Retrieve an invoice by id and token.
+        /// </summary>
+        /// <param name="invoiceId">The id of the requested invoice.</param>
+        /// <param name="facade">The facade to create the invoice against</param>
+        /// <param name="signRequest">Allow unsigned request</param>
+        /// <returns>The invoice object retrieved from the server.</returns>
+        /// <throws>InvoiceQueryException InvoiceQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
+        public async Task<Invoice> GetInvoice(string invoiceId, string facade, bool signRequest)
+        {
+            return await CreateInvoiceClient().GetInvoice(invoiceId, facade, signRequest).ConfigureAwait(false);
+        }
 
         /// <summary>
         ///     Retrieve an invoice by guid.
@@ -208,6 +236,20 @@ namespace BitPay
             var facade = GetFacadeBasedOnAccessToken();
             var signRequest = IsSignRequestFacade(facade);
 
+            return await CreateInvoiceClient().GetInvoiceByGuid(invoiceGuid, facade, signRequest).ConfigureAwait(false);
+        }
+        
+        /// <summary>
+        ///     Retrieve an invoice by guid.
+        /// </summary>
+        /// <param name="invoiceGuid">The guid of the requested invoice.</param>
+        /// <param name="facade">The facade to create the invoice against</param>
+        /// <param name="signRequest">Allow unsigned request</param>
+        /// <returns>The invoice object retrieved from the server.</returns>
+        /// <throws>InvoiceQueryException InvoiceQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
+        public async Task<Invoice> GetInvoiceByGuid(string invoiceGuid, string facade, bool signRequest)
+        {
             return await CreateInvoiceClient().GetInvoiceByGuid(invoiceGuid, facade, signRequest).ConfigureAwait(false);
         }
 
@@ -420,6 +462,20 @@ namespace BitPay
 
             return await CreateBillClient().CreateBill(bill, facade, signRequest).ConfigureAwait(false);
         }
+        
+        /// <summary>
+        ///     Create a bill.
+        /// </summary>
+        /// <param name="bill">An invoice request object.</param>
+        /// <param name="facade">The facade to create the invoice against</param>
+        /// <param name="signRequest">Allow unsigned request</param>
+        /// <returns>A new bill object returned from the server.</returns>
+        /// <throws>BillCreationException BillCreationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
+        public async Task<Bill> CreateBill(Bill bill, string facade, bool signRequest)
+        {
+            return await CreateBillClient().CreateBill(bill, facade, signRequest).ConfigureAwait(false);
+        }
 
         /// <summary>
         ///     Retrieve a bill by id.
@@ -433,6 +489,20 @@ namespace BitPay
             var facade = GetFacadeBasedOnAccessToken();
             var signRequest = IsSignRequestFacade(facade);
 
+            return await CreateBillClient().GetBill(billId, facade, signRequest).ConfigureAwait(false);
+        }
+        
+        /// <summary>
+        ///     Retrieve a bill by id.
+        /// </summary>
+        /// <param name="billId">The id of the requested bill.</param>
+        /// <param name="facade">The facade to create the invoice against</param>
+        /// <param name="signRequest">Allow unsigned request</param>
+        /// <returns>The bill object retrieved from the server.</returns>
+        /// <throws>BillQueryException BillQueryException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
+        public async Task<Bill> GetBill(string billId, string facade, bool signRequest)
+        {
             return await CreateBillClient().GetBill(billId, facade, signRequest).ConfigureAwait(false);
         }
 

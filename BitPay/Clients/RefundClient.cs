@@ -44,7 +44,7 @@ namespace BitPay.Clients
             
             try
             {
-                refundToCreate.ResourceGuid = refundToCreate.ResourceGuid ?? _guidGenerator.Execute();
+                refundToCreate.ResourceGuid ??= _guidGenerator.Execute();
                 var parameters = ResourceClientUtil.InitParams();
                 parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
                 parameters.Add("amount", refundToCreate.Amount);
