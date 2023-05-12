@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System.Collections.Generic;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Models
@@ -11,9 +15,9 @@ namespace BitPay.Models
         // API fields
         //
 
-        [JsonProperty(PropertyName = "guid")] public string Guid { get; set; }
+        [JsonProperty(PropertyName = "guid")] public string ResourceGuid { get; set; }
 
-        [JsonProperty(PropertyName = "nonce")] public long Nonce { get; set; }
+        [JsonProperty(PropertyName = "nonce")] public long? Nonce { get; set; }
 
         // Required fields
         //
@@ -23,31 +27,37 @@ namespace BitPay.Models
         // Optional fields
 
         [JsonProperty(PropertyName = "pairingCode")]
-        public string PairingCode { get; set; }
+        public string? PairingCode { get; set; }
 
         [JsonProperty(PropertyName = "facade")]
-        public string Facade { get; set; }
+        public string? Facade { get; set; }
 
-        [JsonProperty(PropertyName = "label")] public string Label { get; set; }
+        [JsonProperty(PropertyName = "label")] public string? Label { get; set; }
 
-        [JsonProperty(PropertyName = "count")] public int Count { get; set; }
+        [JsonProperty(PropertyName = "count")] public int? Count { get; set; }
 
         // Response fields
         //
 
         [JsonProperty(PropertyName = "pairingExpiration")]
-        public long PairingExpiration { get; set; }
+        public long? PairingExpiration { get; set; }
 
         [JsonProperty(PropertyName = "policies")]
-        public List<Policy> Policies { get; set; }
+        public List<Policy>? Policies { get; set; }
 
         [JsonProperty(PropertyName = "resource")]
-        public string Resource { get; set; }
+        public string? Resource { get; set; }
 
-        [JsonProperty(PropertyName = "token")] public string Value { get; set; }
+        [JsonProperty(PropertyName = "token")] public string? Value { get; set; }
 
         [JsonProperty(PropertyName = "dateCreated")]
-        public long DateCreated { get; set; }
+        public long? DateCreated { get; set; }
+
+        public Token(string id, string resourceGuid)
+        {
+            ResourceGuid = resourceGuid;
+            Id = id;
+        }
 
         public bool ShouldSerializeGuid()
         {
@@ -56,7 +66,7 @@ namespace BitPay.Models
 
         public bool ShouldSerializeNonce()
         {
-            return Nonce != 0;
+            return Nonce != null && Nonce != 0;
         }
 
         public bool ShouldSerializeId()
@@ -81,7 +91,7 @@ namespace BitPay.Models
 
         public bool ShouldSerializeCount()
         {
-            return Count != 0;
+            return Count != null && Count != 0;
         }
 
         public bool ShouldSerializePairingExpiration()

@@ -1,5 +1,10 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System.Collections.Generic;
+
 using BitPay.Exceptions;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Models.Bill
@@ -7,13 +12,6 @@ namespace BitPay.Models.Bill
     public class Bill
     {
         private string _currency = "";
-
-        /// <summary>
-        ///     Creates an uninitialized bill request object.
-        /// </summary>
-        public Bill()
-        {
-        }
 
         // Creates a minimal bill request object.
         public Bill(string number, string currency, string email, List<Item> items)
@@ -28,7 +26,7 @@ namespace BitPay.Models.Bill
         //
 
         [JsonProperty(PropertyName = "token")]
-        public string Token { get; set; }
+        public string? Token { get; set; }
 
         // Required fields
         //
@@ -59,34 +57,34 @@ namespace BitPay.Models.Bill
         public string Number { get; set; }
         
         [JsonProperty(PropertyName = "name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonProperty(PropertyName = "address1")]
-        public string Address1 { get; set; }
+        public string? Address1 { get; set; }
 
         [JsonProperty(PropertyName = "address2")]
-        public string Address2 { get; set; }
+        public string? Address2 { get; set; }
 
         [JsonProperty(PropertyName = "city")]
-        public string City { get; set; }
+        public string? City { get; set; }
 
         [JsonProperty(PropertyName = "state")]
-        public string State { get; set; }
+        public string? State { get; set; }
 
         [JsonProperty(PropertyName = "zip")]
-        public string Zip { get; set; }
+        public string? Zip { get; set; }
         
         [JsonProperty(PropertyName = "country")]
-        public string Country { get; set; }
+        public string? Country { get; set; }
 
         [JsonProperty(PropertyName = "cc")]
-        public List<string> Cc { get; set; }
+        public List<string>? Cc { get; set; }
 
         [JsonProperty(PropertyName = "phone")]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
         [JsonProperty(PropertyName = "dueDate")]
-        public string DueDate { get; set; }
+        public string? DueDate { get; set; }
 
         [JsonProperty(PropertyName = "passProcessingFee")]
         public bool PassProcessingFee { get; set; }
@@ -94,15 +92,15 @@ namespace BitPay.Models.Bill
         // Response fields
         //
 
-        public string Status { get; set; }
+        public string? Status { get; set; }
         
-        public string Url { get; set; }
+        public string? Url { get; set; }
         
-        public string CreatedDate { get; set; }
+        public string? CreatedDate { get; set; }
         
-        public string Id { get; set; }
+        public string? Id { get; set; }
         
-        public string Merchant { get; set; }
+        public string? Merchant { get; set; }
         
         
         public bool ShouldSerializeItems()

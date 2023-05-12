@@ -1,29 +1,37 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
+using System.Runtime.Serialization;
 
 namespace BitPay.Exceptions
 {
+    [Serializable]
     public class BillException : BitPayException
     {
         private const string BitPayMessage = "An unexpected error occured while trying to manage the bill";
-        private readonly string _bitpayCode = "BITPAY-BILL-GENERIC";
+        private new const string BitPayCode = "BITPAY-BILL-GENERIC";
 
-        public BillException() : base(BitPayMessage)
-        {
-            BitpayCode = _bitpayCode;
-        }
-
-        public BillException(Exception ex) : base(BitPayMessage, ex)
-        {
-            BitpayCode = _bitpayCode;
-        }
-
-        public BillException(string bitpayCode, string message) : base(bitpayCode, message)
+        public BillException() : base(BitPayCode, BitPayMessage)
         {
         }
 
-        public BillException(string bitpayCode, string message, Exception cause, string apiCode = "000000") : base(bitpayCode, message, cause, apiCode)
+        public BillException(Exception ex) : base(BitPayCode, BitPayMessage, ex)
         {
-            ApiCode = apiCode;
+        }
+
+        public BillException(string bitPayCode, string message) : base(bitPayCode, message)
+        {
+        }
+
+        public BillException(string bitPayCode, string message, Exception cause, string? apiCode = "000000")
+            : base(bitPayCode, message, cause, apiCode)
+        {
+        }
+
+        protected BillException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
+        {
         }
     }
 }

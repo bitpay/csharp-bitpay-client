@@ -1,5 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+
 using BitPay.Clients;
 
 namespace BitPay.Models.Rate
@@ -23,20 +29,17 @@ namespace BitPay.Models.Rate
 
         public async Task Update(RateClient rateClient)
         {
-            _rates = (await rateClient.GetRates()).GetRates();
+            if (rateClient == null)
+            {
+                throw new ArgumentNullException(nameof(rateClient));
+            }
+
+            _rates = (await rateClient.GetRates().ConfigureAwait(false)).GetRates();
         }
 
         public decimal GetRate(string currencyCode)
         {
-            decimal val = 0;
-            foreach (var rateObj in _rates)
-                if (rateObj.Code.Equals(currencyCode))
-                {
-                    val = rateObj.Value;
-                    break;
-                }
-
-            return val;
+            return (from rateObj in _rates where string.Equals(rateObj.Code, currencyCode, StringComparison.Ordinal) select rateObj.Value).FirstOrDefault();
         }
     }
 }

@@ -1,9 +1,13 @@
+// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using BitPay.Exceptions;
 using BitPay.Models.Wallet;
-using BitPay.Utils;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Clients
@@ -26,9 +30,11 @@ namespace BitPay.Clients
         {
             try
             {
-                var response = await _bitPayClient.Get("supportedWallets", null, false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response);
-                return JsonConvert.DeserializeObject<List<Wallet>>(responseString);
+                var response = await _bitPayClient.Get("supportedWallets", null, false)
+                    .ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response)
+                    .ConfigureAwait(false);
+                return JsonConvert.DeserializeObject<List<Wallet>>(responseString)!;
             }
             catch (Exception ex)
             {

@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System.Collections.Generic;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Models.Wallet
@@ -6,12 +10,15 @@ namespace BitPay.Models.Wallet
     
     public class Wallet
     {
-        /// <summary>
-        ///     Creates an uninitialized wallet request object.
-        /// </summary>
-        public Wallet()
+        public Wallet(string key, string displayName, string avatar, string image, bool payPro)
         {
+            Key = key;
+            DisplayName = displayName;
+            Avatar = avatar;
+            Image = image;
+            PayPro = payPro;
         }
+
         public string Key { get; set; }
         public string DisplayName { get; set; }
         public string Avatar { get; set; }
@@ -19,7 +26,8 @@ namespace BitPay.Models.Wallet
 
         [JsonProperty(PropertyName = "payPro")]
         public bool PayPro { get; set; }
-        public List<Currencies> Currencies { get; set; }
+
+        public List<Currencies>? Currencies { get; set; }
 
         public bool ShouldSerializeKey()
         {

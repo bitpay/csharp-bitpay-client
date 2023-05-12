@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using Newtonsoft.Json;
 
 namespace BitPay.Models.Rate
 {
@@ -12,5 +15,12 @@ namespace BitPay.Models.Rate
         [JsonProperty(PropertyName = "code")] public string Code { get; set; }
 
         [JsonProperty(PropertyName = "rate")] public decimal Value { get; set; }
+
+        public Rate(string name, string code, decimal value)
+        {
+            Name = name;
+            Code = code;
+            Value = value;
+        }
     }
 }

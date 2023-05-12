@@ -1,26 +1,25 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
+// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
 using BitPay;
 using BitPay.Models;
 using BitPay.Models.Bill;
 using BitPay.Models.Invoice;
 using BitPay.Models.Payout;
-using BitPay.Utils;
-using Xunit;
+
 using Xunit.Abstractions;
+
 using Environment = BitPay.Environment;
 using SystemEnvironment = System.Environment;
 
-namespace BitPayIntegrationTest
+namespace BitPayFunctionalTest
 {
-    public class BitPayIntegrationTest
+    public class BitPayFunctionalTest
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private static DateTime today = DateTime.Now;
-        private static DateTime tomorrow = today.AddDays(1);
-        private static DateTime yesterday = today.AddDays(-1);
+        private static readonly DateTime Today = DateTime.Now;
+        private static readonly DateTime Tomorrow = Today.AddDays(1);
+        private static readonly DateTime Yesterday = Today.AddDays(-1);
         
         private readonly Client _client;
         
@@ -31,7 +30,7 @@ namespace BitPayIntegrationTest
         ///     to "email.txt" file in this directory. It's required for submit requests.
         ///     It's impossible to test settlements in test environment.
         /// </summary>
-        public BitPayIntegrationTest(ITestOutputHelper testOutputHelper)
+        public BitPayFunctionalTest(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
             string path = GetBitPayUnitTestPath() + Path.DirectorySeparatorChar + "BitPay.config.json";
@@ -86,15 +85,15 @@ namespace BitPayIntegrationTest
         {
             var invoice = await _client.CreateInvoice(GetInvoiceExample());
             var invoiceToken = invoice.Token;
-            var invoiceId = invoice.Id;
+            var invoiceId = invoice.Id!;
             
             var invoiceGet = _client.GetInvoice(invoiceId).Result;
             Assert.Equal(invoiceToken, invoiceGet.Token);
             
-            var invoiceGetByGuid = _client.GetInvoiceByGuid(invoice.Guid).Result;
+            var invoiceGetByGuid = _client.GetInvoiceByGuid(invoice.ResourceGuid!).Result;
             Assert.Equal(invoiceToken, invoiceGetByGuid.Token);
             
-            var invoices = _client.GetInvoices(yesterday, tomorrow).Result;
+            var invoices = _client.GetInvoices(Yesterday, Tomorrow).Result;
             Assert.NotEmpty(invoices);
             invoices.Exists(invoiceList => invoiceList.Token == invoiceToken);
             
@@ -102,7 +101,7 @@ namespace BitPayIntegrationTest
             Assert.NotNull(getInvoiceEventToken.Token);
             
             var updatedEmail = "updated@email.com";
-            var updateInvoiceParameters = new Dictionary<string, dynamic> {{"buyerEmail", updatedEmail}};
+            var updateInvoiceParameters = new Dictionary<string, dynamic?> {{"buyerEmail", updatedEmail}};
             var updatedInvoice = _client.UpdateInvoice(invoiceId, updateInvoiceParameters).Result;
             Assert.Equal(updatedEmail, updatedInvoice.BuyerProvidedEmail);
             var invoiceGetAfterUpdate = _client.GetInvoice(invoiceId).Result;
@@ -112,7 +111,7 @@ namespace BitPayIntegrationTest
             Assert.True(cancelInvoice.IsCancelled);
             
             var invoiceToCancelByGuid = await _client.CreateInvoice(GetInvoiceExample());
-            var cancelInvoiceByGuid = _client.CancelInvoiceByGuid(invoiceToCancelByGuid.Guid).Result;
+            var cancelInvoiceByGuid = _client.CancelInvoiceByGuid(invoiceToCancelByGuid.ResourceGuid!).Result;
             Assert.True(cancelInvoiceByGuid.IsCancelled);
         }
 
@@ -135,18 +134,18 @@ namespace BitPayIntegrationTest
         public async Task it_should_test_refunds_requests()
         {
             var invoice = await _client.CreateInvoice(GetInvoiceExample());
-            var invoiceId = invoice.Id;
+            var invoiceId = invoice.Id!;
             await _client.PayInvoice(invoiceId);
             
-            var refundToCreateRequest = new Refund {InvoiceId = invoiceId, Amount = 10.0M};
+            var refundToCreateRequest = new Refund(invoiceId: invoiceId, amount: 10.0M);
             var refund = await _client.CreateRefund(refundToCreateRequest);
-            var refundId = refund.Id;
+            var refundId = refund.Id!;
 
             var retrieveRefund = await _client.GetRefund(refundId);
             Assert.Equal(refundId, retrieveRefund.Id);
             Assert.NotNull(retrieveRefund.Invoice);
 
-            var retrieveRefundByGuid = await _client.GetRefundByGuid(refund.Guid);
+            var retrieveRefundByGuid = await _client.GetRefundByGuid(refund.ResourceGuid!);
             Assert.Equal(refundId, retrieveRefundByGuid.Id);
 
             var retrieveRefundByInvoiceId = await _client.GetRefunds(invoiceId);
@@ -161,9 +160,9 @@ namespace BitPayIntegrationTest
             var retrieveRefundAfterCanceled = await _client.GetRefund(refundId);
             Assert.Equal("canceled", retrieveRefundAfterCanceled.Status);
 
-            var refundToCreateForCancelByGuid = new Refund {InvoiceId = invoiceId, Amount = 10.0M};
+            var refundToCreateForCancelByGuid = new Refund(invoiceId: invoiceId, amount: 10.0M);
             var refundToCancelByGuid = await _client.CreateRefund(refundToCreateForCancelByGuid);
-            var refundCanceledByGuid = await _client.CancelRefundByGuid(refundToCancelByGuid.Guid);
+            var refundCanceledByGuid = await _client.CancelRefundByGuid(refundToCancelByGuid.ResourceGuid!);
             Assert.Equal("canceled", refundCanceledByGuid.Status);
         }
 
@@ -184,7 +183,7 @@ namespace BitPayIntegrationTest
             var requestedRecipients = new List<PayoutRecipient> {requestedRecipient};
 
             var recipients = await _client.SubmitPayoutRecipients(new PayoutRecipients(requestedRecipients));
-            var recipientId = recipients[0].Id;
+            var recipientId = recipients[0].Id!;
 
             var retrieveRecipient = await _client.GetPayoutRecipient(recipientId);
             Assert.Equal(email, retrieveRecipient.Email);
@@ -193,8 +192,7 @@ namespace BitPayIntegrationTest
             Assert.NotEmpty(retrieveRecipientsByStatus);
 
             var updatedLabel = "updatedLabel";
-            var updateRecipientRequest  = new PayoutRecipient();
-            updateRecipientRequest.Label = updatedLabel;
+            var updateRecipientRequest  = new PayoutRecipient(label: updatedLabel, email: email);
             var updateRecipient = await _client.UpdatePayoutRecipient(recipientId, updateRecipientRequest);
             Assert.Equal(updatedLabel, updateRecipient.Label);
 
@@ -230,7 +228,7 @@ namespace BitPayIntegrationTest
                 RecipientId = recipientId,
                 NotificationEmail = email,
                 Email = email,
-                Reference = "Integration Test " + Guid.NewGuid().ToString(),
+                Reference = "Integration Test " + Guid.NewGuid(),
                 NotificationUrl = "https://somenotiticationURL.com"
             };
 
@@ -239,23 +237,23 @@ namespace BitPayIntegrationTest
             Assert.NotNull(payoutId);
             Assert.Equal(email, submitPayout.NotificationEmail);
             
-            var getPayoutById = _client.GetPayout(payoutId).Result;
+            var getPayoutById = _client.GetPayout(payoutId!).Result;
             Assert.Equal(email, getPayoutById.NotificationEmail);
             
-            var getPayoutsFilters = new Dictionary<string, dynamic>
+            var getPayoutsFilters = new Dictionary<string, dynamic?>
             {
-                { "startDate", yesterday.ToString("yyyy-MM-dd") },
-                { "endDate", tomorrow.ToString("yyyy-MM-dd") }
+                { "startDate", Yesterday.ToString("yyyy-MM-dd") },
+                { "endDate", Tomorrow.ToString("yyyy-MM-dd") }
             };
             
             var getPayouts = _client.GetPayouts(getPayoutsFilters).Result;
             Assert.NotEmpty(getPayouts);
             getPayouts.Exists(singlePayout => singlePayout.NotificationEmail == email);
              
-            var requestPayoutNotification = _client.RequestPayoutNotification(payoutId).Result;
+            var requestPayoutNotification = _client.RequestPayoutNotification(payoutId!).Result;
             Assert.True(requestPayoutNotification);
             
-            var cancelledPayout = _client.CancelPayout(payoutId).Result;
+            var cancelledPayout = _client.CancelPayout(payoutId!).Result;
             Assert.True(cancelledPayout);
         }
         
@@ -272,7 +270,7 @@ namespace BitPayIntegrationTest
             var ledgers = await _client.GetLedgers();
             Assert.NotEmpty(ledgers);
 
-            var ledgersEntries = await _client.GetLedgerEntries("USD", today.AddDays(-31), today);
+            var ledgersEntries = await _client.GetLedgerEntries("USD", Today.AddDays(-31), Today);
             Assert.NotEmpty(ledgersEntries);
         }
         
@@ -287,14 +285,16 @@ namespace BitPayIntegrationTest
         [Fact]
         public async Task it_should_test_bills_requests()
         {
-            Item item1 = new Item {Id = "Test Item 1", Price = 10.00M, Quantity = 1};
+            Item item1 = new Item(price: 10.00M, quantity: 1) { Id = "Test Item 1" };
             List<Item> items = new List<Item> {item1};
-            var requestedBill = new Bill
+            var requestedBill = new Bill(
+                number: "bill1234-ABCD",
+                currency: "USD",
+                email: "john@doe.com",
+                items: items
+            )
             {
-                Number = "bill1234-ABCD",
-                Currency = "USD",
                 Name = "John Doe",
-                Email = "john@doe.com",
                 Address1 = "2630 Hegal Place",
                 Address2 = "Apt 42",
                 City = "Alexandria",
@@ -304,30 +304,31 @@ namespace BitPayIntegrationTest
                 Phone = "555-123-456",
                 DueDate = "2021-5-31",
                 PassProcessingFee = true,
-                Items = items
             };
             var createBill = await _client.CreateBill(requestedBill);
-            var billId = createBill.Id;
+            var billId = createBill.Id!;
 
-            var getBill = await _client.GetBill(billId.ToString());
+            var getBill = await _client.GetBill(billId);
             Assert.Equal(billId, getBill.Id);
 
             var getBills = await _client.GetBills();
             Assert.NotEmpty(getBills);
 
-            Item itemUpdated = new Item {Id = "Test Item Updated", Price = 9.00M, Quantity = 1};
+            Item itemUpdated = new Item(price: 9.00M, quantity: 1) { Id = "Test Item Updated" };
             List<Item> itemsUpdated = new List<Item> {itemUpdated};
-            var updatedBillRequest = new Bill
+            var updatedBillRequest = new Bill(
+                number: requestedBill.Number,
+                currency: "USD",
+                email:"john@doe.com",
+                items: itemsUpdated
+            ) 
             {
-                Currency = "USD",
                 Token = createBill.Token,
-                Items = itemsUpdated,
-                Email = "john@doe.com"
             };
             var updatedBill = await _client.UpdateBill(updatedBillRequest, billId);
             Assert.Equal(9.00M, updatedBill.Items[0].Price);
 
-            var deliverBill = await _client.DeliverBill(billId, createBill.Token);
+            var deliverBill = await _client.DeliverBill(billId, createBill.Token!);
             Assert.Equal("Success", deliverBill);
         }
 

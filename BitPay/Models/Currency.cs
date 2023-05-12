@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using Newtonsoft.Json;
 
 namespace BitPay.Models
 {
@@ -209,6 +212,29 @@ namespace BitPay.Models
         public const string ZAR = "ZAR";
         public const string ZMW = "ZMW";
         public const string ZWL = "ZWL";
+
+        public Currency(
+            string code,
+            string symbol,
+            int precision,
+            string name,
+            string plural,
+            string alts,
+            decimal minimum,
+            bool sanctioned,
+            decimal decimals
+        )
+        {
+            Code = code;
+            Symbol = symbol;
+            Precision = precision;
+            Name = name;
+            Plural = plural;
+            Alts = alts;
+            Minimum = minimum;
+            Sanctioned = sanctioned;
+            Decimals = decimals;
+        }
 
         public static bool isValid(string value)
         {

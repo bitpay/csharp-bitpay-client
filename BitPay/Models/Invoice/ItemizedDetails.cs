@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using Newtonsoft.Json;
 
 namespace BitPay.Models.Invoice
 {
@@ -6,7 +9,7 @@ namespace BitPay.Models.Invoice
     {
         public int? Amount { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [JsonProperty(PropertyName = "isFee")]
         public bool? IsFee { get; set; }

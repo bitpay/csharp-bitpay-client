@@ -1,19 +1,24 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
 using BitPay.Exceptions;
+
 using Newtonsoft.Json.Linq;
 
-namespace BitPay.Utils
+namespace BitPay.Clients
 {
-    public class HttpResponseParser
+    public static class HttpResponseParser
     {
-        public static async Task<string> ResponseToJsonString(HttpResponseMessage response)
+        public static async Task<string> ResponseToJsonString(HttpResponseMessage? response)
         {
             if (response == null)
-                throw new BitPayApiCommunicationException(new NullReferenceException("Response is null"));
+                throw new BitPayApiCommunicationException(new ArgumentNullException(nameof(response)));
 
             try
             {
@@ -36,16 +41,21 @@ namespace BitPay.Utils
                 else
                     jObj = new JObject();
 
-                JToken value;
-                JToken code;
+                JToken? value;
+                JToken? code;
 
                 if (jObj.TryGetValue("status", out value))
                 {
-                   if (value.ToString().Equals("error"))
+                   if ("error".Equals(value.ToString(), StringComparison.OrdinalIgnoreCase))
                    {
                        jObj.TryGetValue("code", out code);
                        jObj.TryGetValue("message", out value);
-                       throw new BitPayApiCommunicationException(code.ToString(), value.ToString());
+                       if (code == null)
+                       {
+                           throw new BitPayApiCommunicationException(value!.ToString());
+                       }
+                       
+                       throw new BitPayApiCommunicationException(code.ToString(), value!.ToString());
                    }
                 }
 
@@ -67,7 +77,7 @@ namespace BitPay.Utils
                     foreach (var errorItem in errors)
                     {
                         var error = errorItem.ToObject<JProperty>();
-                        message += "\n" + error.Name + ": " + error.Value;
+                        message += "\n" + error?.Name + ": " + error?.Value;
                     }
 
                     throw new BitPayApiCommunicationException(message);

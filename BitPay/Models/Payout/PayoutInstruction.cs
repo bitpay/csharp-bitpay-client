@@ -1,19 +1,17 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
 using System.Collections.Generic;
+
 using BitPay.Exceptions;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Models.Payout
 {
     public class PayoutInstruction
     {
-        /// <summary>
-        ///     Constructor, create an empty PayoutInstruction object.
-        /// </summary>
-        public PayoutInstruction()
-        {
-        }
-
         /**
          * Constructor, create a PayoutInstruction object.
          *
@@ -28,13 +26,13 @@ namespace BitPay.Models.Payout
             {
                 Amount = amount;
                 switch (method) {
-                    case RecipientReferenceMethod.EMAIL:
+                    case RecipientReferenceMethod.Email:
                         Email = methodValue;
                         break;
-                    case RecipientReferenceMethod.RECIPIENT_ID:
+                    case RecipientReferenceMethod.RecipientId:
                         RecipientId = methodValue;
                         break;
-                    case RecipientReferenceMethod.SHOPPER_ID:
+                    case RecipientReferenceMethod.ShopperId:
                         ShopperId = methodValue;
                         break;
                     default:
@@ -51,33 +49,33 @@ namespace BitPay.Models.Payout
         public decimal Amount { get; set; }
 
         [JsonProperty(PropertyName = "email")]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [JsonProperty(PropertyName = "address")]
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
         [JsonProperty(PropertyName = "recipientId")]
-        public string RecipientId { get; set; }
+        public string? RecipientId { get; set; }
 
         [JsonProperty(PropertyName = "shopperId")]
-        public string ShopperId { get; set; }
+        public string? ShopperId { get; set; }
 
         [JsonProperty(PropertyName = "label")]
-        public string Label { get; set; }
+        public string? Label { get; set; }
 
         [JsonProperty(PropertyName = "walletProvider")]
-        public string WalletProvider { get; set; }
+        public string? WalletProvider { get; set; }
 
         // Response fields
         //
 
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
-        public PayoutInstructionBtcSummary Btc { get; set; }
+        public PayoutInstructionBtcSummary? Btc { get; set; }
 
-        public List<PayoutInstructionTransaction> Transactions { get; set; }
+        public List<PayoutInstructionTransaction>? Transactions { get; set; }
 
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
         public bool ShouldSerializeId()
         {

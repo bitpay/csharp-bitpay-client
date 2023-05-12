@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System.Collections.Generic;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Models.Invoice
@@ -13,5 +17,12 @@ namespace BitPay.Models.Invoice
         
         [JsonProperty(PropertyName = "amounts")]
         public Dictionary<string, decimal> Amounts { get; set; }
+        
+        public RefundInfo(string supportRequest, string currency, Dictionary<string, decimal> amounts)
+        {
+            SupportRequest = supportRequest;
+            Currency = currency;
+            Amounts = amounts;
+        }
     }
 }

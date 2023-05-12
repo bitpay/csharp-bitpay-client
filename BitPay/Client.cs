@@ -1,8 +1,12 @@
+// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+
 using BitPay.Clients;
 using BitPay.Exceptions;
 using BitPay.Models;
@@ -14,16 +18,17 @@ using BitPay.Models.Rate;
 using BitPay.Models.Settlement;
 using BitPay.Models.Wallet;
 using BitPay.Utils;
+
 using Microsoft.Extensions.Configuration;
 
 namespace BitPay
 {
     public class Client
     {
-        private IBitPayClient _bitPayClient;
-        private AccessTokens _accessTokens;
-        private IGuidGenerator _guidGenerator;
-        private string _identity;
+        private readonly IBitPayClient _bitPayClient;
+        private readonly AccessTokens _accessTokens;
+        private readonly IGuidGenerator _guidGenerator = new UuidGenerator();
+        private string? _identity;
 
         /// <summary>
         ///     Create Client class for POS.
@@ -31,7 +36,10 @@ namespace BitPay
         /// <param name="token">Pos token VO.</param>
         public Client(PosToken token)
         {
-            InitPosClient(token, Environment.Prod);
+            if (token == null) throw new ArgumentNullException(nameof(token));
+            
+            _accessTokens = GetAccessTokens(token);
+            _bitPayClient = GetDefaultBitPayClient(Environment.Prod);
         }
 
         /// <summary>
@@ -41,7 +49,11 @@ namespace BitPay
         /// <param name="environment">Environment</param>
         public Client(PosToken token, Environment environment)
         {
-            InitPosClient(token, environment);
+            if (token == null) 
+                throw new ArgumentNullException(nameof(token));
+
+            _accessTokens = GetAccessTokens(token);
+            _bitPayClient = GetDefaultBitPayClient(environment);
         }
 
         /// <summary>
@@ -52,13 +64,22 @@ namespace BitPay
         /// <param name="accessTokens"></param>
         public Client(PrivateKey privateKey, AccessTokens accessTokens, Environment environment = Environment.Prod)
         {
+            if (privateKey == null)
+            {
+                throw new ArgumentNullException(nameof(privateKey));
+            }
+
+            if (accessTokens == null)
+            {
+                throw new ArgumentNullException(nameof(accessTokens));
+            }
+
             var ecKey = GetEcKey(privateKey);
             var baseUrl = GetBaseUrl(environment);
-            var httpClient = getHttpClient(baseUrl);
+            var httpClient = GetHttpClient(baseUrl);
 
             _accessTokens = accessTokens;
             _bitPayClient = new BitPayClient(httpClient, baseUrl, ecKey);
-            _guidGenerator = new UuidGenerator();
             CreateIdentity(ecKey);
         }
 
@@ -69,15 +90,19 @@ namespace BitPay
         /// <param name="environment">Environment</param>
         public Client(ConfigFilePath configFilePath, Environment environment = Environment.Prod)
         {
+            if (configFilePath == null)
+            {
+                throw new ArgumentNullException(nameof(configFilePath));
+            }
+
             IConfiguration config = BuildConfigFromFile(configFilePath);
             _accessTokens = new AccessTokens(config);
 
             var ecKey = GetEcKey(config, environment.ToString());
             var baseUrl = GetBaseUrl(environment);
-            var httpClient = getHttpClient(baseUrl);
+            var httpClient = GetHttpClient(baseUrl);
 
             _bitPayClient = new BitPayClient(httpClient, baseUrl, ecKey);
-            _guidGenerator = new UuidGenerator();
             CreateIdentity(ecKey);
         }
 
@@ -114,7 +139,7 @@ namespace BitPay
         /// <returns>Currency</returns>
         public async Task<Currency> GetCurrencyInfo(string currencyCode)
         {
-            return await CreateCurrencyClient().GetCurrencyInfo(currencyCode);
+            return await CreateCurrencyClient().GetCurrencyInfo(currencyCode).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -135,24 +160,25 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<string> CreatePairingCodeForFacade(string facade)
         {
-            return await CreateAuthorizationClient().CreatePairingCodeForFacade(facade);
+            return await CreateAuthorizationClient().CreatePairingCodeForFacade(facade).ConfigureAwait(false);
         }
 
         /// <summary>
         ///     Create an invoice using the specified facade.
         /// </summary>
         /// <param name="invoice">An invoice request object.</param>
-        /// <param name="guid">GUID</param>
+        /// <param name="invoiceGuid">The guid for the requested invoice.</param>
         /// <returns>A new invoice object returned from the server.</returns>
         /// <throws>InvoiceCreationException InvoiceCreationException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<Invoice> CreateInvoice(Invoice invoice, string guid = null)
+        public async Task<Invoice> CreateInvoice(Invoice invoice, string? invoiceGuid = null)
         {
             var invoiceClient = CreateInvoiceClient();
             var facade = GetFacadeBasedOnAccessToken();
             var signRequest = IsSignRequestFacade(facade);
 
-            return await invoiceClient.CreateInvoice(invoice, facade, signRequest, guid);
+            return await invoiceClient.CreateInvoice(invoice, facade, signRequest, invoiceGuid)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -167,22 +193,22 @@ namespace BitPay
             var facade = GetFacadeBasedOnAccessToken();
             var signRequest = IsSignRequestFacade(facade);
 
-            return await CreateInvoiceClient().GetInvoice(invoiceId, facade, signRequest);
+            return await CreateInvoiceClient().GetInvoice(invoiceId, facade, signRequest).ConfigureAwait(false);
         }
 
         /// <summary>
         ///     Retrieve an invoice by guid.
         /// </summary>
-        /// <param name="guid">The guid of the requested invoice.</param>
+        /// <param name="invoiceGuid">The guid of the requested invoice.</param>
         /// <returns>The invoice object retrieved from the server.</returns>
         /// <throws>InvoiceQueryException InvoiceQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<Invoice> GetInvoiceByGuid(string guid)
+        public async Task<Invoice> GetInvoiceByGuid(string invoiceGuid)
         {
             var facade = GetFacadeBasedOnAccessToken();
             var signRequest = IsSignRequestFacade(facade);
 
-            return await CreateInvoiceClient().GetInvoiceByGuid(guid, facade, signRequest);
+            return await CreateInvoiceClient().GetInvoiceByGuid(invoiceGuid, facade, signRequest).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -195,9 +221,9 @@ namespace BitPay
         /// <throws>InvoiceQueryException InvoiceQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<Invoice>> GetInvoices(DateTime dateStart, DateTime dateEnd,
-            Dictionary<string, dynamic> parameters = null)
+            Dictionary<string, dynamic?>? parameters = null)
         {
-            return await CreateInvoiceClient().GetInvoices(dateStart, dateEnd, parameters);
+            return await CreateInvoiceClient().GetInvoices(dateStart, dateEnd, parameters).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -207,9 +233,9 @@ namespace BitPay
         /// <param name="parameters">Available parameters: buyerEmail, buyerSms, smsCode, autoVerify</param>
         /// <returns>A BitPay updated Invoice object.</returns>
         /// <throws>InvoiceUpdateException InvoiceUpdateException class</throws>
-        public async Task<Invoice> UpdateInvoice(string invoiceId, Dictionary<string, dynamic> parameters)
+        public async Task<Invoice> UpdateInvoice(string invoiceId, Dictionary<string, dynamic?> parameters)
         {
-            return await CreateInvoiceClient().UpdateInvoice(invoiceId, parameters);
+            return await CreateInvoiceClient().UpdateInvoice(invoiceId, parameters).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -223,21 +249,21 @@ namespace BitPay
         /// <throws>InvoiceCancellationException InvoiceCancellationException class</throws>
         public async Task<Invoice> CancelInvoice(string invoiceId)
         {
-            return await CreateInvoiceClient().CancelInvoice(invoiceId);
+            return await CreateInvoiceClient().CancelInvoice(invoiceId).ConfigureAwait(false);
         }
         
         /// <summary>
         ///     Cancel a BitPay invoice.
         /// </summary>
-        /// <param name="guid">The GUID of the invoice to cancel.</param>
+        /// <param name="refundGuid">The GUID of the invoice to cancel.</param>
         /// Parameter that will cancel the invoice even if no contact information is present.
         /// Note: Canceling a paid invoice without contact information requires
         /// a manual support process and is not recommended.
         /// <returns>Cancelled invoice object.</returns>
         /// <throws>InvoiceCancellationException InvoiceCancellationException class</throws>
-        public async Task<Invoice> CancelInvoiceByGuid(string guid)
+        public async Task<Invoice> CancelInvoiceByGuid(string refundGuid)
         {
-            return await CreateInvoiceClient().CancelInvoiceByGuid(guid);
+            return await CreateInvoiceClient().CancelInvoiceByGuid(refundGuid).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -248,7 +274,7 @@ namespace BitPay
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<Boolean> RequestInvoiceWebhookToBeResent(string invoiceId)
         {
-            return await CreateInvoiceClient().RequestInvoiceWebhookToBeResent(invoiceId);
+            return await CreateInvoiceClient().RequestInvoiceWebhookToBeResent(invoiceId).ConfigureAwait(false);
         }
         
         /// <summary>
@@ -258,7 +284,7 @@ namespace BitPay
         /// <param name="status">Status></param>
         public async Task<Invoice> PayInvoice(string invoiceId, string status = "complete")
         {
-            return await CreateInvoiceClient().PayInvoice(invoiceId, status);
+            return await CreateInvoiceClient().PayInvoice(invoiceId, status).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -269,7 +295,7 @@ namespace BitPay
         /// <exception cref="BitPayException"></exception>
         public async Task<InvoiceEventToken> GetInvoiceEventToken(string invoiceId)
         {
-            return await CreateInvoiceClient().GetInvoiceEventToken(invoiceId);
+            return await CreateInvoiceClient().GetInvoiceEventToken(invoiceId).ConfigureAwait(false);
         }
 
         ///  <summary>
@@ -277,14 +303,14 @@ namespace BitPay
         ///  </summary>
         ///  <param name="refundToCreate">
         ///     Available params: amount, invoiceId, token, preview, immediate, buyerPaysRefundFee, reference.
-        ///     See https://bitpay.com/api/#rest-api-resources-refunds-create-a-refund-request
+        ///     See https://bitpay.readme.io/reference/create-a-refund-request
         /// </param>
         ///  <returns>An updated Refund Object</returns> 
         /// <throws>RefundCreationException RefundCreationException class</throws> 
         /// <throws>BitPayException BitPayException class</throws> 
         public async Task<Refund> CreateRefund(Refund refundToCreate)
         {
-            return await CreateRefundClient().Create(refundToCreate);
+            return await CreateRefundClient().Create(refundToCreate).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -295,18 +321,18 @@ namespace BitPay
         ///<throws>RefundQueryException RefundQueryException class</throws> 
         public async Task<Refund> GetRefund(string refundId)
         {
-            return await CreateRefundClient().GetById(refundId);
+            return await CreateRefundClient().GetById(refundId).ConfigureAwait(false);
         }
 
         /// <summary>
         ///     Retrieve a previously made refund request on a BitPay invoice.
         /// </summary>
-        ///<param name="guid"></param>The BitPay guid.
+        ///<param name="refundGuid"></param>The BitPay guid.
         ///<returns>A BitPay Refund object with the associated Refund object.</returns> 
         ///<throws>RefundQueryException RefundQueryException class</throws> 
-        public async Task<Refund> GetRefundByGuid(string guid)
+        public async Task<Refund> GetRefundByGuid(string refundGuid)
         {
-            return await CreateRefundClient().GetByGuid(guid);
+            return await CreateRefundClient().GetByGuid(refundGuid).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -317,7 +343,7 @@ namespace BitPay
         /// <throws>RefundQueryException RefundQueryException class</throws>
         public async Task<List<Refund>> GetRefunds(string invoiceId)
         {
-            return await CreateRefundClient().GetByInvoiceId(invoiceId);
+            return await CreateRefundClient().GetByInvoiceId(invoiceId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -329,19 +355,19 @@ namespace BitPay
         ///<throws>RefundUpdateException class</throws> 
         public async Task<Refund> UpdateRefund(string refundId, string status)
         {
-            return await CreateRefundClient().Update(refundId, status);
+            return await CreateRefundClient().Update(refundId, status).ConfigureAwait(false);
         }
 
         /// <summary>
         ///     Update the status of a BitPay invoice.
         /// </summary>
-        ///<param name="guid">A BitPay Guid.</param>
+        ///<param name="refundGuid">A BitPay Guid.</param>
         ///<param name="status">The new status for the refund to be updated.</param>   
         /// <returns>A BitPay generated Refund object.</returns>
         ///<throws>RefundUpdateException class</throws> 
-        public async Task<Refund> UpdateRefundByGuid(string guid, string status)
+        public async Task<Refund> UpdateRefundByGuid(string refundGuid, string status)
         {
-            return await CreateRefundClient().UpdateByGuid(guid, status);
+            return await CreateRefundClient().UpdateByGuid(refundGuid, status).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -353,7 +379,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class </throws>
         public async Task<Boolean> SendRefundNotification(string refundId)
         {
-            return await CreateRefundClient().SendRefundNotification(refundId);
+            return await CreateRefundClient().SendRefundNotification(refundId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -365,26 +391,26 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Refund> CancelRefund(string refundId)
         {
-            return await CreateRefundClient().Cancel(refundId);
+            return await CreateRefundClient().Cancel(refundId).ConfigureAwait(false);
         }
 
         /// <summary>
         ///     Cancel a previously submitted refund request.
         /// </summary>
-        /// <param name="guid">The GUID of the refund request for which you want to cancel.</param>
+        /// <param name="refundGuid">The GUID of the refund request for which you want to cancel.</param>
         /// <returns>Refund object.</returns>
         /// <throws>RefundCancellationException RefundCancellationException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<Refund> CancelRefundByGuid(string guid)
+        public async Task<Refund> CancelRefundByGuid(string refundGuid)
         {
-            return await CreateRefundClient().CancelByGuid(guid);
+            return await CreateRefundClient().CancelByGuid(refundGuid).ConfigureAwait(false);
         }
 
         /// <summary>
         ///     Create a bill.
         /// </summary>
         /// <param name="bill">An invoice request object.</param>
-        /// <returns>A new bill object returned from the server.</returns
+        /// <returns>A new bill object returned from the server.</returns>
         /// <throws>BillCreationException BillCreationException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Bill> CreateBill(Bill bill)
@@ -392,7 +418,7 @@ namespace BitPay
             var facade = GetFacadeBasedOnAccessToken();
             var signRequest = IsSignRequestFacade(facade);
 
-            return await CreateBillClient().CreateBill(bill, facade, signRequest);
+            return await CreateBillClient().CreateBill(bill, facade, signRequest).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -407,7 +433,7 @@ namespace BitPay
             var facade = GetFacadeBasedOnAccessToken();
             var signRequest = IsSignRequestFacade(facade);
 
-            return await CreateBillClient().GetBill(billId, facade, signRequest);
+            return await CreateBillClient().GetBill(billId, facade, signRequest).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -417,9 +443,9 @@ namespace BitPay
         /// <returns>A list of bill objects.</returns>
         /// <throws>BillQueryException BillQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<Bill>> GetBills(string status = null)
+        public async Task<List<Bill>> GetBills(string? status = null)
         {
-            return await CreateBillClient().GetBills(status);
+            return await CreateBillClient().GetBills(status).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -432,7 +458,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Bill> UpdateBill(Bill bill, string billId)
         {
-            return await CreateBillClient().UpdateBill(bill, billId);
+            return await CreateBillClient().UpdateBill(bill, billId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -445,7 +471,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<string> DeliverBill(string billId, string billToken)
         {
-            return await CreateBillClient().DeliverBill(billId, billToken);
+            return await CreateBillClient().DeliverBill(billId, billToken).ConfigureAwait(false);
         }
         
         /// <summary>
@@ -458,7 +484,7 @@ namespace BitPay
         /// <exception cref="NotImplementedException"></exception>
         public async Task<Rate> GetRate(string baseCurrency, string currency)
         {
-            return await CreateRateClient().GetRate(baseCurrency, currency);
+            return await CreateRateClient().GetRate(baseCurrency, currency).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -469,7 +495,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Rates> GetRates()
         {
-            return await CreateRateClient().GetRates();
+            return await CreateRateClient().GetRates().ConfigureAwait(false);
         }
         
         /// <summary>
@@ -481,7 +507,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Rates> GetRates(string currency)
         {
-            return await CreateRateClient().GetRates(currency);
+            return await CreateRateClient().GetRates(currency).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -495,7 +521,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<LedgerEntry>> GetLedgerEntries(string currency, DateTime dateStart, DateTime dateEnd)
         {
-            return await CreateLedgerClient().GetLedgerEntries(currency, dateStart, dateEnd);
+            return await CreateLedgerClient().GetLedgerEntries(currency, dateStart, dateEnd).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -506,7 +532,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<Ledger>> GetLedgers()
         {
-            return await CreateLedgerClient().GetLedgers();
+            return await CreateLedgerClient().GetLedgers().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -518,7 +544,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<List<PayoutRecipient>> SubmitPayoutRecipients(PayoutRecipients recipients)
         {
-            return await CreatePayoutRecipientClient().Submit(recipients);
+            return await CreatePayoutRecipientClient().Submit(recipients).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -531,7 +557,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<PayoutRecipient> GetPayoutRecipient(string recipientId)
         {
-            return await CreatePayoutRecipientClient().Get(recipientId);
+            return await CreatePayoutRecipientClient().Get(recipientId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -543,10 +569,10 @@ namespace BitPay
         /// <returns>A list of BitPayRecipient objects.</returns>
         /// <throws>PayoutRecipientQueryException PayoutRecipientQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<PayoutRecipient>> GetPayoutRecipients(string status = null, int limit = 100,
+        public async Task<List<PayoutRecipient>> GetPayoutRecipients(string? status = null, int limit = 100,
             int offset = 0)
         {
-            return await CreatePayoutRecipientClient().GetByFilters(status, limit, offset);
+            return await CreatePayoutRecipientClient().GetByFilters(status, limit, offset).ConfigureAwait(false);
         }
         
         /// <summary>
@@ -561,7 +587,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<PayoutRecipient> UpdatePayoutRecipient(string recipientId, PayoutRecipient recipient)
         {
-            return await CreatePayoutRecipientClient().Update(recipientId, recipient);
+            return await CreatePayoutRecipientClient().Update(recipientId, recipient).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -573,7 +599,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Boolean> DeletePayoutRecipient(string recipientId)
         {
-            return await CreatePayoutRecipientClient().Delete(recipientId);
+            return await CreatePayoutRecipientClient().Delete(recipientId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -585,7 +611,8 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Boolean> RequestPayoutRecipientNotification(string recipientId)
         {
-            return await CreatePayoutRecipientClient().RequestPayoutRecipientNotification(recipientId);
+            return await CreatePayoutRecipientClient().RequestPayoutRecipientNotification(recipientId)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -597,7 +624,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Payout> SubmitPayout(Payout payout)
         {
-            return await CreatePayoutClient().Submit(payout);
+            return await CreatePayoutClient().Submit(payout).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -610,7 +637,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Payout> GetPayout(string payoutId)
         {
-            return await CreatePayoutClient().Get(payoutId);
+            return await CreatePayoutClient().Get(payoutId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -622,7 +649,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Boolean> CancelPayout(string payoutId)
         {
-            return await CreatePayoutClient().Cancel(payoutId);
+            return await CreatePayoutClient().Cancel(payoutId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -630,14 +657,14 @@ namespace BitPay
         /// </summary>
         /// <param name="filters">
         /// Filters available: startDate, endDate, status, reference, limit, offset.
-        /// See https://bitpay.com/api/#rest-api-resources-payouts-retrieve-payouts-filtered-by-query
+        /// See https://bitpay.readme.io/reference/retrieve-payouts-filtered-by-query
         /// </param>
         /// <returns>A list of BitPay Payout objects.</returns>
         /// <throws>PayoutQueryException PayoutQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<Payout>> GetPayouts(Dictionary<string, dynamic> filters)
+        public async Task<List<Payout>> GetPayouts(Dictionary<string, dynamic?> filters)
         {
-            return await CreatePayoutClient().GetPayouts(filters);
+            return await CreatePayoutClient().GetPayouts(filters).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -649,7 +676,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Boolean> RequestPayoutNotification(string payoutId)
         {
-            return await CreatePayoutClient().RequestPayoutNotification(payoutId);
+            return await CreatePayoutClient().RequestPayoutNotification(payoutId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -661,7 +688,7 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Settlement> GetSettlement(string settlementId)
         {
-            return await CreateSettlementClient().GetById(settlementId);
+            return await CreateSettlementClient().GetById(settlementId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -671,14 +698,14 @@ namespace BitPay
         /// <param name="filters">
         ///     Available filters: startDate (Format YYYY-MM-DD), endDate (Format YYYY-MM-DD), status, currency,
         ///     limit, offset.
-        ///     See https://bitpay.com/api/#rest-api-resources-settlements-retrieve-settlements
+        ///     See https://bitpay.readme.io/reference/retrieve-settlements
         /// </param>
         /// <returns>A list of BitPay Settlement objects</returns>
         /// <throws>SettlementQueryException SettlementQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<Settlement>> GetSettlements(Dictionary<string, dynamic> filters)
+        public async Task<List<Settlement>> GetSettlements(Dictionary<string, dynamic?> filters)
         {
-            return await CreateSettlementClient().GetByFilters(filters);
+            return await CreateSettlementClient().GetByFilters(filters).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -695,7 +722,8 @@ namespace BitPay
         /// <throws>BitPayException BitPayException class</throws>
         public async Task<Settlement> GetSettlementReconciliationReport(string settlementId, string token)
         {
-            return await CreateSettlementClient().GetSettlementReconciliationReport(settlementId, token);
+            return await CreateSettlementClient().GetSettlementReconciliationReport(settlementId, token)
+                .ConfigureAwait(false);
         }
         
         /// <summary>
@@ -705,7 +733,7 @@ namespace BitPay
         ///<throws>WalletQueryException WalletQueryException class</throws> 
         public async Task<List<Wallet>> GetSupportedWallets()
         {
-            return await CreateWalletClient().GetSupportedWallets();
+            return await CreateWalletClient().GetSupportedWallets().ConfigureAwait(false);
         }
 
 
@@ -778,7 +806,7 @@ namespace BitPay
         {
             if (!File.Exists(configFilePath.Value()))
             {
-                throw new Exception("Configuration file not found");
+                throw new ConfigurationException("Configuration file not found");
             }
 
             var builder = new ConfigurationBuilder().AddJsonFile(configFilePath.Value(), false, true);
@@ -797,16 +825,14 @@ namespace BitPay
             {
                 return KeyUtils.LoadEcKey();
             }
-            else
+
+            try
             {
-                try
-                {
-                    return KeyUtils.CreateEcKeyFromString(privateKey.Value());
-                }
-                catch (Exception)
-                {
-                    throw new BitPayException( "Private Key file not found OR invalid key provided");
-                }
+                return KeyUtils.CreateEcKeyFromString(privateKey.Value());
+            }
+            catch (Exception)
+            {
+                throw new BitPayException( "Private Key file not found OR invalid key provided");
             }
         }
 
@@ -814,21 +840,25 @@ namespace BitPay
         {
             _identity = KeyUtils.DeriveSin(ecKey);
         }
-
-        private void InitPosClient(PosToken token, Environment environment)
+        
+        private AccessTokens GetAccessTokens(PosToken token)
         {
-            var baseUrl = GetBaseUrl(environment);
-            var httpClient = getHttpClient(baseUrl);
-
-            _accessTokens = new AccessTokens();
-            _accessTokens.AddPos(token.Value());
-            _bitPayClient = new BitPayClient(httpClient, baseUrl, null);
-            _guidGenerator = new UuidGenerator();
+            var accessTokens = new AccessTokens();
+            accessTokens.AddPos(token.Value());
+            
+            return accessTokens;
         }
 
-        private static HttpClient getHttpClient(string baseUrl)
+        private IBitPayClient GetDefaultBitPayClient(Environment environment)
         {
-            return new HttpClient() {BaseAddress = new Uri(baseUrl)};
+            var baseUrl = GetBaseUrl(environment);
+            var httpClient = GetHttpClient(baseUrl);
+            return new BitPayClient(httpClient, baseUrl, null);
+        }
+
+        private static HttpClient GetHttpClient(string baseUrl)
+        {
+            return new HttpClient {BaseAddress = new Uri(baseUrl)};
         }
 
         private static string GetBaseUrl(Environment environment)

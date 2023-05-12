@@ -1,4 +1,7 @@
-﻿namespace BitPaySetup.Models
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+namespace BitPaySetup.Models
 {
     public class BitPayConfigurationModel
     {
@@ -18,8 +21,8 @@
             payout = "";
         }
 
-        public string merchant { get; set; }
-        public string payout { get; set; }
+        public string? merchant { get; set; }
+        public string? payout { get; set; }
     }
 
     public class Test

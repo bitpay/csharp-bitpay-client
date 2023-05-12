@@ -1,29 +1,37 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
+using System.Runtime.Serialization;
 
 namespace BitPay.Exceptions
 {
+    [Serializable]
     public class PayoutRecipientException : BitPayException
     {
         private const string BitPayMessage = "An unexpected error occured while trying to manage the payout recipient";
-        private readonly string _bitpayCode = "BITPAY-PAYOUT-RECIPIENT-GENERIC";
+        private new const string BitPayCode = "BITPAY-PAYOUT-RECIPIENT-GENERIC";
 
-        public PayoutRecipientException() : base(BitPayMessage)
-        {
-            BitpayCode = _bitpayCode;
-        }
-
-        public PayoutRecipientException(Exception ex) : base(BitPayMessage, ex)
-        {
-            BitpayCode = _bitpayCode;
-        }
-
-        public PayoutRecipientException(string bitpayCode, string message) : base(bitpayCode, message)
+        public PayoutRecipientException() : base(BitPayCode, BitPayMessage)
         {
         }
 
-        public PayoutRecipientException(string bitpayCode, string message, Exception cause, string apiCode = "000000") : base(bitpayCode, message, cause, apiCode)
+        public PayoutRecipientException(Exception ex) : base(BitPayCode, BitPayMessage, ex)
         {
-            ApiCode = apiCode;
+        }
+
+        public PayoutRecipientException(string bitPayCode, string message) : base(bitPayCode, message)
+        {
+        }
+
+        public PayoutRecipientException(string bitPayCode, string message, Exception cause, string? apiCode = "000000")
+            : base(bitPayCode, message, cause, apiCode)
+        {
+        }
+
+        protected PayoutRecipientException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
+        {
         }
     }
 }

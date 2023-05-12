@@ -1,4 +1,7 @@
-﻿namespace BitPay.Models.Payout
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+namespace BitPay.Models.Payout
 {
     public static class Status
     {

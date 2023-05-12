@@ -1,9 +1,13 @@
+// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using BitPay.Exceptions;
 using BitPay.Models.Settlement;
-using BitPay.Utils;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Clients
@@ -34,13 +38,14 @@ namespace BitPay.Clients
                 var parameters = ResourceClientUtil.InitParams();
                 parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
             
-                var response = await _bitPayClient.Get($"settlements/{settlementId}", parameters);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response);
-                return JsonConvert.DeserializeObject<Settlement>(responseString);
+                var response = await _bitPayClient.Get($"settlements/{settlementId}", parameters)
+                    .ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+                return JsonConvert.DeserializeObject<Settlement>(responseString)!;
             }
             catch (BitPayException ex)
             {
-                throw new SettlementQueryException(ex, ex.GetApiCode());
+                throw new SettlementQueryException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {
@@ -58,25 +63,25 @@ namespace BitPay.Clients
         /// <param name="filters">
         ///     Available filters: startDate (Format YYYY-MM-DD), endDate (Format YYYY-MM-DD), status, currency,
         ///     limit, offset.
-        ///     See https://bitpay.com/api/#rest-api-resources-settlements-retrieve-settlements
+        ///     See https://bitpay.readme.io/reference/retrieve-settlements
         /// </param>
         /// <returns>A list of BitPay Settlement objects</returns>
         /// <throws>SettlementQueryException SettlementQueryException class</throws>
         /// <throws>BitPayException BitPayException class</throws>
-        public async Task<List<Settlement>> GetByFilters(Dictionary<string, dynamic> filters)
+        public async Task<List<Settlement>> GetByFilters(Dictionary<string, dynamic?> filters)
         {
             if (filters == null) throw new MissingFieldException(nameof(filters));
             try
             {
                 filters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
                
-                var response = await _bitPayClient.Get("settlements", filters);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response);
-                return JsonConvert.DeserializeObject<List<Settlement>>(responseString);
+                var response = await _bitPayClient.Get("settlements", filters).ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+                return JsonConvert.DeserializeObject<List<Settlement>>(responseString)!;
             }
             catch (BitPayException ex)
             {
-                throw new SettlementQueryException(ex, ex.GetApiCode());
+                throw new SettlementQueryException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {
@@ -109,14 +114,14 @@ namespace BitPay.Clients
                 var parameters = ResourceClientUtil.InitParams();
                 parameters.Add("token", token);
 
-                var response = await _bitPayClient.Get(
-                    $"settlements/" + settlementId + "/reconciliationReport", parameters);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response);
-                return JsonConvert.DeserializeObject<Settlement>(responseString);
+                var response = await _bitPayClient.Get("settlements/" + settlementId + "/reconciliationReport", parameters)
+                    .ConfigureAwait(false);
+                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+                return JsonConvert.DeserializeObject<Settlement>(responseString)!;
             }
             catch (BitPayException ex)
             {
-                throw new SettlementQueryException(ex, ex.GetApiCode());
+                throw new SettlementQueryException(ex, ex.ApiCode);
             }
             catch (Exception ex)
             {

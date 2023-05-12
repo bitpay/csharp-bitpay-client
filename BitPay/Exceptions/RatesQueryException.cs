@@ -1,19 +1,29 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
+using System.Runtime.Serialization;
 
 namespace BitPay.Exceptions
 {
+    [Serializable]
     public class RatesQueryException : RatesException
     {
-        private const string BitPayCode = "BITPAY-RATES-GET";
+        private new const string BitPayCode = "BITPAY-RATES-GET";
         private const string BitPayMessage = "Failed to retirieve rates.";
 
         public RatesQueryException() : base(BitPayCode, BitPayMessage)
         {
         }
 
-        public RatesQueryException(Exception ex, string apiCode = "000000") : base(BitPayCode, BitPayMessage, ex)
+        public RatesQueryException(Exception ex, string? apiCode = "000000")
+            : base(BitPayCode, BitPayMessage, ex, apiCode)
         {
-            ApiCode = apiCode;
+        }
+
+        protected RatesQueryException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
+        {
         }
     }
 }

@@ -1,10 +1,15 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
+using System.Runtime.Serialization;
 
 namespace BitPay.Exceptions
 {
+    [Serializable]
     public class BatchException : BitPayException
     {
-        private const string BitPayCode = "BITPAY-BATCH";
+        private new const string BitPayCode = "BITPAY-BATCH";
         private const string BitPayMessage = "Error when processing the batch";
 
         public BatchException() : base(BitPayCode, BitPayMessage)
@@ -15,9 +20,14 @@ namespace BitPay.Exceptions
         {
         }
 
-        public BatchException(string bitpayCode, string message, Exception cause, string apiCode = "000000") : base(bitpayCode, message, cause, apiCode)
+        public BatchException(string bitPayCode, string message, Exception cause, string apiCode = "000000")
+            : base(bitPayCode, message, cause, apiCode)
         {
-            ApiCode = apiCode;
+        }
+
+        protected BatchException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
+        {
         }
     }
 }
