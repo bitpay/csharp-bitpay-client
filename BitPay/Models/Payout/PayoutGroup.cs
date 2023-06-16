@@ -9,7 +9,7 @@ namespace BitPay.Models.Payout;
 
 public class PayoutGroup
 {
-    [JsonProperty(PropertyName = "completed")]
+    [JsonProperty(PropertyName = "created")]
     public List<Payout> Payouts { get; private set; } = new();
     public List<PayoutGroupFailed> Failed { get; } = new();
     
