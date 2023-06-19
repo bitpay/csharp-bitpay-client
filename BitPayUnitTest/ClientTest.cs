@@ -843,6 +843,55 @@ namespace BitPayUnitTest
             Assert.Equal("6RZSTPtnzEaroAe2X4YijenRiqteRDNvzbT8NjtcHjUVd9FUFwa7dsX8RFgRDDC5SL", result.Token);
             Assert.Empty(result.Transactions!);
         }
+        
+        [Fact]
+        public void it_should_submit_payout_group()
+        {
+            // given
+            HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "createPayoutGroupResponse.json"));
+            _bitPayClient.Setup(b => b.Post(
+                "payouts/group",
+                File.ReadAllText(GetJsonResponsePath() + "createPayoutGroupRequest.json"),
+                true
+            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            
+            // when
+            var result = GetTestedClassAsPayout()
+                .SubmitPayouts(new List<Payout>{GetPayoutExample(), GetPayoutExample()})
+                .Result;
+            
+            // then
+            Assert.NotEmpty(result.Payouts);
+            var firstPayout = result.Payouts[0];
+            Assert.Equal(10.0M, firstPayout.Amount);
+            Assert.Null(firstPayout.Btc);
+            Assert.Equal("USD", firstPayout.Currency);
+            Assert.Null(firstPayout.DateExecuted);
+            Assert.Null(firstPayout.DepositTotal);
+            Assert.Equal(DateTime.Parse("2021-05-27T09:00:00.000Z").ToUniversalTime(), firstPayout.EffectiveDate);
+            Assert.Equal("john@doe.com", firstPayout.Email);
+            Assert.Null(firstPayout.ExchangeRates);
+            Assert.Null(firstPayout.Fee);
+            Assert.Equal("JMwv8wQCXANoU2ZZQ9a9GH", firstPayout.Id);
+            Assert.Equal("John Doe", firstPayout.Label);
+            Assert.Equal("GBP", firstPayout.LedgerCurrency);
+            Assert.Null(firstPayout.Message);
+            Assert.Equal("merchant@email.com", firstPayout.NotificationEmail);
+            Assert.Equal("https://yournotiticationURL.com/wed3sa0wx1rz5bg0bv97851eqx", firstPayout.NotificationUrl);
+            Assert.Null(firstPayout.PercentFee);
+            Assert.Null(firstPayout.Rate);
+            Assert.Equal("LDxRZCGq174SF8AnQpdBPB", firstPayout.RecipientId);
+            Assert.Equal("payout_20210527", firstPayout.Reference);
+            Assert.Equal(DateTime.Parse("2021-05-27T10:47:37.834Z").ToUniversalTime(), firstPayout.RequestDate);
+            Assert.Equal("7qohDf2zZnQK5Qanj8oyC2", firstPayout.ShopperId);
+            Assert.Equal("new", firstPayout.Status);
+            Assert.Null(firstPayout.SupportPhone);
+            Assert.Empty(firstPayout.Transactions!);
+            
+            Assert.NotEmpty(result.Failed);
+            Assert.Equal("Ledger currency is required", result.Failed[0].ErrMessage);
+            Assert.Equal("john@doe.com", result.Failed[0].Payee);
+        }
 
         [Fact]
         public void it_should_get_payout()
@@ -904,6 +953,27 @@ namespace BitPayUnitTest
             
             //  then
             Assert.True(result);
+        }
+        
+        [Fact]
+        public void it_should_cancel_payout_group()
+        {
+            // given
+            HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "cancelPayoutGroupResponse.json"));
+            var requestParameters = new Dictionary<string, dynamic> {{"token", PayoutToken}};
+            _bitPayClient.Setup(b => b.Delete(
+                "payouts/group/KMXZeQigXG6T5abzCJmTcH",
+                It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!))
+            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            
+            // when
+            var result = GetTestedClassAsPayout().CancelPayouts("KMXZeQigXG6T5abzCJmTcH").Result;
+            
+            //  then
+            Assert.NotEmpty(result.Payouts);
+            Assert.NotEmpty(result.Failed);
+            Assert.Equal("D8tgWzn1psUua4NYWW1vYo", result.Failed[0].PayoutId);
+            Assert.Equal($"PayoutId is missing or invalid", result.Failed[0].ErrMessage);
         }
 
         [Fact]

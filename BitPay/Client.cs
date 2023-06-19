@@ -696,6 +696,18 @@ namespace BitPay
         {
             return await CreatePayoutClient().Submit(payout).ConfigureAwait(false);
         }
+        
+        /// <summary>
+        ///     Submit a BitPay Payouts.
+        /// </summary>
+        /// <param name="payouts">Collection of Payout object with request parameters defined.</param>
+        /// <returns>Object with created payouts and information's about not created payouts.</returns>
+        /// <throws>PayoutCreationException PayoutCreationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
+        public async Task<PayoutGroup> SubmitPayouts(ICollection<Payout> payouts)
+        {
+            return await CreatePayoutGroupClient().Submit(payouts).ConfigureAwait(false);
+        }
 
         /// <summary>
         ///     Retrieve a BitPay payout by payout id using.  The client must have been previously authorized for the 
@@ -720,6 +732,18 @@ namespace BitPay
         public async Task<Boolean> CancelPayout(string payoutId)
         {
             return await CreatePayoutClient().Cancel(payoutId).ConfigureAwait(false);
+        }
+        
+        /// <summary>
+        ///     Cancel a BitPay Payouts.
+        /// </summary>
+        /// <param name="groupId">The id of the payout group to cancel.</param>
+        /// <returns>Object with cancelled payouts and information's about not cancelled payouts.</returns>
+        /// <throws>PayoutCancellationException PayoutCancellationException class</throws>
+        /// <throws>BitPayException BitPayException class</throws>
+        public async Task<PayoutGroup> CancelPayouts(string groupId)
+        {
+            return await CreatePayoutGroupClient().Cancel(groupId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -855,6 +879,11 @@ namespace BitPay
         private PayoutClient CreatePayoutClient()
         {
             return new PayoutClient(_bitPayClient, _accessTokens);
+        }
+        
+        private PayoutGroupClient CreatePayoutGroupClient()
+        {
+            return new PayoutGroupClient(_bitPayClient, _accessTokens);
         }
 
         private SettlementClient CreateSettlementClient()

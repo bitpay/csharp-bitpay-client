@@ -227,8 +227,7 @@ namespace BitPayFunctionalTest
                 LedgerCurrency = "USD",
                 RecipientId = recipientId,
                 NotificationEmail = email,
-                Email = email,
-                Reference = "Integration Test " + Guid.NewGuid(),
+                Reference = "C# Integration Test " + Guid.NewGuid(),
                 NotificationUrl = "https://somenotiticationURL.com"
             };
 
@@ -255,6 +254,78 @@ namespace BitPayFunctionalTest
             
             var cancelledPayout = _client.CancelPayout(payoutId!).Result;
             Assert.True(cancelledPayout);
+        }
+        
+        /// <summary>
+        ///     You need to have recipient before
+        /// 
+        ///     Tested payout requests:
+        ///     - SubmitPayouts(ICollection<Payout> payouts)
+        ///     - GetPayout(string payoutId)
+        ///     - CancelPayouts(string groupId)
+        ///     - GetPayouts(Dictionary<string, dynamic> filters)
+        ///     - RequestPayoutNotification(string payoutId)
+        /// </summary>
+        [Fact]
+        public async Task it_should_test_payout_group_requests()
+        {
+            var email = GetEmail();
+            var requestedRecipient = new PayoutRecipient(email, "Bob");
+            var requestedRecipients = new List<PayoutRecipient> {requestedRecipient};
+            
+            var recipients = await _client.SubmitPayoutRecipients(new PayoutRecipients(requestedRecipients));
+            var recipientId = recipients[0].Id;
+
+            Payout payout = new()
+            {
+                Amount = 10.00M,
+                Currency = "USD",
+                LedgerCurrency = "USD",
+                RecipientId = recipientId,
+                NotificationEmail = email,
+                Reference = "C# Integration Test " + Guid.NewGuid(),
+                NotificationUrl = "https://somenotiticationURL.com",
+            };
+            
+            Payout payout2 = new()
+            {
+                Amount = 10.00M,
+                Currency = "USD",
+                LedgerCurrency = "USD",
+                RecipientId = recipientId,
+                NotificationEmail = email,
+                Reference = "C# Integration Test " + Guid.NewGuid(),
+                NotificationUrl = "https://somenotiticationURL.com"
+            };
+
+            var payoutGroup = _client.SubmitPayouts(new List<Payout> {payout, payout2}).Result;
+            Assert.Empty(payoutGroup.Failed);
+            Assert.NotEmpty(payoutGroup.Payouts);
+
+            var firstPayoutId = payoutGroup.Payouts[0].Id;
+            Assert.NotNull(firstPayoutId);
+            Assert.NotNull(payoutGroup.Payouts[1].Id);
+            Assert.Equal(email, payoutGroup.Payouts[0].NotificationEmail);
+            
+            var getPayoutById = _client.GetPayout(firstPayoutId!).Result;
+            Assert.Equal(email, getPayoutById.NotificationEmail);
+            var getPayoutsFilters = new Dictionary<string, dynamic?>
+            {
+                { "startDate", Yesterday.ToString("yyyy-MM-dd") },
+                { "endDate", Tomorrow.ToString("yyyy-MM-dd") },
+                { "groupId", getPayoutById.GroupId }
+            };
+            
+            var getPayouts = _client.GetPayouts(getPayoutsFilters).Result;
+            Assert.NotEmpty(getPayouts);
+            getPayouts.Exists(singlePayout => singlePayout.NotificationEmail == email);
+              
+            var requestPayoutNotification = _client.RequestPayoutNotification(firstPayoutId!).Result;
+            Assert.True(requestPayoutNotification);
+            
+            var cancelledPayout = _client.CancelPayouts(getPayoutById.GroupId!).Result;
+            Assert.Empty(cancelledPayout.Failed);
+            Assert.NotEmpty(cancelledPayout.Payouts);
         }
         
         /// <summary>
