@@ -1,21 +1,26 @@
-﻿using Newtonsoft.Json;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Models.Payout
+using BitPay.Converters;
+
+using Newtonsoft.Json;
+
+namespace BitPay.Models.Payout
 {
     public class PayoutInstructionBtcSummary
     {
-        public PayoutInstructionBtcSummary(double paid, double unpaid)
+        public PayoutInstructionBtcSummary(decimal paid, decimal unpaid)
         {
             Paid = paid;
             Unpaid = unpaid;
         }
 
         [JsonProperty(PropertyName = "paid")]
-        [JsonConverter(typeof(Converters.BtcValueConverter))]
-        public double Paid { get; set; }
+        [JsonConverter(typeof(BtcValueConverter))]
+        public decimal Paid { get; set; }
 
         [JsonProperty(PropertyName = "unpaid")]
-        [JsonConverter(typeof(Converters.BtcValueConverter))]
-        public double Unpaid { get; set; }
+        [JsonConverter(typeof(BtcValueConverter))]
+        public decimal Unpaid { get; set; }
     }
 }

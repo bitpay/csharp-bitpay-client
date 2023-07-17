@@ -1,6 +1,9 @@
-﻿namespace BitPaySDK.Models.Bill
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+namespace BitPay.Models.Bill
 {
-    public class Status
+    public static class Status
     {
         public const string Draft = "draft";
         public const string Sent = "sent";

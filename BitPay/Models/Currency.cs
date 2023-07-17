@@ -1,10 +1,33 @@
-﻿namespace BitPaySDK.Models
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using Newtonsoft.Json;
+
+namespace BitPay.Models
 {
     /// <summary>
     /// Model provided to avoid mistyping. Check the allowed currencies at: https://bitpay.com/currencies
     /// </summary>
     public class Currency
     {
+        [JsonProperty(PropertyName = "code")] public string Code { get; set; }
+        
+        [JsonProperty(PropertyName = "symbol")] public string Symbol { get; set; }
+        
+        [JsonProperty(PropertyName = "precision")] public int Precision { get; set; }
+        
+        [JsonProperty(PropertyName = "name")] public string Name { get; set; }
+        
+        [JsonProperty(PropertyName = "plural")] public string Plural { get; set; }
+        
+        [JsonProperty(PropertyName = "alts")] public string Alts { get; set; }
+        
+        [JsonProperty(PropertyName = "minimum")] public decimal Minimum { get; set; }
+        
+        [JsonProperty(PropertyName = "sanctioned")] public bool Sanctioned { get; set; }
+        
+        [JsonProperty(PropertyName = "decimals")] public decimal Decimals { get; set; }
+
         // Crypto
         public const string BCH  = "BCH";
         public const string BTC  = "BTC";
@@ -189,6 +212,29 @@
         public const string ZAR = "ZAR";
         public const string ZMW = "ZMW";
         public const string ZWL = "ZWL";
+
+        public Currency(
+            string code,
+            string symbol,
+            int precision,
+            string name,
+            string plural,
+            string alts,
+            decimal minimum,
+            bool sanctioned,
+            decimal decimals
+        )
+        {
+            Code = code;
+            Symbol = symbol;
+            Precision = precision;
+            Name = name;
+            Plural = plural;
+            Alts = alts;
+            Minimum = minimum;
+            Sanctioned = sanctioned;
+            Decimals = decimals;
+        }
 
         public static bool isValid(string value)
         {

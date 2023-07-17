@@ -1,30 +1,34 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Exceptions
+using System;
+using System.Runtime.Serialization;
+
+namespace BitPay.Exceptions
 {
+    [Serializable]
     public class ClientAuthorizationException : BitPayException
     {
-        private const string BitPayCode = "BITPAY-CLIENT-AUTH";
+        private new const string BitPayCode = "BITPAY-CLIENT-AUTH";
         private const string BitPayMessage = "Client authorization failed";
-        protected string ApiCode;
 
         public ClientAuthorizationException() : base(BitPayCode, BitPayMessage)
         {
         }
 
-        public ClientAuthorizationException(Exception ex, string apiCode = "000000") : base(BitPayCode, BitPayMessage, ex)
+        public ClientAuthorizationException(Exception ex, string? apiCode = "000000")
+            : base(BitPayCode, BitPayMessage, ex, apiCode)
         {
-            ApiCode = apiCode;
         }
 
-        public ClientAuthorizationException(string bitpayCode, string message, Exception cause, string apiCode = "000000") : base(bitpayCode, message, cause, apiCode)
+        public ClientAuthorizationException(string bitPayCode, string message, Exception cause, string apiCode = "000000")
+            : base(bitPayCode, message, cause, apiCode)
         {
-            ApiCode = apiCode;
         }
 
-        public String GetApiCode()
+        protected ClientAuthorizationException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
         {
-            return ApiCode;
         }
     }
 }

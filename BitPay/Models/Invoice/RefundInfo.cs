@@ -1,7 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
 using System.Collections.Generic;
 
-namespace BitPaySDK.Models.Invoice
+using Newtonsoft.Json;
+
+namespace BitPay.Models.Invoice
 {
     public class RefundInfo
     {
@@ -12,6 +16,13 @@ namespace BitPaySDK.Models.Invoice
         public string Currency { get; set; }
         
         [JsonProperty(PropertyName = "amounts")]
-        public Dictionary<string, double> Amounts { get; set; }
+        public Dictionary<string, decimal> Amounts { get; set; }
+        
+        public RefundInfo(string supportRequest, string currency, Dictionary<string, decimal> amounts)
+        {
+            SupportRequest = supportRequest;
+            Currency = currency;
+            Amounts = amounts;
+        }
     }
 }

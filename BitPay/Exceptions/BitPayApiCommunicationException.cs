@@ -1,24 +1,26 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Exceptions
+using System;
+using System.Runtime.Serialization;
+
+namespace BitPay.Exceptions
 {
+    [Serializable]
     public class BitPayApiCommunicationException : BitPayException
     {
         private const string BitPayMessage = "Error when communicating with the BitPay API";
-        private static readonly string _bitpayCode = "BITPAY-API";
-        protected string ApiCode;
+        private new const string BitPayCode = "BITPAY-API";
 
-        public BitPayApiCommunicationException() : base(BitPayMessage)
+        public BitPayApiCommunicationException() : base(BitPayCode, BitPayMessage)
         {
-            BitpayCode = _bitpayCode;
         }
 
-        public BitPayApiCommunicationException(Exception ex) : base(BitPayMessage, ex)
+        public BitPayApiCommunicationException(Exception ex) : base(BitPayCode, BitPayMessage, ex)
         {
-            BitpayCode = _bitpayCode;
         }
 
-        public BitPayApiCommunicationException(string message) : base(_bitpayCode, message)
+        public BitPayApiCommunicationException(string message) : base(BitPayCode, message)
         {
         }
 
@@ -26,13 +28,16 @@ namespace BitPaySDK.Exceptions
         {
         }
 
-        public BitPayApiCommunicationException(string bitpayCode, string message, Exception cause, string apiCode = "000000") : base(bitpayCode, message, cause, apiCode)
+        public BitPayApiCommunicationException(string bitPayCode, string message, Exception cause,
+            string apiCode = "000000")
+            : base(bitPayCode, message, cause, apiCode)
         {
         }
 
-        public String GetApiCode()
+        protected BitPayApiCommunicationException(SerializationInfo serializationInfo,
+            StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
         {
-            return ApiCode;
         }
     }
 }

@@ -1,28 +1,36 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Exceptions
+using System;
+using System.Runtime.Serialization;
+
+namespace BitPay.Exceptions
 {
+    [Serializable]
     public class ConfigNotFoundException : BitPayException
     {
         private const string BitPayMessage = "An unexpected error occured while trying to retrieve the configuration";
-        private readonly string _bitpayCode = "BITPAY-CONFIG-READ";
+        private new const string BitPayCode = "BITPAY-CONFIG-READ";
 
-        public ConfigNotFoundException() : base(BitPayMessage)
-        {
-            BitpayCode = _bitpayCode;
-        }
-
-        public ConfigNotFoundException(Exception ex) : base(BitPayMessage, ex)
-        {
-            BitpayCode = _bitpayCode;
-        }
-
-        public ConfigNotFoundException(string bitpayCode, string message) : base(bitpayCode, message)
+        public ConfigNotFoundException() : base(BitPayCode, BitPayMessage)
         {
         }
 
-        public ConfigNotFoundException(string bitpayCode, string message, Exception cause) : base(bitpayCode, message,
-            cause)
+        public ConfigNotFoundException(Exception ex) : base(BitPayCode, BitPayMessage, ex)
+        {
+        }
+
+        public ConfigNotFoundException(string bitPayCode, string message) : base(bitPayCode, message)
+        {
+        }
+
+        public ConfigNotFoundException(string bitPayCode, string message, Exception cause)
+            : base(bitPayCode, message, cause)
+        {
+        }
+
+        protected ConfigNotFoundException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
         {
         }
     }

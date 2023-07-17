@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System.Collections.Generic;
+
 using Newtonsoft.Json;
 
-namespace BitPaySDK.Models.Payout
+namespace BitPay.Models.Payout
 {
     public class PayoutRecipients
     {
@@ -17,9 +21,9 @@ namespace BitPaySDK.Models.Payout
         // API fields
         //
 
-        [JsonProperty(PropertyName = "guid")] public string Guid { get; set; }
+        [JsonProperty(PropertyName = "guid")] public string? ResourceGuid { get; set; }
 
-        [JsonProperty(PropertyName = "token")] public string Token { get; set; }
+        [JsonProperty(PropertyName = "token")] public string? Token { get; set; }
 
         // Required fields
         //

@@ -1,25 +1,29 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Exceptions
+using System;
+using System.Runtime.Serialization;
+
+namespace BitPay.Exceptions
 {
+    [Serializable]
     public class RefundCancellationException : RefundException
     {
-        private const string BitPayCode = "BITPAY-REFUND-CANCELLATION";
+        private new const string BitPayCode = "BITPAY-REFUND-CANCELLATION";
         private const string BitPayMessage = "Failed to cancel refund";
-        protected string ApiCode;
 
         public RefundCancellationException() : base(BitPayCode, BitPayMessage)
         {
         }
 
-        public RefundCancellationException(Exception ex, string apiCode = "000000") : base(BitPayCode, BitPayMessage, ex)
+        public RefundCancellationException(Exception ex, string? apiCode = "000000") 
+            : base(BitPayCode, BitPayMessage, ex, apiCode)
         {
-            ApiCode = apiCode;
         }
 
-        public String GetApiCode()
+        protected RefundCancellationException(SerializationInfo serializationInfo, StreamingContext streamingContext) 
+            : base(serializationInfo, streamingContext)
         {
-            return ApiCode;
         }
     }
 }

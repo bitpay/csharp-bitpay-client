@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
+
 using Newtonsoft.Json;
 
-namespace BitPaySDK.Models.Invoice
+namespace BitPay.Models.Invoice
 {
     public class Refund
     {
-        public Refund() {
-        }
-
         // Request fields
         //
 
         [JsonProperty(PropertyName = "invoiceId")]
-        public string InvoiceId { get; set; }
+        public string? InvoiceId { get; set; }
 
         [JsonProperty(PropertyName = "preview")]
         public bool Preview { get; set; }
@@ -25,43 +25,65 @@ namespace BitPaySDK.Models.Invoice
         public bool BuyerPaysRefundFee { get; set; }
 
         [JsonProperty(PropertyName = "guid")]
-        public string Guid { get; set; }
+        public string? ResourceGuid { get; set; }
 
         [JsonProperty(PropertyName = "refundEmail")]
-        public string RefundEmail { get; set; }
+        public string? RefundEmail { get; set; }
 
         [JsonProperty(PropertyName = "amount")]
-        public double Amount { get; set; }
+        public decimal? Amount { get; set; }
 
         [JsonProperty(PropertyName = "token")]
-        public string Token { get; set; }
+        public string? Token { get; set; }
 
         [JsonProperty(PropertyName = "currency")]
-        public string Currency { get; set; }
+        public string? Currency { get; set; }
 
         // Response fields
         //
 
         [JsonProperty(PropertyName = "refundFee")]
-        public double RefundFee { get; set; }
+        public decimal? RefundFee { get; set; }
 
         [JsonProperty(PropertyName = "lastRefundNotification")]
-        public DateTime LastRefundNotification { get; set; }
+        public DateTime? LastRefundNotification { get; set; }
 
         [JsonProperty(PropertyName = "invoice")]
-        public string Invoice { get; set; }
+        public string? Invoice { get; set; }
 
         [JsonProperty(PropertyName = "id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty(PropertyName = "requestDate")]
-        public string RequestDate { get; set; }
+        public DateTime? RequestDate { get; set; }
 
         [JsonProperty(PropertyName = "status")]
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
         [JsonProperty(PropertyName = "params")]
-        public RefundParams PaymentUrls { get; set; }
+        public RefundParams? PaymentUrls { get; set; }
+        
+        [JsonProperty(PropertyName = "reference")]
+        public string? Reference { get; set; }
+        
+        [JsonProperty(PropertyName = "transactionCurrency")]
+        public string? TransactionCurrency { get; set; }
+        
+        [JsonProperty(PropertyName = "transactionAmount")]
+        public decimal? TransactionAmount { get; set; }
+        
+        [JsonProperty(PropertyName = "transactionRefundFee")]
+        public decimal? TransactionRefundFee { get; set; }
+
+        public Refund()
+        {
+        }
+
+        public Refund(string? invoiceId, decimal? amount)
+        {
+            InvoiceId = invoiceId;
+            Amount = amount;
+        }
 
         public bool ShouldSerializeId()
         {

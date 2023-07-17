@@ -1,27 +1,34 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Exceptions
+using System;
+using System.Runtime.Serialization;
+
+namespace BitPay.Exceptions
 {
+    [Serializable]
     public class WalletException : BitPayException
     {
         private const string BitPayMessage = "An unexpected error occured while trying to manage the wallet";
-        private readonly string _bitpayCode = "BITPAY-WALLET-GENERIC";
+        private new const string BitPayCode = "BITPAY-WALLET-GENERIC";
 
-        public WalletException() : base(BitPayMessage)
-        {
-            BitpayCode = _bitpayCode;
-        }
-
-        public WalletException(Exception ex) : base(BitPayMessage, ex)
-        {
-            BitpayCode = _bitpayCode;
-        }
-
-        public WalletException(string bitpayCode, string message) : base(bitpayCode, message)
+        public WalletException() : base(BitPayCode, BitPayMessage)
         {
         }
 
-        public WalletException(string bitpayCode, string message, Exception cause) : base(bitpayCode, message, cause)
+        public WalletException(Exception ex) : base(BitPayCode, BitPayMessage, ex)
+        {
+        }
+
+        public WalletException(string bitPayCode, string message) : base(bitPayCode, message)
+        {
+        }
+
+        public WalletException(string bitPayCode, string message, Exception cause) : base(bitPayCode, message, cause)
+        {
+        }
+
+        protected WalletException(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext)
         {
         }
     }

@@ -1,20 +1,20 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Models.Ledger
+using Newtonsoft.Json;
+
+namespace BitPay.Models.Ledger
 {
     public class Ledger
     {
+        [JsonProperty(PropertyName = "currency")] public string Currency { get; set; }
+        
+        [JsonProperty(PropertyName = "balance")] public decimal Balance { get; set; }
 
-        public List<LedgerEntry> Entries;
-        public string currency { get; set; }
-        public double balance { get; set; }
-
-        /// <summary>
-        ///     Creates a Ledger object.
-        /// </summary>
-        public Ledger(List<LedgerEntry> entries)
+        public Ledger(string currency, decimal balance)
         {
-            Entries = entries;
+            Currency = currency;
+            Balance = balance;
         }
     }
 }

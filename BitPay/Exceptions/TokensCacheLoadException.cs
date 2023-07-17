@@ -1,10 +1,15 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Exceptions
+using System;
+using System.Runtime.Serialization;
+
+namespace BitPay.Exceptions
 {
+    [Serializable]
     public class TokensCacheLoadException : TokensCacheException
     {
-        private const string BitPayCode = "BITPAY-TOKENS-LOAD";
+        private new const string BitPayCode = "BITPAY-TOKENS-LOAD";
         private const string BitPayMessage = "Error when trying to load the tokens";
 
         public TokensCacheLoadException() : base(BitPayCode, BitPayMessage)
@@ -12,6 +17,11 @@ namespace BitPaySDK.Exceptions
         }
 
         public TokensCacheLoadException(Exception ex) : base(BitPayCode, BitPayMessage, ex)
+        {
+        }
+
+        protected TokensCacheLoadException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
         {
         }
     }

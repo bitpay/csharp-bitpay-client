@@ -1,25 +1,29 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Exceptions
+using System;
+using System.Runtime.Serialization;
+
+namespace BitPay.Exceptions
 {
+    [Serializable]
     public class InvoiceCancellationException : InvoiceException
     {
-        private const string BitPayCode = "BITPAY-INVOICE-CANCELLATION";
+        private new const string BitPayCode = "BITPAY-INVOICE-CANCELLATION";
         private const string BitPayMessage = "Failed to cancel invoice";
-        protected string ApiCode;
 
         public InvoiceCancellationException() : base(BitPayCode, BitPayMessage)
         {
         }
 
-        public InvoiceCancellationException(Exception ex, string apiCode = "000000") : base(BitPayCode, BitPayMessage, ex)
+        public InvoiceCancellationException(Exception ex, string apiCode = "000000")
+            : base(BitPayCode, BitPayMessage, ex, apiCode)
         {
-            ApiCode = apiCode;
         }
 
-        public String GetApiCode()
+        protected InvoiceCancellationException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
         {
-            return ApiCode;
         }
     }
 }

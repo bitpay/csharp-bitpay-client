@@ -1,35 +1,38 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Exceptions
+using System;
+using System.Runtime.Serialization;
+
+namespace BitPay.Exceptions
 {
+    [Serializable]
     public class LedgerException : BitPayException
     {
         private const string BitPayMessage = "An unexpected error occured while trying to manage the ledger";
-        private readonly string _bitpayCode = "BITPAY-LEDGER-GENERIC";
-        protected string ApiCode;
+        private new const string BitPayCode = "BITPAY-LEDGER-GENERIC";
 
-        public LedgerException() : base(BitPayMessage)
-        {
-            BitpayCode = _bitpayCode;
-        }
-
-        public LedgerException(Exception ex) : base(BitPayMessage, ex)
-        {
-            BitpayCode = _bitpayCode;
-        }
-
-        public LedgerException(string bitpayCode, string message) : base(bitpayCode, message)
+        public LedgerException() : base(BitPayCode, BitPayMessage)
         {
         }
 
-        public LedgerException(string bitpayCode, string message, Exception cause, string apiCode = "000000") : base(bitpayCode, message, cause, apiCode)
+        public LedgerException(Exception ex) : base(BitPayCode, BitPayMessage, ex)
         {
-            ApiCode = apiCode;
         }
 
-        public String GetApiCode()
+        public LedgerException(string bitPayCode, string message)
+            : base(bitPayCode, message)
         {
-            return ApiCode;
+        }
+
+        public LedgerException(string bitPayCode, string message, Exception cause, string? apiCode = "000000")
+            : base(bitPayCode, message, cause, apiCode)
+        {
+        }
+
+        protected LedgerException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
+        {
         }
     }
 }

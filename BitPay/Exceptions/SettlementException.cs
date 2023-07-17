@@ -1,12 +1,16 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Exceptions
+using System;
+using System.Runtime.Serialization;
+
+namespace BitPay.Exceptions
 {
+    [Serializable]
     public class SettlementException : BitPayException
     {
-        private const string BitPayCode = "BITPAY-SETTLEMENT";
+        private new const string BitPayCode = "BITPAY-SETTLEMENT";
         private const string BitPayMessage = "Error when processing the settlement";
-        protected string ApiCode;
 
         public SettlementException() : base(BitPayCode, BitPayMessage)
         {
@@ -16,18 +20,18 @@ namespace BitPaySDK.Exceptions
         {
         }
 
-        public SettlementException(string bitpayCode, string message) : base(bitpayCode, message)
+        public SettlementException(string bitPayCode, string message) : base(bitPayCode, message)
         {
         }
 
-        public SettlementException(string bitpayCode, string message, Exception cause, string apiCode = "000000") : base(bitpayCode, message, cause, apiCode)
+        public SettlementException(string bitPayCode, string message, Exception cause, string? apiCode = "000000") 
+            : base(bitPayCode, message, cause, apiCode)
         {
-            ApiCode = apiCode;
         }
 
-        public String GetApiCode()
+        protected SettlementException(SerializationInfo serializationInfo, StreamingContext streamingContext) 
+            : base(serializationInfo, streamingContext)
         {
-            return ApiCode;
         }
     }
 }

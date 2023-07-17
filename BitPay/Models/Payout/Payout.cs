@@ -1,10 +1,15 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using BitPaySDK.Exceptions;
+
+using BitPay.Converters;
+using BitPay.Exceptions;
+
 using Newtonsoft.Json;
 
-namespace BitPaySDK.Models.Payout
+namespace BitPay.Models.Payout
 {
     public class Payout
     {
@@ -12,14 +17,14 @@ namespace BitPaySDK.Models.Payout
 
         private string _currency = "";
         private string _ledgerCurrency = "";
-        private dynamic _exchangeRates;
+        private dynamic? _exchangeRates;
 
         /// <summary>
         ///     Constructor, create an empty Payout object.
         /// </summary>
         public Payout()
         {
-            Amount = 0.0;
+            Amount = 0.0M;
             Currency = "USD";
             NotificationEmail = "";
             NotificationUrl = "";
@@ -44,7 +49,7 @@ namespace BitPaySDK.Models.Payout
         ///     PAX, XRP, BUSD, DOGE, ETH, WBTC, DAI.
         /// </param>
 
-        public Payout(double amount, string currency, string ledgerCurrency) : this()
+        public Payout(decimal amount, string currency, string ledgerCurrency) : this()
         {
             Amount = amount;
             Currency = currency;
@@ -56,13 +61,13 @@ namespace BitPaySDK.Models.Payout
 
         //[JsonProperty(PropertyName = "guid")] public string Guid { get; set; }
 
-        [JsonProperty(PropertyName = "token")] public string Token { get; set; }
+        [JsonProperty(PropertyName = "token")] public string? Token { get; set; }
 
         // Required fields
         //
 
         [JsonProperty(PropertyName = "amount")]
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
 
         [JsonProperty(PropertyName = "currency")]
         public string Currency
@@ -90,18 +95,11 @@ namespace BitPaySDK.Models.Payout
             }
         }
 
-        [JsonProperty(PropertyName = "effectiveDate")]
-        [JsonConverter(typeof(BitPaySDK.Converters.DateStringConverter))]
-        public DateTime? EffectiveDate { get; set; }
-
-        [JsonProperty(PropertyName = "transactions")]
-        public List<PayoutInstructionTransaction> Transactions { get; set; }
-
         // Optional fields
         //
 
         [JsonProperty(PropertyName = "reference")]
-        public string Reference { get; set; }
+        public string? Reference { get; set; }
 
         [JsonProperty(PropertyName = "notificationEmail")]
         public string NotificationEmail { get; set; }
@@ -109,51 +107,67 @@ namespace BitPaySDK.Models.Payout
         [JsonProperty(PropertyName = "notificationURL")]
         public string NotificationUrl { get; set; }
 
+        [JsonProperty(PropertyName = "email")]
+        public string? Email { get; set; }
+        
+        [JsonProperty(PropertyName = "recipientId")]
+        public string? RecipientId { get; set; }
+
+        [JsonProperty(PropertyName = "shopperId")]
+        public string? ShopperId { get; set; }
+        
+        [JsonProperty(PropertyName = "label")]
+        public string? Label { get; set; }
+        
+        [JsonProperty(PropertyName = "effectiveDate")]
+        [JsonConverter(typeof(DateStringConverter))]
+        public DateTime? EffectiveDate { get; set; }
+
+        [JsonProperty(PropertyName = "ignoreEmails")]
+        public bool IgnoreEmails { get; set; }
+        
         // Response fields
         //
 
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
-        [JsonProperty(PropertyName = "recipientId")]
-        public string RecipientId { get; set; }
+        public string? AccountId { get; set; }
 
-        [JsonProperty(PropertyName = "shopperId")]
-        public string ShopperId { get; set; }
+        public string? Account { get; set; }
 
-        public string Account { get; set; }
+        public string? SupportPhone { get; set; }
 
-        public string SupportPhone { get; set; }
+        public string? Status { get; set; }
 
-        public string Status { get; set; }
+        public decimal? PercentFee { get; set; }
 
-        public string Email { get; set; }
+        public decimal? Fee { get; set; }
 
-        public string Label { get; set; }
+        public decimal? DepositTotal { get; set; }
 
-        public double PercentFee { get; set; }
+        public decimal? Rate { get; set; }
 
-        public double Fee { get; set; }
-
-        public double DepositTotal { get; set; }
-
-        public double Rate { get; set; }
-
-        public double Btc { get; set; }
+        public decimal? Btc { get; set; }
 
         [JsonProperty(PropertyName = "message")]
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
-        [JsonConverter(typeof(BitPaySDK.Converters.DateStringConverter))]
-        public DateTime RequestDate { get; set; }
+        [JsonConverter(typeof(DateStringConverter))]
+        public DateTime? RequestDate { get; set; }
 
-        [JsonConverter(typeof(BitPaySDK.Converters.DateStringConverter))]
-        public DateTime DateExecuted { get; set; }
+        [JsonConverter(typeof(DateStringConverter))]
+        public DateTime? DateExecuted { get; set; }
 
-        public dynamic ExchangeRates
+        public dynamic? ExchangeRates
         {
             get => _exchangeRates;
-            set => _exchangeRates = JsonConvert.DeserializeObject(value.ToString(Formatting.None));
+            set => _exchangeRates = JsonConvert.DeserializeObject(value?.ToString(Formatting.None));
         }
+        
+        public string? GroupId { get; set; }
+        
+        [JsonProperty(PropertyName = "transactions")]
+        public List<PayoutInstructionTransaction>? Transactions { get; set; }
 
         // Private methods
         public bool ShouldSerializeAmount()
@@ -238,6 +252,41 @@ namespace BitPaySDK.Models.Payout
         public bool ShouldSerializeDateExecuted()
         {
             return false;
+        }
+        
+        public bool ShouldSerializeEffectiveDate()
+        {
+            return EffectiveDate != null;
+        }
+        
+        public bool ShouldSerializeIgnoreEmails()
+        {
+            return IgnoreEmails != null;
+        }
+        
+        public bool ShouldSerializeGroupId()
+        {
+            return false;
+        }
+        
+        public bool ShouldSerializeAccountId()
+        {
+            return false;
+        }
+        
+        public bool ShouldSerializeRecipientId()
+        {
+            return !string.IsNullOrEmpty(RecipientId);
+        }
+        
+        public bool ShouldSerializeEmail()
+        {
+            return !string.IsNullOrEmpty(Email);
+        }
+        
+        public bool ShouldSerializeShopperId()
+        {
+            return !string.IsNullOrEmpty(ShopperId);
         }
     }
 }

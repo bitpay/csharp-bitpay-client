@@ -4,11 +4,11 @@
 [![NuGet version (BitPay.Light)](https://img.shields.io/nuget/v/BitPay.svg?style=for-the-badge&logo=nuget)](https://www.nuget.org/packages/BitPay/)
 [![License](https://img.shields.io/github/license/bitpay/csharp-bitpay-client.svg?style=for-the-badge&logo=github)](https://raw.githubusercontent.com/bitpay/csharp-bitpay-client/master/LICENSE)
 
-Full implementation of the BitPay Payment Gateway. This library implements BitPay's [Cryptographically Secure RESTful API](https://bitpay.com/api).
+Full implementation of the BitPay Payment Gateway. This library implements BitPay's [Cryptographically Secure RESTful API](https://bitpay.readme.io/reference/concepts).
 
 ## Getting Started
 
-To get up and running with our C# library quickly, follow [The GUIDE](https://github.com/bitpay/csharp-bitpay-client/blob/master/GUIDE.md)
+To get up and running with our C# library quickly, follow [The GUIDE](https://bitpay.readme.io/reference/c-full-sdk-overview)
 
 ## Support
 

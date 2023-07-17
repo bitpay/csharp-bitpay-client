@@ -1,25 +1,29 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Exceptions
+using System;
+using System.Runtime.Serialization;
+
+namespace BitPay.Exceptions
 {
+    [Serializable]
     public class BillDeliveryException : BillException
     {
-        private const string BitPayCode = "BITPAY-BILL-Delivery";
+        private new const string BitPayCode = "BITPAY-BILL-Delivery";
         private const string BitPayMessage = "Failed to deliver bill";
-        protected string ApiCode;
 
         public BillDeliveryException() : base(BitPayCode, BitPayMessage)
         {
         }
 
-        public BillDeliveryException(Exception ex, string apiCode = "000000") : base(BitPayCode, BitPayMessage, ex)
+        public BillDeliveryException(Exception ex, string? apiCode = "000000")
+            : base(BitPayCode, BitPayMessage, ex, apiCode)
         {
-            ApiCode = apiCode;
         }
 
-        public String GetApiCode()
+        protected BillDeliveryException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
         {
-            return ApiCode;
         }
     }
 }

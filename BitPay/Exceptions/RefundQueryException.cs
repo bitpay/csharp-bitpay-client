@@ -1,25 +1,29 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Exceptions
+using System;
+using System.Runtime.Serialization;
+
+namespace BitPay.Exceptions
 {
+    [Serializable]
     public class RefundQueryException : RefundException
     {
-        private const string BitPayCode = "BITPAY-REFUND-GET";
+        private new const string BitPayCode = "BITPAY-REFUND-GET";
         private const string BitPayMessage = "Failed to retrieve refund";
-        protected string ApiCode;
 
         public RefundQueryException() : base(BitPayCode, BitPayMessage)
         {
         }
 
-        public RefundQueryException(Exception ex, string apiCode = "000000") : base(BitPayCode, BitPayMessage, ex)
+        public RefundQueryException(Exception ex, string apiCode = "000000")
+            : base(BitPayCode, BitPayMessage, ex, apiCode)
         {
-            ApiCode = apiCode;
         }
 
-        public String GetApiCode()
+        protected RefundQueryException(SerializationInfo serializationInfo, StreamingContext streamingContext) 
+            : base(serializationInfo, streamingContext)
         {
-            return ApiCode;
         }
     }
 }

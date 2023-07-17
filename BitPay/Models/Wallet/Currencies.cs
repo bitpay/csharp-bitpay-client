@@ -1,14 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using BitPaySDK.Exceptions;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
 using Newtonsoft.Json;
 
-namespace BitPaySDK.Models.Wallet
+namespace BitPay.Models.Wallet
 {
     public class Currencies
     {
+        public Currencies(string code, string? withdrawalFee, bool p2P, bool dappBrowser, bool walletConnect, bool payPro, Qr qr, string image)
+        {
+            Code = code;
+            WithdrawalFee = withdrawalFee;
+            P2P = p2P;
+            DappBrowser = dappBrowser;
+            WalletConnect = walletConnect;
+            PayPro = payPro;
+            Qr = qr;
+            Image = image;
+        }
+
         public string Code { get; set; }
-        public string WithdrawalFee { get; set; }
+        public string? WithdrawalFee { get; set; }
 
         [JsonProperty(PropertyName = "p2p")]
         public bool P2P { get; set; }
@@ -21,7 +33,10 @@ namespace BitPaySDK.Models.Wallet
 
         [JsonProperty(PropertyName = "payPro")]
         public bool PayPro { get; set; }
-        public CurrencyQr CurrencyQr { get; set; }
+        
+        public Qr Qr { get; set; }
+        
+        public string Image { get; set; }
 
         public bool ShouldSerializeCode()
         {
@@ -53,7 +68,7 @@ namespace BitPaySDK.Models.Wallet
             return false;
         }
 
-        public bool ShouldSerializeCurrencyQr()
+        public bool ShouldSerializeQr()
         {
             return false;
         }

@@ -1,28 +1,36 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Exceptions
+using System;
+using System.Runtime.Serialization;
+
+namespace BitPay.Exceptions
 {
+    [Serializable]
     public class TokensCacheException : BitPayException
     {
+        private new const string BitPayCode = "BITPAY-TOKENSCACHE-GENERIC";
         private const string BitPayMessage = "An unexpected error occured while trying to manage the tokens cache";
-        private readonly string _bitpayCode = "BITPAY-TOKENSCACHE-GENERIC";
 
-        public TokensCacheException() : base(BitPayMessage)
-        {
-            BitpayCode = _bitpayCode;
-        }
-
-        public TokensCacheException(Exception ex) : base(BitPayMessage, ex)
-        {
-            BitpayCode = _bitpayCode;
-        }
-
-        public TokensCacheException(string bitpayCode, string message) : base(bitpayCode, message)
+        public TokensCacheException() : base(BitPayCode, BitPayMessage)
         {
         }
 
-        public TokensCacheException(string bitpayCode, string message, Exception cause) : base(bitpayCode, message,
-            cause)
+        public TokensCacheException(Exception ex) : base(BitPayCode, BitPayMessage, ex)
+        {
+        }
+
+        public TokensCacheException(string bitPayCode, string message) : base(bitPayCode, message)
+        {
+        }
+
+        public TokensCacheException(string bitPayCode, string message, Exception cause)
+            : base(bitPayCode, message, cause)
+        {
+        }
+
+        protected TokensCacheException(SerializationInfo serializationInfo, StreamingContext streamingContext) 
+            : base(serializationInfo, streamingContext)
         {
         }
     }

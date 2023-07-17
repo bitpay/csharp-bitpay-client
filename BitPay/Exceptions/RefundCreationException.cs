@@ -1,25 +1,32 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Exceptions
+using System;
+using System.Runtime.Serialization;
+
+namespace BitPay.Exceptions
 {
+    [Serializable]
     public class RefundCreationException : RefundException
     {
-        private const string BitPayCode = "BITPAY-REFUND-CREATE";
+        private new const string BitPayCode = "BITPAY-REFUND-CREATE";
         private const string BitPayMessage = "Failed to create refund";
-        protected string ApiCode;
 
         public RefundCreationException() : base(BitPayCode, BitPayMessage)
         {
         }
-
-        public RefundCreationException(Exception ex, string apiCode = "000000") : base(BitPayCode, BitPayMessage, ex)
+        
+        public RefundCreationException(string message) : base(BitPayCode, message)
         {
-            ApiCode = apiCode;
         }
 
-        public String GetApiCode()
+        public RefundCreationException(Exception ex, string apiCode = "000000") : base(BitPayCode, BitPayMessage, ex, apiCode)
         {
-            return ApiCode;
+        }
+
+        protected RefundCreationException(SerializationInfo serializationInfo, StreamingContext streamingContext) 
+            : base(serializationInfo, streamingContext)
+        {
         }
     }
 }

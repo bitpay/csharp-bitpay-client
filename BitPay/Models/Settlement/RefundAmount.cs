@@ -1,4 +1,7 @@
-﻿namespace BitPaySDK.Models.Settlement
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+namespace BitPay.Models.Settlement
 {
     public class RefundAmount
     {

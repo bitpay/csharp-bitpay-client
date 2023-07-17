@@ -1,9 +1,12 @@
-﻿namespace BitPaySDK.Models.Payout
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+namespace BitPay.Models.Payout
 {
     public static class RecipientReferenceMethod
     {
-        public const int EMAIL = 1;
-        public const int RECIPIENT_ID = 2;
-        public const int SHOPPER_ID = 3;
+        public const int Email = 1;
+        public const int RecipientId = 2;
+        public const int ShopperId = 3;
     }
 }

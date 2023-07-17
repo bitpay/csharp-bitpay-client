@@ -1,35 +1,37 @@
-﻿using System;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
 
-namespace BitPaySDK.Exceptions
+using System;
+using System.Runtime.Serialization;
+
+namespace BitPay.Exceptions
 {
+    [Serializable]
     public class RatesException : BitPayException
     {
         private const string BitPayMessage = "An unexpected error occured while trying to manage the rates";
-        private readonly string _bitpayCode = "BITPAY-RATES-GENERIC";
-        protected string ApiCode;
+        private new const string BitPayCode = "BITPAY-RATES-GENERIC";
 
-        public RatesException() : base(BitPayMessage)
-        {
-            BitpayCode = _bitpayCode;
-        }
-
-        public RatesException(Exception ex) : base(BitPayMessage, ex)
-        {
-            BitpayCode = _bitpayCode;
-        }
-
-        public RatesException(string bitpayCode, string message) : base(bitpayCode, message)
+        public RatesException() : base(BitPayCode, BitPayMessage)
         {
         }
 
-        public RatesException(string bitpayCode, string message, Exception cause, string apiCode = "000000") : base(bitpayCode, message, cause, apiCode)
+        public RatesException(Exception ex) : base(BitPayCode, BitPayMessage, ex)
         {
-            ApiCode = apiCode;
         }
 
-        public String GetApiCode()
+        public RatesException(string bitPayCode, string message) : base(bitPayCode, message)
         {
-            return ApiCode;
+        }
+
+        public RatesException(string bitPayCode, string message, Exception cause, string? apiCode = "000000") 
+            : base(bitPayCode, message, cause, apiCode)
+        {
+        }
+
+        protected RatesException(SerializationInfo serializationInfo, StreamingContext streamingContext) 
+            : base(serializationInfo, streamingContext)
+        {
         }
     }
 }

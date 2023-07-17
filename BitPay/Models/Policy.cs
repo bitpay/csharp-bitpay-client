@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) 2019 BitPay.
+// All rights reserved.
+
+using System.Collections.Generic;
+
 using Newtonsoft.Json;
 
-namespace BitPaySDK.Models
+namespace BitPay.Models
 {
     /// <summary>
     ///     Provides BitPay token policy information.
@@ -15,6 +19,12 @@ namespace BitPaySDK.Models
         public string Method { get; set; }
 
         [JsonProperty(PropertyName = "params")]
-        public List<string> Params { get; set; }
+        public List<string>? Params { get; set; }
+
+        public Policy(string value, string method)
+        {
+            Value = value;
+            Method = method;
+        }
     }
 }
