@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <!-- version numbers will be updated by build -->
-    <AssemblyVersion>5.0.1.0</AssemblyVersion>
-    <FileVersion>5.0.1</FileVersion>
-    <VersionPrefix>5.0.1</VersionPrefix>
-    <Version>5.0.1</Version>
+    <AssemblyVersion>5.0.2.0</AssemblyVersion>
+    <FileVersion>5.0.2</FileVersion>
+    <VersionPrefix>5.0.2</VersionPrefix>
+    <Version>5.0.2</Version>
     <Authors>Antonio Buedo</Authors>
     <Company>BitPay Inc.</Company>
     <Owners>BitPay, Inc.</Owners>
