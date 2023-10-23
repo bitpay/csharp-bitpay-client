@@ -905,7 +905,7 @@ namespace BitPay
         {
             if (!File.Exists(configFilePath.Value()))
             {
-                throw new ConfigurationException("Configuration file not found");
+                BitPayExceptionProvider.ThrowGenericExceptionWithMessage("Configuration file not found");
             }
 
             var builder = new ConfigurationBuilder().AddJsonFile(configFilePath.Value(), false, true);

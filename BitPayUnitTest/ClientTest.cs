@@ -98,7 +98,12 @@ namespace BitPayUnitTest
                 "tokens",
                 "{\"guid\":\"37bd36bd-6fcb-409c-a907-47f9244302aa\",\"id\":\"someIdentity\",\"pairingCode\":\"123123123\"}",
                 false
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Post, "tokens")
+            });
 
             var testedClass = GetTestedClass();
 
@@ -121,7 +126,12 @@ namespace BitPayUnitTest
                 "tokens",
                 "{\"guid\":\"37bd36bd-6fcb-409c-a907-47f9244302aa\",\"id\":\"someIdentity\",\"facade\":\"merchant\"}",
                 false
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Post, "tokens")
+            });
             _guidGenerator.Setup(p => p.Execute()).Returns(ExampleGuid);
 
             var testedClass = GetTestedClass();
@@ -143,7 +153,12 @@ namespace BitPayUnitTest
                 "bills",
                 File.ReadAllText(GetJsonResponsePath() + "createBillRequest.json"),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Post, "bills")
+            });
             
             // when
             var result = testedClass.CreateBill(GetBill()).Result;
@@ -189,7 +204,12 @@ namespace BitPayUnitTest
                 "bills/3Zpmji8bRKxWJo2NJbWX5H",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "bills/3Zpmji8bRKxWJo2NJbWX5H")
+            });
             
             // when
             var result = testedClass.GetBill("3Zpmji8bRKxWJo2NJbWX5H").Result;
@@ -235,7 +255,12 @@ namespace BitPayUnitTest
                 "bills",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "bills")
+            });
             
             // when
             var result = testedClass.GetBills("draft").Result;
@@ -286,7 +311,12 @@ namespace BitPayUnitTest
             _bitPayClient.Setup(b => b.Put(
                 "bills/" + billId,
                 File.ReadAllText(GetJsonResponsePath() + "updateBillRequest.json")
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Put, "bills/3Zpmji8bRKxWJo2NJbWX5H")
+            });
             
             // when
             var result = testedClass.UpdateBill(billToUpdate, billId).Result;
@@ -331,7 +361,12 @@ namespace BitPayUnitTest
                 "bills/3Zpmji8bRKxWJo2NJbWX5H/deliveries",
             "{\"token\":\"billToken\"}",
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Post, "bills/3Zpmji8bRKxWJo2NJbWX5H/deliveries")
+            });
             
             // when
             var result = testedClass.DeliverBill("3Zpmji8bRKxWJo2NJbWX5H", "billToken").Result;
@@ -351,7 +386,12 @@ namespace BitPayUnitTest
                 "currencies",
                 null,
                 false
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "currencies")
+            });
             
             // when
             var result = testedClass.GetCurrencyInfo("BTC").Result;
@@ -372,7 +412,12 @@ namespace BitPayUnitTest
                 "invoices",
                 File.ReadAllText(GetJsonResponsePath() + "createInvoiceRequest.json"),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Post, "invoices")
+            });
             
             // when
             var result = GetTestedClassAsMerchant().CreateInvoice(invoice).Result;
@@ -420,7 +465,12 @@ namespace BitPayUnitTest
                 "invoices/G3viJEJgE8Jk2oekSdgT2A",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "invoices/G3viJEJgE8Jk2oekSdgT2A")
+            });
 
             // when
             var result = GetTestedClassAsMerchant().GetInvoice("G3viJEJgE8Jk2oekSdgT2A").Result;
@@ -467,7 +517,12 @@ namespace BitPayUnitTest
                 "invoices/guid/payment#1234",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "invoices/guid/payment#1234")
+            });
 
             // when
             var result = GetTestedClassAsMerchant().GetInvoiceByGuid("payment#1234").Result;
@@ -520,7 +575,12 @@ namespace BitPayUnitTest
                 "invoices",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "invoices")
+            });
 
             // when
             var result = GetTestedClassAsMerchant().GetInvoices(dateStart, dateEnd, parameters).Result;
@@ -565,7 +625,12 @@ namespace BitPayUnitTest
             _bitPayClient.Setup(b => b.Put(
                 "invoices/G3viJEJgE8Jk2oekSdgT2A",
                 "{\"buyerSms\":\"+12223334444\",\"token\":\"merchantToken\"}")
-            ).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            ).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Put, "invoices/G3viJEJgE8Jk2oekSdgT2A")
+            });
             var testedClass = GetTestedClassAsMerchant();
             var updatedData = new Dictionary<string, dynamic?> {{"buyerSms", "+12223334444"}};
 
@@ -617,7 +682,12 @@ namespace BitPayUnitTest
             _bitPayClient.Setup(b => b.Delete(
                 "invoices/Hpqc63wvE1ZjzeeH4kEycF",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!))
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Delete, "invoices/Hpqc63wvE1ZjzeeH4kEycF")
+            });
 
             // when
             var result = this.GetTestedClassAsMerchant().CancelInvoice("Hpqc63wvE1ZjzeeH4kEycF").Result;
@@ -665,7 +735,12 @@ namespace BitPayUnitTest
             _bitPayClient.Setup(b => b.Delete(
                 "invoices/guid/payment#1234",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!))
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Delete, "invoices/guid/payment#1234")
+            });
 
             // when
             var result = this.GetTestedClassAsMerchant().CancelInvoiceByGuid("payment#1234").Result;
@@ -710,7 +785,13 @@ namespace BitPayUnitTest
                 "invoices/Hpqc63wvE1ZjzeeH4kEycF/notifications",
             "{\"token\":\"merchantToken\"}",
                 false
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(
+                    HttpMethod.Delete, "invoices/Hpqc63wvE1ZjzeeH4kEycF/notifications")
+            });
 
             // when
             var result = GetTestedClassAsMerchant().RequestInvoiceWebhookToBeResent("Hpqc63wvE1ZjzeeH4kEycF").Result;
@@ -732,7 +813,12 @@ namespace BitPayUnitTest
                 "invoices/GZRP3zgNHTDf8F5BmdChKz/events",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
             true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "invoices/GZRP3zgNHTDf8F5BmdChKz/events")
+            });
 
             // when
             var result = GetTestedClassAsMerchant().GetInvoiceEventToken("GZRP3zgNHTDf8F5BmdChKz").Result;
@@ -752,7 +838,12 @@ namespace BitPayUnitTest
                 "ledgers",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "ledgers")
+            });
 
             // when
             var result = GetTestedClassAsMerchant().GetLedgers().Result;
@@ -777,7 +868,12 @@ namespace BitPayUnitTest
                 "ledgers/USD",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "ledgers/USD")
+            });
 
             // when
             var result = GetTestedClassAsMerchant().GetLedgerEntries(
@@ -810,7 +906,12 @@ namespace BitPayUnitTest
                 "payouts",
                 File.ReadAllText(GetJsonResponsePath() + "createPayoutRequest.json"),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Post, "payouts")
+            });
             
             // when
             var result = GetTestedClassAsPayout().SubmitPayout(GetPayoutExample()).Result;
@@ -853,7 +954,12 @@ namespace BitPayUnitTest
                 "payouts/group",
                 File.ReadAllText(GetJsonResponsePath() + "createPayoutGroupRequest.json"),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Post, "payouts/group")
+            });
             
             // when
             var result = GetTestedClassAsPayout()
@@ -903,7 +1009,12 @@ namespace BitPayUnitTest
                 "payouts/JMwv8wQCXANoU2ZZQ9a9GH",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "payouts/JMwv8wQCXANoU2ZZQ9a9GH")
+            });
             
             // when
             var result = GetTestedClassAsPayout().GetPayout("JMwv8wQCXANoU2ZZQ9a9GH").Result;
@@ -946,7 +1057,12 @@ namespace BitPayUnitTest
             _bitPayClient.Setup(b => b.Delete(
                 "payouts/KMXZeQigXG6T5abzCJmTcH",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!))
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Delete, "payouts/KMXZeQigXG6T5abzCJmTcH")
+            });
             
             // when
             var result = GetTestedClassAsPayout().CancelPayout("KMXZeQigXG6T5abzCJmTcH").Result;
@@ -964,7 +1080,12 @@ namespace BitPayUnitTest
             _bitPayClient.Setup(b => b.Delete(
                 "payouts/group/KMXZeQigXG6T5abzCJmTcH",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!))
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Delete, "payouts/group/KMXZeQigXG6T5abzCJmTcH")
+            });
             
             // when
             var result = GetTestedClassAsPayout().CancelPayouts("KMXZeQigXG6T5abzCJmTcH").Result;
@@ -993,7 +1114,12 @@ namespace BitPayUnitTest
                 "payouts",
                 requestParameters,
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "payouts")
+            });
             
             // when
             var result = GetTestedClassAsPayout().GetPayouts(parameters).Result;
@@ -1061,7 +1187,12 @@ namespace BitPayUnitTest
                 "payouts/JMwv8wQCXANoU2ZZQ9a9GH/notifications",
                 "{\"token\":\"payoutToken\"}",
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Post, "payouts/JMwv8wQCXANoU2ZZQ9a9GH/notifications")
+            });
             
             // when
             var result = GetTestedClassAsPayout().RequestPayoutNotification("JMwv8wQCXANoU2ZZQ9a9GH").Result;
@@ -1079,7 +1210,12 @@ namespace BitPayUnitTest
                 "recipients",
                 File.ReadAllText(GetJsonResponsePath() + "submitPayoutRecipientsRequest.json"),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Post, "recipients")
+            });
             
             // when
             var result = GetTestedClassAsPayout().SubmitPayoutRecipients(GetPayoutRecipientsExample()).Result;
@@ -1114,7 +1250,12 @@ namespace BitPayUnitTest
                 "recipients",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "recipients")
+            });
             
             // when
             var result = GetTestedClassAsPayout().GetPayoutRecipients("invited").Result;
@@ -1146,7 +1287,12 @@ namespace BitPayUnitTest
                 "recipients/JA4cEtmBxCp5cybtnh1rds",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "recipients/JA4cEtmBxCp5cybtnh1rds")
+            });
             
             // when
             var result = GetTestedClassAsPayout().GetPayoutRecipient("JA4cEtmBxCp5cybtnh1rds").Result;
@@ -1167,7 +1313,12 @@ namespace BitPayUnitTest
             _bitPayClient.Setup(b => b.Put(
                 "recipients/X3icwc4tE8KJ5hEPNPpDXW",
             "{\"email\":\"test@example.com\",\"label\":\"Bob123\",\"token\":\"payoutToken\"}"
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Put, "recipients/X3icwc4tE8KJ5hEPNPpDXW")
+            });
             var updatedLabel = "Bob123";
             var updatedPayoutRecipient = new PayoutRecipient("test@example.com", updatedLabel);
 
@@ -1187,7 +1338,12 @@ namespace BitPayUnitTest
             _bitPayClient.Setup(b => b.Delete(
                 "recipients/X3icwc4tE8KJ5hEPNPpDXW",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!))
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Delete, "recipients/X3icwc4tE8KJ5hEPNPpDXW")
+            });
 
             // when
             var result = GetTestedClassAsPayout().DeletePayoutRecipient("X3icwc4tE8KJ5hEPNPpDXW").Result;
@@ -1205,7 +1361,12 @@ namespace BitPayUnitTest
                 "rates/BCH/USD",
                 null,
                 false
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "rates/BCH/USD")
+            });
 
             // when
             var result = GetTestedClass().GetRate("BCH", "USD").Result;
@@ -1223,7 +1384,12 @@ namespace BitPayUnitTest
                 "rates",
                 null,
                 false
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "rates")
+            });
 
             // when
             var result = GetTestedClass().GetRates().Result;
@@ -1242,7 +1408,12 @@ namespace BitPayUnitTest
                 "rates/BTC",
                 null,
                 false
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "rates/BTC")
+            });
 
             // when
             var result = GetTestedClass().GetRates("BTC").Result;
@@ -1261,7 +1432,12 @@ namespace BitPayUnitTest
                 "refunds",
                 "{\"token\":\"merchantToken\",\"amount\":10.00,\"preview\":false,\"immediate\":false,\"buyerPaysRefundFee\":false,\"guid\":\"37bd36bd-6fcb-409c-a907-47f9244302aa\"}",
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Post, "refunds")
+            });
             var refund = new Refund {Invoice = "Hpqc63wvE1ZjzeeH4kEycF", Amount = 10.00M};
 
             // when
@@ -1297,7 +1473,12 @@ namespace BitPayUnitTest
                 "refunds/WoE46gSLkJQS48RJEiNw3L",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "refunds/WoE46gSLkJQS48RJEiNw3L")
+            });
             
             // when
             var result = GetTestedClassAsMerchant().GetRefund("WoE46gSLkJQS48RJEiNw3L").Result;
@@ -1332,7 +1513,12 @@ namespace BitPayUnitTest
                 "refunds/guid/ee26b5e0-9185-493e-bc12-e846d5fcf07c",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "refunds/guid/ee26b5e0-9185-493e-bc12-e846d5fcf07c")
+            });
             
             // when
             var result = GetTestedClassAsMerchant().GetRefundByGuid("ee26b5e0-9185-493e-bc12-e846d5fcf07c").Result;
@@ -1370,7 +1556,12 @@ namespace BitPayUnitTest
                 "refunds",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "refunds")
+            });
             
             // when
             var result = GetTestedClassAsMerchant().GetRefunds("Hpqc63wvE1ZjzeeH4kEycF").Result;
@@ -1419,7 +1610,12 @@ namespace BitPayUnitTest
             _bitPayClient.Setup(b => b.Put(
                 "refunds/X3icwc4tE8KJ5hEPNPpDXW",
                 "{\"token\":\"merchantToken\",\"status\":\"created\"}"
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Put, "refunds/X3icwc4tE8KJ5hEPNPpDXW")
+            });
             const string status = "created";
 
             // when
@@ -1437,7 +1633,12 @@ namespace BitPayUnitTest
             _bitPayClient.Setup(b => b.Put(
                 "refunds/guid/ee26b5e0-9185-493e-bc12-e846d5fcf07c",
                 "{\"token\":\"merchantToken\",\"status\":\"created\"}"
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Put, "refunds/guid/ee26b5e0-9185-493e-bc12-e846d5fcf07c")
+            });
             const string status = "created";
 
             // when
@@ -1456,7 +1657,12 @@ namespace BitPayUnitTest
                 "refunds/WoE46gSLkJQS48RJEiNw3L/notifications",
                 "{\"token\":\"merchantToken\"}",
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Post, "refunds/WoE46gSLkJQS48RJEiNw3L/notifications")
+            });
 
             // when
             var result = GetTestedClassAsMerchant().SendRefundNotification("WoE46gSLkJQS48RJEiNw3L").Result;
@@ -1474,7 +1680,12 @@ namespace BitPayUnitTest
             _bitPayClient.Setup(b => b.Delete(
                 "refunds/WoE46gSLkJQS48RJEiNw3L",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!))
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Delete, "refunds/WoE46gSLkJQS48RJEiNw3L")
+            });
 
             // when
             var result = this.GetTestedClassAsMerchant().CancelRefund("WoE46gSLkJQS48RJEiNw3L").Result;
@@ -1505,7 +1716,12 @@ namespace BitPayUnitTest
             _bitPayClient.Setup(b => b.Delete(
                 "refunds/guid/WoE46gSLkJQS48RJEiNw3L",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!))
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Delete, "refunds/guid/WoE46gSLkJQS48RJEiNw3L")
+            });
 
             // when
             var result = this.GetTestedClassAsMerchant().CancelRefundByGuid("WoE46gSLkJQS48RJEiNw3L").Result;
@@ -1545,7 +1761,12 @@ namespace BitPayUnitTest
                 "settlements",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "settlements")
+            });
             
             // when
             var result = GetTestedClassAsMerchant().GetSettlements(parameters).Result;
@@ -1610,7 +1831,12 @@ namespace BitPayUnitTest
                 "settlements/DNFnN3fFjjzLn6if5bdGJC",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "settlements/DNFnN3fFjjzLn6if5bdGJC")
+            });
             
             // when
             var result = GetTestedClassAsMerchant().GetSettlement("DNFnN3fFjjzLn6if5bdGJC").Result;
@@ -1654,7 +1880,12 @@ namespace BitPayUnitTest
                 "settlements/RvNuCTMAkURKimwgvSVEMP/reconciliationReport",
                 It.Is<Dictionary<string, dynamic?>>(d => requestParameters.SequenceEqual(d!)),
                 true
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "settlements/RvNuCTMAkURKimwgvSVEMP/reconciliationReport")
+            });
             
             // when
             var result = GetTestedClassAsMerchant().GetSettlementReconciliationReport(
@@ -1704,7 +1935,12 @@ namespace BitPayUnitTest
                 "supportedWallets",
                 null,
                 false
-            )).ReturnsAsync(new HttpResponseMessage {StatusCode = HttpStatusCode.OK, Content = response});
+            )).ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = response,
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, "supportedWallets")
+            });
             
             // when
             var result = GetTestedClassAsMerchant().GetSupportedWallets().Result;

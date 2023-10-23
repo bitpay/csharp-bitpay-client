@@ -19,8 +19,8 @@ namespace BitPay.Clients
 
         public PayoutGroupClient(IBitPayClient bitPayClient, AccessTokens accessTokens)
         {
-            _bitPayClient = bitPayClient ?? throw new MissingRequiredField("bitPayClient");
-            _accessTokens = accessTokens ?? throw new MissingRequiredField("accessTokens");
+            _bitPayClient = bitPayClient;
+            _accessTokens = accessTokens;
         }
 
         /// <summary>
@@ -28,37 +28,43 @@ namespace BitPay.Clients
         /// </summary>
         /// <param name="payouts">Collection of Payout object with request parameters defined.</param>
         /// <returns>Object with created payouts and information's about not created payouts.</returns>
-        /// <throws>PayoutCreationException PayoutCreationException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<PayoutGroup> Submit(ICollection<Payout> payouts)
         {
-            if (payouts == null) throw new MissingRequiredField(nameof(payouts));
+            var request = new Dictionary<string, object>
+            {
+                {"instructions", payouts},
+                {"token", _accessTokens.GetAccessToken(Facade.Payout)}
+            };
+
+            string json = null!;
+
+            try
+            {
+                json = JsonConvert.SerializeObject(request);
+            }
+            catch (Exception e)
+            {
+                BitPayExceptionProvider.ThrowSerializeResourceException("Payout Group", e.Message);
+
+                throw;
+            }
+            
+            var response = await _bitPayClient.Post("payouts/group", json, true).ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
             
             try
             {
-                var request = new Dictionary<string, object>
-                {
-                    {"instructions", payouts},
-                    {"token", _accessTokens.GetAccessToken(Facade.Payout)}
-                };
-
-                var json = JsonConvert.SerializeObject(request);
-                var response = await _bitPayClient.Post("payouts/group", json, true).ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<PayoutGroup>(responseString,
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
                     })!;
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new PayoutCreationException(ex, ex.ApiCode);
-            }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new PayoutCreationException(ex);
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Payout Group", e.Message);
 
                 throw;
             }
@@ -69,34 +75,28 @@ namespace BitPay.Clients
         /// </summary>
         /// <param name="groupId">The id of the payout group to cancel.</param>
         /// <returns>Object with cancelled payouts and information's about not cancelled payouts.</returns>
-        /// <throws>PayoutCancellationException PayoutCancellationException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<PayoutGroup> Cancel(string groupId)
         {
-            if (groupId == null) throw new MissingFieldException(nameof(groupId));
+            var parameters = ResourceClientUtil.InitParams();
+            parameters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
+
+            var response = await _bitPayClient.Delete("payouts/group/" + groupId, parameters)
+                .ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
             
             try
             {
-                var parameters = ResourceClientUtil.InitParams();
-                parameters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
-
-                var response = await _bitPayClient.Delete("payouts/group/" + groupId, parameters)
-                    .ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<PayoutGroup>(responseString,
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
                     })!;
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new PayoutCancellationException(ex, ex.ApiCode);
-            }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new PayoutCancellationException(ex);
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Payout Group", e.Message);
 
                 throw;
             }

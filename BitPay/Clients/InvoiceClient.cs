@@ -33,44 +33,36 @@ namespace BitPay.Clients
         /// <param name="facade">The facade to create the invoice against</param>
         /// <param name="signRequest">Allow unsigned request</param>
         /// <returns>A new invoice object returned from the server.</returns>
-        /// <throws>InvoiceCreationException InvoiceCreationException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<Invoice> CreateInvoice(Invoice invoice, string facade = Facade.Merchant,
             bool signRequest = true)
         {
-            if (invoice == null)
+            invoice.Token = _accessTokens.GetAccessToken(facade);
+            invoice.ResourceGuid ??= _guidGenerator.Execute();
+
+            string json = null!;
+            
+            try
             {
-                throw new ArgumentNullException(nameof(invoice));
+                json = JsonConvert.SerializeObject(invoice);
+            }
+            catch (Exception e)
+            {
+                BitPayExceptionProvider.ThrowSerializeResourceException("Bill", e.Message);
             }
 
-            if (facade == null)
-            {
-                throw new ArgumentNullException(nameof(facade));
-            }
+            var response = await _bitPayClient.Post("invoices", json, signRequest).ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
 
             try
             {
-                invoice.Token = _accessTokens.GetAccessToken(facade);
-                invoice.ResourceGuid ??= _guidGenerator.Execute();
-                var json = JsonConvert.SerializeObject(invoice);
-                var response = await _bitPayClient.Post("invoices", json, signRequest).ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 JsonConvert.PopulateObject(responseString, invoice);
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new InvoiceCreationException(ex, ex.ApiCode);
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Bill", e.Message);
             }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new InvoiceCreationException(ex);
-
-                throw;
-            }
-
-            // Track the token for this invoice
-            // CacheToken(invoice.Id, invoice.Token);
 
             return invoice;
         }
@@ -82,46 +74,32 @@ namespace BitPay.Clients
         /// <param name="facade">The facade to get the invoice from</param>
         /// <param name="signRequest">Add token to request parameters</param>
         /// <returns>The invoice object retrieved from the server.</returns>
-        /// <throws>InvoiceQueryException InvoiceQueryException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<Invoice> GetInvoice(string invoiceId, string facade = Facade.Merchant,
             bool signRequest = true)
         {
             Dictionary<string, dynamic?>? parameters = null;
+            
+            parameters = ResourceClientUtil.InitParams();
+            parameters.Add("token", _accessTokens.GetAccessToken(facade));
+            
+            var response = await _bitPayClient.Get("invoices/" + invoiceId, parameters, signRequest)
+                .ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+
+            Invoice invoice = null!;
+            
             try
             {
-                if (signRequest)
-                {
-                    // Provide the merchant token when the merchant facade is being used.
-                    // GET/invoices expects the merchant token and not the merchant/invoice token.
-                    try
-                    {
-                        parameters = ResourceClientUtil.InitParams();
-                        parameters.Add("token", _accessTokens.GetAccessToken(facade));
-                    }
-                    catch (BitPayException)
-                    {
-                        // No token for invoice.
-                        parameters = null;
-                    }
-                }
-
-                var response = await _bitPayClient.Get("invoices/" + invoiceId, parameters, signRequest)
-                    .ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Invoice>(responseString)!;
+                invoice = JsonConvert.DeserializeObject<Invoice>(responseString)!;
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new InvoiceQueryException(ex, ex.ApiCode);
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Invoice", e.Message);
             }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new InvoiceQueryException(ex);
 
-                throw;
-            }
+            return invoice;
         }
 
         /// <summary>
@@ -131,48 +109,31 @@ namespace BitPay.Clients
         /// <param name="facade">The facade to get the invoice from</param>
         /// <param name="signRequest">Add token to request parameters</param>
         /// <returns>The invoice object retrieved from the server.</returns>
-        /// <throws>InvoiceQueryException InvoiceQueryException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<Invoice> GetInvoiceByGuid(string invoiceGuid, string facade = Facade.Merchant,
             bool signRequest = true)
         {
-            if (invoiceGuid == null) throw new ArgumentNullException(nameof(invoiceGuid));
-
             Dictionary<string, dynamic?>? parameters = null;
+            parameters = ResourceClientUtil.InitParams();
+            parameters.Add("token", _accessTokens.GetAccessToken(facade));
+            
+            var response = await _bitPayClient.Get("invoices/guid/" + invoiceGuid, parameters, signRequest)
+                .ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+
+            Invoice invoice = null!;
+            
             try
             {
-                if (signRequest)
-                {
-                    // Provide the merchant token when the merchant facade is being used.
-                    // GET/invoices expects the merchant token and not the merchant/invoice token.
-                    try
-                    {
-                        parameters = ResourceClientUtil.InitParams();
-                        parameters.Add("token", _accessTokens.GetAccessToken(facade));
-                    }
-                    catch (BitPayException)
-                    {
-                        // No token for invoice.
-                        parameters = null;
-                    }
-                }
-
-                var response = await _bitPayClient.Get("invoices/guid/" + invoiceGuid, parameters, signRequest)
-                    .ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Invoice>(responseString)!;
+                invoice = JsonConvert.DeserializeObject<Invoice>(responseString)!;
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new InvoiceQueryException(ex, ex.ApiCode);
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Invoice", e.Message);
             }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new InvoiceQueryException(ex);
 
-                throw;
-            }
+            return invoice;
         }
 
         /// <summary>
@@ -182,8 +143,8 @@ namespace BitPay.Clients
         /// <param name="dateEnd">The end date for the query. Using format YYYY-MM-DD.</param>
         /// <param name="parameters">Available parameters: orderId, limit, offset</param>
         /// <returns>A list of invoice objects retrieved from the server.</returns>
-        /// <throws>InvoiceQueryException InvoiceQueryException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<List<Invoice>> GetInvoices(DateTime dateStart, DateTime dateEnd,
             Dictionary<string, dynamic?>? parameters = null)
         {
@@ -191,29 +152,27 @@ namespace BitPay.Clients
             {
                 parameters = ResourceClientUtil.InitParams();
             }
+            
+            // UTC date, ISO-8601 format yyyy-mm-dd.
+            parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
+            parameters.Add("dateStart", dateStart.ToString("yyyy-MM-dd"));
+            parameters.Add("dateEnd", dateEnd.ToString("yyyy-MM-dd"));
+            
+            var response = await _bitPayClient.Get("invoices", parameters).ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
 
+            List<Invoice> invoices = null!;
+            
             try
             {
-                // UTC date, ISO-8601 format yyyy-mm-dd.
-                parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
-                parameters.Add("dateStart", dateStart.ToString("yyyy-MM-dd"));
-                parameters.Add("dateEnd", dateEnd.ToString("yyyy-MM-dd"));
-
-                var response = await _bitPayClient.Get("invoices", parameters).ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<List<Invoice>>(responseString)!;
+                invoices = JsonConvert.DeserializeObject<List<Invoice>>(responseString)!;
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new InvoiceQueryException(ex, ex.ApiCode);
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Invoice", e.Message);
             }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new InvoiceQueryException(ex);
 
-                throw;
-            }
+            return invoices;
         }
 
         /// <summary>
@@ -222,35 +181,40 @@ namespace BitPay.Clients
         /// <param name="invoiceId">The id of the invoice to updated.</param>
         /// <param name="parameters">Available parameters: buyerEmail, buyerSms, smsCode, autoVerify</param>
         /// <returns>A BitPay updated Invoice object.</returns>
-        /// <throws>InvoiceUpdateException InvoiceUpdateException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<Invoice> UpdateInvoice(string invoiceId, Dictionary<string, dynamic?> parameters)
         {
-            if (invoiceId == null)
-            {
-                throw new ArgumentNullException(nameof(invoiceId));
-            }
+            parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
 
-            if (parameters == null)
-            {
-                throw new ArgumentNullException(nameof(parameters));
-            }
-
+            string json = null!;
+            
             try
             {
-                parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
-
-                var json = JsonConvert.SerializeObject(parameters);
-                var response = await _bitPayClient.Put("invoices/" + invoiceId, json).ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Invoice>(responseString)!;
+                json = JsonConvert.SerializeObject(parameters);
+               
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new InvoiceUpdateException(ex);
-
-                throw;
+                BitPayExceptionProvider.ThrowEncodeException(e.Message);
             }
+            
+            var response = await _bitPayClient.Put("invoices/" + invoiceId, json).ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+
+            Invoice invoice = null!;
+            
+            try
+            {
+                invoice = JsonConvert.DeserializeObject<Invoice>(responseString)!;
+               
+            }
+            catch (Exception e)
+            {
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Invoice", e.Message);
+            }
+
+            return invoice;
         }
 
         /// <summary>
@@ -263,38 +227,33 @@ namespace BitPay.Clients
         /// a manual support process and is not recommended.
         /// </param>
         /// <returns>Cancelled invoice object.</returns>
-        /// <throws>InvoiceCancellationException InvoiceCancellationException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<Invoice> CancelInvoice(string invoiceId, bool forceCancel = true)
         {
-            if (invoiceId == null)
+            var parameters = ResourceClientUtil.InitParams();
+            parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
+            
+            if (forceCancel)
             {
-                throw new ArgumentNullException(nameof(invoiceId));
+                parameters.Add("forceCancel", true);
             }
+            
+            var response = await _bitPayClient.Delete("invoices/" + invoiceId, parameters).ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
 
+            Invoice invoice = null!;
+            
             try
             {
-                var parameters = ResourceClientUtil.InitParams();
-                parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
-                if (forceCancel)
-                {
-                    parameters.Add("forceCancel", true);
-                }
-
-                var response = await _bitPayClient.Delete("invoices/" + invoiceId, parameters).ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Invoice>(responseString)!;
+                invoice = JsonConvert.DeserializeObject<Invoice>(responseString)!;
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new InvoiceQueryException(ex, ex.ApiCode);
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Invoice", e.Message);
             }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new InvoiceCancellationException(ex);
 
-                throw;
-            }
+            return invoice;
         }
 
         /// <summary>
@@ -307,39 +266,33 @@ namespace BitPay.Clients
         /// a manual support process and is not recommended.
         /// </param>
         /// <returns>Cancelled invoice object.</returns>
-        /// <throws>InvoiceCancellationException InvoiceCancellationException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<Invoice> CancelInvoiceByGuid(string guidId, bool forceCancel = true)
         {
-            if (guidId == null)
+            var parameters = ResourceClientUtil.InitParams();
+            parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
+            if (forceCancel)
             {
-                throw new ArgumentNullException(nameof(guidId));
+                parameters.Add("forceCancel", true);
             }
+            
+            var response = await _bitPayClient.Delete("invoices/guid/" + guidId, parameters)
+                .ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
 
+            Invoice invoice = null!;
+            
             try
             {
-                var parameters = ResourceClientUtil.InitParams();
-                parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
-                if (forceCancel)
-                {
-                    parameters.Add("forceCancel", true);
-                }
-
-                var response = await _bitPayClient.Delete("invoices/guid/" + guidId, parameters)
-                    .ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                return JsonConvert.DeserializeObject<Invoice>(responseString)!;
+                invoice = JsonConvert.DeserializeObject<Invoice>(responseString)!;
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new InvoiceQueryException(ex, ex.ApiCode);
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Invoice", e.Message);
             }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new InvoiceCancellationException(ex);
 
-                throw;
-            }
+            return invoice;
         }
 
         /// <summary>
@@ -347,17 +300,23 @@ namespace BitPay.Clients
         /// </summary>
         /// <param name="invoiceId">Invoice ID.</param>
         /// <returns>Status of request</returns>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<bool> RequestInvoiceWebhookToBeResent(string invoiceId)
         {
-            if (invoiceId == null)
-            {
-                throw new ArgumentNullException(nameof(invoiceId));
-            }
-
             var parameters = ResourceClientUtil.InitParams();
             parameters.Add("token", _accessTokens.GetAccessToken((Facade.Merchant)));
-            var json = JsonConvert.SerializeObject(parameters);
+
+            string json = null!;
+            
+            try
+            {
+                json = JsonConvert.SerializeObject(parameters);
+            }
+            catch (Exception e)
+            {
+                BitPayExceptionProvider.ThrowSerializeParamsException(e.Message);
+            }
 
             var response = await _bitPayClient.Post("invoices/" + invoiceId + "/notifications", json)
                 .ConfigureAwait(false);
@@ -370,44 +329,71 @@ namespace BitPay.Clients
         /// </summary>
         /// <param name="invoiceId">the id of the invoice for which you want to fetch an event token</param>
         /// <returns>event token</returns>
-        /// <exception cref="BitPayException"></exception>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<InvoiceEventToken> GetInvoiceEventToken(string invoiceId)
         {
-            if (invoiceId == null)
-            {
-                throw new ArgumentNullException(nameof(invoiceId));
-            }
-
             var parameters = ResourceClientUtil.InitParams();
             parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
 
             var response = await _bitPayClient.Get("invoices/" + invoiceId + "/events", parameters)
                 .ConfigureAwait(false);
             var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<InvoiceEventToken>(responseString)!;
+
+            InvoiceEventToken invoiceEventToken = null!;
+
+            try
+            {
+                invoiceEventToken = JsonConvert.DeserializeObject<InvoiceEventToken>(responseString)!;
+            }
+            catch (Exception e)
+            {
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Invoice Event Token", e.Message);
+            }
+
+            return invoiceEventToken;
         }
 
+        /// <summary>
+        ///     Pay a BitPay invoice with a mock transaction.
+        /// </summary>
+        /// <param name="invoiceId"></param>
+        /// <param name="status"></param>
+        /// <returns>Invoice</returns>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<Invoice> PayInvoice(string invoiceId, string status)
         {
-            if (invoiceId == null)
-            {
-                throw new ArgumentNullException(nameof(invoiceId));
-            }
-
-            if (status == null)
-            {
-                throw new ArgumentNullException(nameof(status));
-            }
-
             var parameters = ResourceClientUtil.InitParams();
             parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
             parameters.Add("status", status);
 
-            var json = JsonConvert.SerializeObject(parameters);
+            string json = null!;
+            
+            try
+            {
+                json = JsonConvert.SerializeObject(parameters);
+            }
+            catch (Exception e)
+            {
+                BitPayExceptionProvider.ThrowSerializeParamsException(e.Message);
+            }
 
             var response = await _bitPayClient.Put("invoices/pay/" + invoiceId, json).ConfigureAwait(false);
             var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<Invoice>(responseString)!;
+
+            Invoice invoice = null!;
+            
+            try
+            {
+                invoice = JsonConvert.DeserializeObject<Invoice>(responseString)!;
+            }
+            catch (Exception e)
+            {
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Invoice Event Token", e.Message);
+            }
+
+            return invoice;
         }
     }
 }

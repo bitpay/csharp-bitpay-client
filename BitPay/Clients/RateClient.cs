@@ -18,7 +18,7 @@ namespace BitPay.Clients
 
         public RateClient(IBitPayClient bitPayClient)
         {
-            _bitPayClient = bitPayClient ?? throw new MissingRequiredField("bitPayClient");
+            _bitPayClient = bitPayClient;
         }
         
         /// <summary>
@@ -28,27 +28,21 @@ namespace BitPay.Clients
         ///     The cryptocurrency for which you want to fetch the rates. Current supported values are BTC and BCH.
         /// </param>
         /// <param name="currency">The fiat currency for which you want to fetch the baseCurrency rates.</param>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<Rate> GetRate(string baseCurrency, string currency)
         {
-            if (baseCurrency == null) throw new MissingFieldException(nameof(baseCurrency));
-            if (currency == null) throw new MissingFieldException(nameof(currency));
+            var response = await _bitPayClient.Get("rates/" + baseCurrency + "/" + currency, signatureRequired: false)
+                .ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
             
             try
             {
-                var response = await _bitPayClient.Get("rates/" + baseCurrency + "/" + currency, signatureRequired: false)
-                    .ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<Rate>(responseString)!;
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new RatesQueryException(ex, ex.ApiCode);
-            }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new RatesQueryException(ex);
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Rate", e.Message);
 
                 throw;
             }
@@ -58,29 +52,29 @@ namespace BitPay.Clients
         ///     Retrieve the exchange rate table using the public facade.
         /// </summary>
         /// <returns>The rate table as an object retrieved from the server.</returns>
-        /// <throws>RatesQueryException RatesQueryException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<Rates> GetRates()
         {
+            var response = await _bitPayClient.Get("rates", signatureRequired: false).ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response)
+                .ConfigureAwait(false);
+
+            List<Rate> rates;
+            
             try
             {
-                var response = await _bitPayClient.Get("rates", signatureRequired: false).ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response)
-                    .ConfigureAwait(false);
-                var rates = JsonConvert.DeserializeObject<List<Rate>>(responseString)!;
-                return new Rates(rates);
+                rates = JsonConvert.DeserializeObject<List<Rate>>(responseString)!;
+                
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new RatesQueryException(ex, ex.ApiCode);
-            }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new RatesQueryException(ex);
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Rate", e.Message);
 
                 throw;
             }
+            
+            return new Rates(rates);
         }
         
         /// <summary>
@@ -88,29 +82,29 @@ namespace BitPay.Clients
         /// </summary>
         /// <param name="currency">The fiat currency for which you want to fetch the baseCurrency rates.</param>
         /// <returns>The rate table as an object retrieved from the server.</returns>
-        /// <throws>RatesQueryException RatesQueryException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<Rates> GetRates(string currency)
         {
+            var response = await _bitPayClient.Get("rates/" + currency, signatureRequired: false)
+                .ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+            
+            List<Rate> rates;
+            
             try
             {
-                var response = await _bitPayClient.Get("rates/" + currency, signatureRequired: false)
-                    .ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                var rates = JsonConvert.DeserializeObject<List<Rate>>(responseString)!;
-                return new Rates(rates);
+                rates = JsonConvert.DeserializeObject<List<Rate>>(responseString)!;
+                
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new RatesQueryException(ex, ex.ApiCode);
-            }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new RatesQueryException(ex);
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Rate", e.Message);
 
                 throw;
             }
+            
+            return new Rates(rates);
         }
     }
 }

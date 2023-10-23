@@ -6,6 +6,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using BitPay.Exceptions;
 
 using Org.BouncyCastle.Crypto.Digests;
 using BigInteger = Org.BouncyCastle.Math.BigInteger;
@@ -205,19 +206,53 @@ namespace BitPay
         /// <param name="ecKey">The key object to sign with</param>
         /// <param name="input">The string to be signed</param>
         /// <returns>The signature</returns>
+        /// <throws>BitPayGenericException BitPayGenericException class</throws>
         public static string Sign(EcKey? ecKey, string input)
         {
             if (ecKey == null)
             {
-                throw new ArgumentNullException(nameof(ecKey));
+                BitPayExceptionProvider.ThrowMissingParameterException();
             }
 
-            // return ecKey.Sign(input);
-            var hash = Sha256Hash(input);
-            var hashBytes = HexToBytes(hash);
-            var signature = ecKey.Sign(hashBytes);
-            var bytesHex = BytesToHex(signature);
-            return bytesHex;
+            string result = null!;
+
+            try
+            {
+                var hash = Sha256Hash(input);
+                var hashBytes = HexToBytes(hash);
+                var signature = ecKey.Sign(hashBytes);
+                result = BytesToHex(signature);
+            }
+            catch (Exception e)
+            {
+                BitPayExceptionProvider.ThrowGenericExceptionWithMessage(e.Message);
+            }
+
+            return result;
+        }
+        
+        /// <summary>
+        ///     Bytes to Hex
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns>string</returns>
+        /// <throws>BitPayGenericException BitPayGenericException class</throws>
+        public static string BytesToHex(byte[]? bytes)
+        {
+            if (bytes == null)
+            {
+                BitPayExceptionProvider.ThrowGenericExceptionWithMessage("Missing bytes");
+            }
+
+            var hexChars = new char[bytes.Length * 2];
+            for (var j = 0; j < bytes.Length; j++)
+            {
+                var v = bytes[j] & 0xFF;
+                hexChars[j * 2] = HexArray[(int) ((uint) v >> 4)];
+                hexChars[j * 2 + 1] = HexArray[v & 0x0F];
+            }
+
+            return new string(hexChars);
         }
         
         private static EcKey CreateEcKeyFromHexString(string privateKey)
@@ -289,24 +324,6 @@ namespace BitPay
                 sr.Close();
                 return line;
             }
-        }
-
-        public static string BytesToHex(byte[]? bytes)
-        {
-            if (bytes == null)
-            {
-                throw new ArgumentNullException(nameof(bytes));
-            }
-
-            var hexChars = new char[bytes.Length * 2];
-            for (var j = 0; j < bytes.Length; j++)
-            {
-                var v = bytes[j] & 0xFF;
-                hexChars[j * 2] = HexArray[(int) ((uint) v >> 4)];
-                hexChars[j * 2 + 1] = HexArray[v & 0x0F];
-            }
-
-            return new string(hexChars);
         }
     }
 }

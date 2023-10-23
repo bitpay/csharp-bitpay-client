@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -22,10 +23,16 @@ namespace BitPay.Clients
         {
             _bitPayClient = bitPayClient;
         }
-
-        public async Task<Currency> GetCurrencyInfo(string currencyCode)
+        
+        /// <summary>
+        ///  Get currency info.
+        /// </summary>
+        /// <param name="currencyCode"></param>
+        /// <returns>Currency</returns>
+        /// <exception cref="BitPayGenericException"></exception>
+        public async Task<Currency> GetCurrencyInfo(string? currencyCode)
         {
-            if (currencyCode == null) throw new MissingFieldException(nameof(currencyCode));
+            if (currencyCode == null) BitPayExceptionProvider.ThrowMissingParameterException();
 
             _currenciesInfo ??= await LoadCurrencies().ConfigureAwait(false);
 
@@ -33,8 +40,9 @@ namespace BitPay.Clients
             {
                 return currency;
             }
-
-            throw new BitPayException("missing currency");
+            
+            BitPayExceptionProvider.ThrowGenericExceptionWithMessage("Missing currency");
+            throw new SyntaxErrorException();
         }
 
         private async Task<List<Currency>> LoadCurrencies()

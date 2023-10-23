@@ -29,27 +29,47 @@ namespace BitPay.Clients
             _identity = identity ?? throw new ArgumentNullException(nameof(identity));
         }
 
+        /// <summary>
+        ///     Authorize (pair) this client with the server using the specified pairing code.
+        /// </summary>
+        /// <param name="pairingCode">A code obtained from the server; typically from bitpay.com/api-tokens.</param>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task AuthorizeClient(string pairingCode)
         {
+            Token token = new(
+                id: _identity,
+                resourceGuid: _guidGenerator.Execute()
+            ) { PairingCode = pairingCode };
+
+            string json = null!;
+            
             try
             {
-                Token token = new(
-                    id: _identity,
-                    resourceGuid: _guidGenerator.Execute()
-                ) { PairingCode = pairingCode };
-                var json = JsonConvert.SerializeObject(token);
-                var response = await _bitPayClient.Post("tokens", json).ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                var tokens = JsonConvert.DeserializeObject<List<Token>>(responseString)!;
-                foreach (var t in tokens) _accessTokens.AddToken(t.Facade!, t.Value!);
+                json = JsonConvert.SerializeObject(token);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new ClientAuthorizationException(ex);
-
-                throw;
+                BitPayExceptionProvider.ThrowGenericExceptionWithMessage(
+                    "Failed to serialize Token object : " + e.Message);
             }
+            
+            var response = await _bitPayClient.Post("tokens", json).ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+
+            List<Token> tokens = null!;
+            
+            try
+            {
+                tokens = JsonConvert.DeserializeObject<List<Token>>(responseString)!;
+                
+            }
+            catch (Exception e)
+            {
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Tokens", e.Message);
+            }
+            
+            foreach (var t in tokens) _accessTokens.AddToken(t.Facade!, t.Value!);
         }
         
         /// <summary>
@@ -57,35 +77,32 @@ namespace BitPay.Clients
         /// </summary>
         /// <param name="facade">The facade for which authorization is requested.</param>
         /// <returns>A pairing code for this client. This code must be used to authorize this client at BitPay.com/api-tokens.</returns>
-        /// <throws>ClientAuthorizationException ClientAuthorizationException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<string> CreatePairingCodeForFacade(string facade)
         {
+            var token = new Token(
+                id: _identity,
+                resourceGuid: _guidGenerator.Execute()
+            ) { Facade = facade };
+
+            string json = null!;
+            
             try
             {
-                var token = new Token(
-                    id: _identity,
-                    resourceGuid: _guidGenerator.Execute()
-                ) { Facade = facade };
-                var json = JsonConvert.SerializeObject(token);
-                var response = await _bitPayClient.Post("tokens", json).ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
-                var tokens = JsonConvert.DeserializeObject<List<Token>>(responseString)!;
-                _accessTokens.AddToken(tokens[0].Facade!, tokens[0].Value!);
-
-                return tokens[0].PairingCode!;
+                json = JsonConvert.SerializeObject(token);
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new ClientAuthorizationException(ex, ex.ApiCode);
+                BitPayExceptionProvider.ThrowSerializeResourceException("Token", e.Message);
             }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new ClientAuthorizationException(ex);
-
-                throw;
-            }
+            
+            var response = await _bitPayClient.Post("tokens", json).ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+            var tokens = JsonConvert.DeserializeObject<List<Token>>(responseString)!;
+            _accessTokens.AddToken(tokens[0].Facade!, tokens[0].Value!);
+            
+            return tokens[0].PairingCode!;
         }
     }
 }
