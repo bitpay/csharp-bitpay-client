@@ -19,8 +19,11 @@ namespace BitPay.Clients
         public static async Task<string> ResponseToJsonString(HttpResponseMessage? response)
         {
             if (response == null)
+            {
                 BitPayExceptionProvider.ThrowApiExceptionWithMessage("HTTP response is null");
-            
+                throw new InvalidOperationException();
+            }
+
             string? responseString = null;
             
             try
@@ -30,15 +33,16 @@ namespace BitPay.Clients
                 // A data object has its content extracted (throw away the data wrapper object).
                 responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                HttpRequestMessage responseRequestMessage = response.RequestMessage;
+                HttpRequestMessage responseRequestMessage = response.RequestMessage!;
                 LoggerProvider.GetLogger().LogResponse(
                     responseRequestMessage.Method.ToString(), 
-                    responseRequestMessage.RequestUri.ToString(),
+                    responseRequestMessage.RequestUri!.ToString(),
                     responseString);
             }
             catch (Exception e)
             {
                 BitPayExceptionProvider.ThrowApiExceptionWithMessage(e.Message);
+                throw new InvalidOperationException();
             }
             
             JObject jObj;

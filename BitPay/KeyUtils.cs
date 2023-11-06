@@ -212,6 +212,7 @@ namespace BitPay
             if (ecKey == null)
             {
                 BitPayExceptionProvider.ThrowMissingParameterException();
+                throw new InvalidOperationException();
             }
 
             string result = null!;
@@ -242,6 +243,7 @@ namespace BitPay
             if (bytes == null)
             {
                 BitPayExceptionProvider.ThrowGenericExceptionWithMessage("Missing bytes");
+                throw new InvalidOperationException();
             }
 
             var hexChars = new char[bytes.Length * 2];
