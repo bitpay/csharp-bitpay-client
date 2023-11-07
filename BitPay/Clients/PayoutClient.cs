@@ -33,7 +33,11 @@ namespace BitPay.Clients
         /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<Payout> Submit(Payout payout)
         {
-            if (payout == null) BitPayExceptionProvider.ThrowMissingParameterException();
+            if (payout == null)
+            {
+                BitPayExceptionProvider.ThrowMissingParameterException();
+                throw new InvalidOperationException();
+            }
             
             payout.Token = _accessTokens.GetAccessToken(Facade.Payout);
 
@@ -146,7 +150,11 @@ namespace BitPay.Clients
         /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<List<Payout>> GetPayouts(Dictionary<string, dynamic?> filters)
         {
-            if (filters == null) BitPayExceptionProvider.ThrowMissingParameterException();
+            if (filters == null)
+            {
+                BitPayExceptionProvider.ThrowMissingParameterException();
+                throw new InvalidOperationException();
+            }
             
             filters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
 

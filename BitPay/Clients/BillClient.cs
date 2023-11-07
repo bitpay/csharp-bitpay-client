@@ -35,7 +35,11 @@ namespace BitPay.Clients
         /// <throws>BitPayApiException BitPayApiException class</throws>
         public async Task<Bill> CreateBill(Bill bill, string facade = Facade.Merchant, bool signRequest = true)
         {
-            if (bill == null) BitPayExceptionProvider.ThrowMissingParameterException();
+            if (bill == null)
+            {
+                BitPayExceptionProvider.ThrowMissingParameterException();
+                throw new InvalidOperationException();
+            }
             
             bill.Token = _accessTokens.GetAccessToken(facade);
 

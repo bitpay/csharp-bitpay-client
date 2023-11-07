@@ -21,10 +21,6 @@ namespace BitPay.Clients
 
         public InvoiceClient(IBitPayClient bitPayClient, AccessTokens accessTokens, IGuidGenerator guidGenerator)
         {
-            if (bitPayClient == null) BitPayExceptionProvider.ThrowMissingParameterException();
-            if (accessTokens == null) BitPayExceptionProvider.ThrowMissingParameterException();
-            if (guidGenerator == null) BitPayExceptionProvider.ThrowMissingParameterException();
-
             _bitPayClient = bitPayClient;
             _accessTokens = accessTokens;
             _guidGenerator = guidGenerator;
@@ -42,7 +38,11 @@ namespace BitPay.Clients
         public async Task<Invoice> CreateInvoice(Invoice invoice, string facade = Facade.Merchant,
             bool signRequest = true)
         {
-            if (invoice == null) BitPayExceptionProvider.ThrowMissingParameterException();
+            if (invoice == null)
+            {
+                BitPayExceptionProvider.ThrowMissingParameterException();
+                throw new InvalidOperationException();
+            }
             
             invoice.Token = _accessTokens.GetAccessToken(facade);
             invoice.ResourceGuid ??= _guidGenerator.Execute();
@@ -191,6 +191,11 @@ namespace BitPay.Clients
         /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<Invoice> UpdateInvoice(string invoiceId, Dictionary<string, dynamic?> parameters)
         {
+            if (parameters == null)
+            {
+                BitPayExceptionProvider.ThrowMissingParameterException();
+                throw new InvalidOperationException();
+            }
             parameters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
 
             string json = null!;

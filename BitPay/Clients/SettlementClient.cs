@@ -64,7 +64,11 @@ namespace BitPay.Clients
         /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<List<Settlement>> GetByFilters(Dictionary<string, dynamic?> filters)
         {
-            if (filters == null) BitPayExceptionProvider.ThrowMissingParameterException();
+            if (filters == null)
+            {
+                BitPayExceptionProvider.ThrowMissingParameterException();
+                throw new InvalidOperationException();
+            }
             
             filters.Add("token", _accessTokens.GetAccessToken(Facade.Merchant));
 
