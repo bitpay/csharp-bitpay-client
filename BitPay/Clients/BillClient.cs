@@ -20,8 +20,8 @@ namespace BitPay.Clients
 
         public BillClient(IBitPayClient bitPayClient, AccessTokens accessTokens)
         {
-            _bitPayClient = bitPayClient ?? throw new BitPayValidationException(nameof(bitPayClient));
-            _accessTokens = accessTokens ?? throw new BitPayValidationException(nameof(accessTokens));
+            _bitPayClient = bitPayClient;
+            _accessTokens = accessTokens;
         }
 
         /// <summary>
@@ -35,6 +35,8 @@ namespace BitPay.Clients
         /// <throws>BitPayApiException BitPayApiException class</throws>
         public async Task<Bill> CreateBill(Bill bill, string facade = Facade.Merchant, bool signRequest = true)
         {
+            if (bill == null) BitPayExceptionProvider.ThrowMissingParameterException();
+            
             bill.Token = _accessTokens.GetAccessToken(facade);
 
             string json;
@@ -141,6 +143,8 @@ namespace BitPay.Clients
         /// <throws>BitPayApiException BitPayApiException class</throws>
         public async Task<Bill> UpdateBill(Bill bill, string billId)
         {
+            if (bill == null) BitPayExceptionProvider.ThrowMissingParameterException();
+
             string json = null!;
             
             try

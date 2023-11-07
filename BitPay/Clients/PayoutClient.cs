@@ -33,6 +33,8 @@ namespace BitPay.Clients
         /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<Payout> Submit(Payout payout)
         {
+            if (payout == null) BitPayExceptionProvider.ThrowMissingParameterException();
+            
             payout.Token = _accessTokens.GetAccessToken(Facade.Payout);
 
             string json = null!;
@@ -144,6 +146,8 @@ namespace BitPay.Clients
         /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<List<Payout>> GetPayouts(Dictionary<string, dynamic?> filters)
         {
+            if (filters == null) BitPayExceptionProvider.ThrowMissingParameterException();
+            
             filters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
 
             var response = await _bitPayClient.Get("payouts", filters).ConfigureAwait(false); 

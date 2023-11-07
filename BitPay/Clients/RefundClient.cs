@@ -39,6 +39,7 @@ namespace BitPay.Clients
         /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<Refund> Create(Refund refundToCreate)
         {
+            if (refundToCreate == null) BitPayExceptionProvider.ThrowMissingParameterException();
             if (refundToCreate.Amount == 0) BitPayExceptionProvider.ThrowValidationException("Wrong refund Amount");
             
             refundToCreate.ResourceGuid ??= _guidGenerator.Execute();

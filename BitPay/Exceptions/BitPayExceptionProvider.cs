@@ -7,7 +7,7 @@ using BitPay.Logger;
 
 namespace BitPay.Exceptions
 {
-    public class BitPayExceptionProvider
+    public static class BitPayExceptionProvider
     {
         public const string GenericApiUnmappedErrorCode = "000000";
         

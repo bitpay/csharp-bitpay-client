@@ -5,13 +5,9 @@ using System;
 
 namespace BitPay.Logger
 {
-    public class LoggerProvider
+    public static class LoggerProvider
     {
         private static IBitPayLogger? s_logger;
-
-        private LoggerProvider()
-        {
-        }
 
         public static IBitPayLogger GetLogger()
         {

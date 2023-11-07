@@ -119,15 +119,7 @@ namespace BitPay.Clients
 
         public async Task<HttpResponseMessage> Post(string uri, string json, bool signatureRequired = false)
         {
-            StringContent bodyContent = null!;
-            try
-            {
-                bodyContent = new StringContent(UnicodeToAscii(json));
-            }
-            catch (Exception e)
-            {
-                BitPayExceptionProvider.ThrowGenericExceptionWithMessage(e.Message);
-            }
+            using var bodyContent = new StringContent(UnicodeToAscii(json));
             
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("x-accept-version", Config.BitPayApiVersion);
@@ -162,15 +154,7 @@ namespace BitPay.Clients
 
         public async Task<HttpResponseMessage> Put(string uri, string json)
         {
-            StringContent bodyContent = null!;
-            try
-            {
-                bodyContent = new StringContent(UnicodeToAscii(json));
-            }
-            catch (Exception e)
-            {
-                BitPayExceptionProvider.ThrowGenericExceptionWithMessage(e.Message);
-            }
+            using var bodyContent = new StringContent(UnicodeToAscii(json));
             
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("x-accept-version", Config.BitPayApiVersion);
