@@ -18,29 +18,29 @@ namespace BitPay.Clients
 
         public WalletClient(IBitPayClient bitPayClient)
         {
-            _bitPayClient = bitPayClient ?? throw new MissingRequiredField("bitPayClient");
+            _bitPayClient = bitPayClient;
         }
         
         /// <summary>
         ///     Retrieve all supported wallets.
         /// </summary>
-        ///<returns>A list of wallet objets.</returns> 
-        ///<throws>WalletQueryException WalletQueryException class</throws> 
+        /// <returns>A list of wallet objets.</returns> 
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<List<Wallet>> GetSupportedWallets()
         {
+            var response = await _bitPayClient.Get("supportedWallets", null, false)
+                .ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response)
+                .ConfigureAwait(false);
+            
             try
             {
-                var response = await _bitPayClient.Get("supportedWallets", null, false)
-                    .ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response)
-                    .ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<List<Wallet>>(responseString)!;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new WalletQueryException(ex);
-
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Wallet", e.Message);
                 throw;
             }
         }

@@ -22,9 +22,9 @@ namespace BitPay.Clients
 
         public PayoutRecipientsClient(IBitPayClient bitPayClient, AccessTokens accessTokens, IGuidGenerator guidGenerator)
         {
-            _bitPayClient = bitPayClient ?? throw new MissingRequiredField("bitPayClient");
-            _accessTokens = accessTokens ?? throw new MissingRequiredField("accessTokens");
-            _guidGenerator = guidGenerator ?? throw new MissingRequiredField("guidGenerator");
+            _bitPayClient = bitPayClient;
+            _accessTokens = accessTokens;
+            _guidGenerator = guidGenerator;
         }
         
         /// <summary>
@@ -32,34 +32,46 @@ namespace BitPay.Clients
         /// </summary>
         /// <param name="recipients">A PayoutRecipients object with request parameters defined.</param>
         /// <returns>A list of BitPay PayoutRecipients objects.</returns>
-        /// <throws>PayoutRecipientCreationException PayoutRecipientCreationException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<List<PayoutRecipient>> Submit(PayoutRecipients recipients)
         {
-            if (recipients == null) throw new MissingFieldException(nameof(recipients));
+            if (recipients == null)
+            {
+                BitPayExceptionProvider.ThrowMissingParameterException();
+                throw new InvalidOperationException();
+            }
+
+            recipients.Token = _accessTokens.GetAccessToken(Facade.Payout);
+            recipients.ResourceGuid ??= _guidGenerator.Execute();
+
+            string json;
+            
             try
             {
-                recipients.Token = _accessTokens.GetAccessToken(Facade.Payout);
-                recipients.ResourceGuid ??= _guidGenerator.Execute();
-
-                var json = JsonConvert.SerializeObject(recipients);
-                var response = await _bitPayClient.Post("recipients", json, true)
-                    .ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+                json = JsonConvert.SerializeObject(recipients);
+            }
+            catch (Exception e)
+            {
+                BitPayExceptionProvider.ThrowSerializeResourceException("Payout Recipient", e.Message);
+                throw;
+            }
+            
+            var response = await _bitPayClient.Post("recipients", json, true)
+                .ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+            
+            try
+            {
                 return JsonConvert.DeserializeObject<List<PayoutRecipient>>(responseString,
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
                     })!;
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new PayoutRecipientCreationException(ex, ex.ApiCode);
-            }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new PayoutRecipientCreationException(ex);
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Payout Recipient", e.Message);
 
                 throw;
             }
@@ -71,33 +83,28 @@ namespace BitPay.Clients
         /// </summary>
         /// <param name="recipientId">The id of the recipient to retrieve.</param>
         /// <returns>A BitPay PayoutRecipient object.</returns>
-        /// <throws>PayoutRecipientQueryException PayoutRecipientQueryException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<PayoutRecipient> Get(string recipientId)
         {
-            if (recipientId == null) throw new MissingFieldException(nameof(recipientId));
+            var parameters = ResourceClientUtil.InitParams();
+            parameters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
+
+            var response = await _bitPayClient.Get("recipients/" + recipientId, parameters)
+                .ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+            
             try
             {
-                var parameters = ResourceClientUtil.InitParams();
-                parameters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
-
-                var response = await _bitPayClient.Get("recipients/" + recipientId, parameters)
-                    .ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<PayoutRecipient>(responseString,
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
                     })!;
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new PayoutRecipientQueryException(ex, ex.ApiCode);
-            }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new PayoutRecipientQueryException(ex);
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Payout Recipient", e.Message);
 
                 throw;
             }
@@ -110,37 +117,34 @@ namespace BitPay.Clients
         /// <param name="limit">Maximum results that the query will return (useful for paging results).</param>
         /// <param name="offset">Offset for paging</param>
         /// <returns>A list of BitPayRecipient objects.</returns>
-        /// <throws>PayoutRecipientQueryException PayoutRecipientQueryException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<List<PayoutRecipient>> GetByFilters(string? status, int limit, int offset)
         {
+            var parameters = ResourceClientUtil.InitParams();
+            if (!string.IsNullOrEmpty(status))
+            {
+                parameters.Add("status", status!);
+            }
+            parameters.Add("limit", limit.ToString());
+            parameters.Add("offset", offset.ToString());
+            parameters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
+
+            var response = await _bitPayClient.Get("recipients", parameters).ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+            
             try
             {
-                var parameters = ResourceClientUtil.InitParams();
-                if (!string.IsNullOrEmpty(status))
-                {
-                    parameters.Add("status", status!);
-                }
-                parameters.Add("limit", limit.ToString());
-                parameters.Add("offset", offset.ToString());
-                parameters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
-
-                var response = await _bitPayClient.Get("recipients", parameters).ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<List<PayoutRecipient>>(responseString,
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
                     })!;
             }
-            catch (BitPayException ex)
+         
+            catch (Exception e)
             {
-                throw new PayoutRecipientQueryException(ex, ex.ApiCode);
-            }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new PayoutRecipientQueryException();
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Payout Recipient", e.Message);
 
                 throw;
             }
@@ -154,34 +158,44 @@ namespace BitPay.Clients
         ///     Available changes: label, token
         /// </param>
         /// <returns>The updated recipient object.</returns>
-        /// <throws>PayoutRecipientUpdateException PayoutRecipientUpdateException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<PayoutRecipient> Update(string recipientId, PayoutRecipient recipient)
         {
-            if (recipientId == null) throw new MissingFieldException(nameof(recipientId));
-            if (recipient == null) throw new MissingFieldException(nameof(recipient));
+            if (recipient == null)
+            {
+                BitPayExceptionProvider.ThrowMissingParameterException();
+                throw new InvalidOperationException();
+            }
+            
+            recipient.Token = _accessTokens.GetAccessToken(Facade.Payout);
+
+            string json;
             
             try
             {
-                recipient.Token = _accessTokens.GetAccessToken(Facade.Payout);
+                json = JsonConvert.SerializeObject(recipient);
+            }
+            catch (Exception e)
+            {
+                BitPayExceptionProvider.ThrowSerializeResourceException("Payout Recipient", e.Message);
+                throw;
+            }
 
-                var json = JsonConvert.SerializeObject(recipient);
-                var response = await _bitPayClient.Put("recipients/" + recipientId, json).ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false); 
+            var response = await _bitPayClient.Put("recipients/" + recipientId, json).ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false); 
+            
+            try
+            {
                 return JsonConvert.DeserializeObject<PayoutRecipient>(responseString,
                     new JsonSerializerSettings
                     {
                         NullValueHandling = NullValueHandling.Ignore
                     })!;
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new PayoutRecipientUpdateException(ex, ex.ApiCode);
-            }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new PayoutRecipientUpdateException(ex);
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Payout Recipient", e.Message);
 
                 throw;
             }
@@ -192,32 +206,27 @@ namespace BitPay.Clients
         /// </summary>
         /// <param name="recipientId">The id of the recipient to cancel.</param>
         /// <returns>True if the delete operation was successfully, false otherwise.</returns>
-        /// <throws>PayoutRecipientCancellationException PayoutRecipientCancellationException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<bool> Delete(string recipientId)
         {
-            if (recipientId == null) throw new MissingFieldException(nameof(recipientId));
+            var parameters = ResourceClientUtil.InitParams();
+            parameters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
+                
+            var response = await _bitPayClient.Delete("recipients/" + recipientId, parameters).ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+            
             try
             {
-                var parameters = ResourceClientUtil.InitParams();
-                parameters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
-                
-                var response = await _bitPayClient.Delete("recipients/" + recipientId, parameters).ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString)!;
                 return "success".Equals(
                     responseObject.GetValue("status", StringComparison.Ordinal)?.ToString(),
                     StringComparison.OrdinalIgnoreCase
                 );
             }
-            catch (BitPayException ex)
+            catch (Exception e)
             {
-                throw new PayoutRecipientCancellationException(ex, ex.ApiCode);
-            }
-            catch (Exception ex)
-            {
-                if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                    throw new PayoutRecipientCancellationException();
+                BitPayExceptionProvider.ThrowDeserializeResourceException("Payout Recipient", e.Message);
 
                 throw;
             }
@@ -228,33 +237,40 @@ namespace BitPay.Clients
         /// </summary>
         /// <param name="recipientId">The id of the recipient to notify.</param>
         /// <returns>True if the notification was successfully sent, false otherwise.</returns>
-        /// <throws>PayoutRecipientNotificationException PayoutRecipientNotificationException class</throws>
-        /// <throws>BitPayException BitPayException class</throws>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
+        /// <exception cref="BitPayApiException">BitPayApiException class</exception>
         public async Task<bool> RequestPayoutRecipientNotification(string recipientId)
         {
+            var parameters = ResourceClientUtil.InitParams();
+            parameters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
+            
+            string json;
+            
+            try
+            {
+                json = JsonConvert.SerializeObject(parameters);
+            }
+            catch (Exception e)
+            {
+                BitPayExceptionProvider.ThrowSerializeParamsException(e.Message);
+                throw;
+            }
+            
+            var response = await _bitPayClient.Post("recipients/" + recipientId + "/notifications", json, true)
+                .ConfigureAwait(false);
+            var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
+            
            try
            {
-                var parameters = ResourceClientUtil.InitParams();
-                parameters.Add("token", _accessTokens.GetAccessToken(Facade.Payout));
-
-                var json = JsonConvert.SerializeObject(parameters);
-                var response = await _bitPayClient.Post("recipients/" + recipientId + "/notifications", json, true)
-                    .ConfigureAwait(false);
-                var responseString = await HttpResponseParser.ResponseToJsonString(response).ConfigureAwait(false);
                 JObject responseObject = JsonConvert.DeserializeObject<dynamic>(responseString)!;
                 return "success".Equals(
                     responseObject.GetValue("status", StringComparison.Ordinal)?.ToString(),
                     StringComparison.OrdinalIgnoreCase
                     );
            }
-           catch (BitPayException ex)
+           catch (Exception e)
            {
-               throw new PayoutRecipientNotificationException(ex, ex.ApiCode);
-           }
-           catch (Exception ex)
-           {
-               if (!(ex.GetType().IsSubclassOf(typeof(BitPayException)) || ex.GetType() == typeof(BitPayException)))
-                   throw new PayoutRecipientNotificationException(ex);
+               BitPayExceptionProvider.ThrowDeserializeResourceException("Payout Recipient", e.Message);
 
                throw;
            }

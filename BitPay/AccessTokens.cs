@@ -67,16 +67,28 @@ namespace BitPay
             _data[facade] = token;
         }
 
+        /// <summary>
+        ///     Get access token for specific facade.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        /// <exception cref="BitPayGenericException">BitPayGenericException class</exception>
         public virtual string GetAccessToken(string key)
         {
+            string errorMessage = "There is no token for the specified key : " + key;
             if (!_data.ContainsKey(key))
-                throw new TokenNotFoundException(key);
+                BitPayExceptionProvider.ThrowGenericExceptionWithMessage(
+                    errorMessage);
 
             var token = _data[key];
-            if (token == null)
-                throw new TokenNotFoundException(key);
-            
-            return token;
+            if (token != null)
+            {
+                return token;
+            }
+
+            BitPayExceptionProvider.ThrowGenericExceptionWithMessage(errorMessage);
+            throw new InvalidOperationException();
+
         }
 
         /// <summary>

@@ -22,26 +22,20 @@ namespace BitPay.Models.Payout
          */
         public PayoutInstruction(decimal amount, int method, string methodValue)
         {
-            try
-            {
-                Amount = amount;
-                switch (method) {
-                    case RecipientReferenceMethod.Email:
-                        Email = methodValue;
-                        break;
-                    case RecipientReferenceMethod.RecipientId:
-                        RecipientId = methodValue;
-                        break;
-                    case RecipientReferenceMethod.ShopperId:
-                        ShopperId = methodValue;
-                        break;
-                    default:
-                        throw new PayoutCreationException();
-                }
-            }
-            catch (Exception e)
-            {
-                throw new BitPayException(e);
+            Amount = amount;
+            switch (method) {
+                case RecipientReferenceMethod.Email:
+                    Email = methodValue;
+                    break;
+                case RecipientReferenceMethod.RecipientId:
+                    RecipientId = methodValue;
+                    break;
+                case RecipientReferenceMethod.ShopperId:
+                    ShopperId = methodValue;
+                    break;
+                default:
+                    BitPayExceptionProvider.ThrowValidationException("Wrong Payout Instruction method");
+                    break;
             }
         }
 
