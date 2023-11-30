@@ -17,7 +17,12 @@ namespace BitPay.Models.Invoice
         
         public SupportedTransactionCurrency? GetSupportedCurrency(string currency)
         {
-            return !SupportedCurrencies.ContainsKey(currency) ? null : SupportedCurrencies[currency];
+            if (SupportedCurrencies.TryGetValue(currency, out SupportedTransactionCurrency? value))
+            {
+                return value;
+            }
+
+            return null;
         }
 
         [Obsolete("Deprecated, use GetSupportedCurrency(\"BTC\") or directly SupportedCurrencies[\"BTC\"]")]
