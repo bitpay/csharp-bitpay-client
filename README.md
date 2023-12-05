@@ -1,4 +1,4 @@
-<img src="https://bitpay.com/_nuxt/img/1c0494b.svg" width="150">
+<img src="https://bitpay.com/_nuxt/img/bitpay-logo-blue.1c0494b.svg" width="150">
 
 # BitPay .NET client
 [![NuGet version (BitPay.Light)](https://img.shields.io/nuget/v/BitPay.svg?style=for-the-badge&logo=nuget)](https://www.nuget.org/packages/BitPay/)
@@ -9,6 +9,12 @@ Full implementation of the BitPay Payment Gateway. This library implements BitPa
 ## Getting Started
 
 To get up and running with our C# library quickly, follow [The GUIDE](https://bitpay.readme.io/reference/c-full-sdk-overview)
+
+## .NET supported versions
+
+SDK | 5.x.x | 6.x.x
+--- | --- | ---
+.NET Supported version | net48, 6.0, 7.0 | net48, 6.0, 7.0, 8.0
 
 ## Support
 

@@ -76,14 +76,15 @@ namespace BitPay
         public virtual string GetAccessToken(string key)
         {
             string errorMessage = "There is no token for the specified key : " + key;
-            if (!_data.ContainsKey(key))
-                BitPayExceptionProvider.ThrowGenericExceptionWithMessage(
-                    errorMessage);
-
-            var token = _data[key];
-            if (token != null)
+            if (_data.TryGetValue(key, out string? value))
             {
-                return token;
+                if (value != null)
+                {
+                    return value;
+                }
+
+                BitPayExceptionProvider.ThrowGenericExceptionWithMessage(errorMessage);
+                throw new InvalidOperationException();
             }
 
             BitPayExceptionProvider.ThrowGenericExceptionWithMessage(errorMessage);
