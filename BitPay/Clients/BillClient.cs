@@ -147,7 +147,11 @@ namespace BitPay.Clients
         /// <throws>BitPayApiException BitPayApiException class</throws>
         public async Task<Bill> UpdateBill(Bill bill, string billId)
         {
-            if (bill == null) BitPayExceptionProvider.ThrowMissingParameterException();
+            if (bill == null)
+            {
+                BitPayExceptionProvider.ThrowMissingParameterException();
+                throw new InvalidOperationException();
+            }
 
             string json = null!;
             
