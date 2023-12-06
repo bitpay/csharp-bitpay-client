@@ -258,12 +258,7 @@ namespace BitPay.Models.Payout
         {
             return EffectiveDate != null;
         }
-        
-        public bool ShouldSerializeIgnoreEmails()
-        {
-            return IgnoreEmails != null;
-        }
-        
+
         public bool ShouldSerializeGroupId()
         {
             return false;

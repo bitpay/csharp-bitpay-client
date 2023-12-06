@@ -69,14 +69,17 @@ namespace BitPay
 
         public virtual string GetAccessToken(string key)
         {
-            if (!_data.ContainsKey(key))
-                throw new TokenNotFoundException(key);
+            if (_data.TryGetValue(key, out string? value))
+            {
+                if (value == null)
+                {
+                    throw new TokenNotFoundException(key);
+                }
 
-            var token = _data[key];
-            if (token == null)
-                throw new TokenNotFoundException(key);
+                return value;
+            }
             
-            return token;
+            throw new TokenNotFoundException(key);
         }
 
         /// <summary>
