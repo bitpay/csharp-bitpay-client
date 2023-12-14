@@ -13,22 +13,22 @@ namespace BitPay.Models.Invoice
         private dynamic? _exchangeRates;
         
         [JsonProperty(PropertyName = "amount")]
-        public decimal Amount { get; set; }
+        public decimal? Amount { get; set; }
 
         [JsonProperty(PropertyName = "confirmations")]
-        public string Confirmations { get; set; }
+        public int? Confirmations { get; set; }
 
         [JsonProperty(PropertyName = "receivedTime")]
-        public string ReceivedTime { get; set; }
+        public string? ReceivedTime { get; set; }
 
         [JsonProperty(PropertyName = "type")]
         public string? Type { get; set; }
 
         [JsonProperty(PropertyName = "txid")]
-        public string Txid { get; set; }
+        public string? Txid { get; set; }
         
         [JsonProperty(PropertyName = "refundAmount")]
-        public decimal RefundAmount { get; set; }
+        public decimal? RefundAmount { get; set; }
 
         [JsonProperty(PropertyName = "time")]
         public string? Time { get; set; }
@@ -40,23 +40,51 @@ namespace BitPay.Models.Invoice
         }
 
         [JsonProperty(PropertyName = "outputIndex")]
-        public int OutputIndex { get; set; }
+        public int? OutputIndex { get; set; }
 
-        public InvoiceTransaction(
-            decimal amount,
-            string confirmations,
-            string receivedTime,
-            string txid, 
-            decimal refundAmount,
-            int outputIndex
-        )
+        public bool ShouldSerializeAmount()
         {
-            Amount = amount;
-            Confirmations = confirmations;
-            ReceivedTime = receivedTime;
-            Txid = txid;
-            RefundAmount = refundAmount;
-            OutputIndex = outputIndex;
+            return Amount.HasValue;
+        }
+        
+        public bool ShouldSerializeConfirmations()
+        {
+            return Confirmations.HasValue;
+        }
+        
+        public bool ShouldSerializeExchangeRates()
+        {
+            return !string.IsNullOrEmpty(ExchangeRates);
+        }
+        
+        public bool ShouldSerializeOutputIndex()
+        {
+            return OutputIndex.HasValue;
+        }
+        
+        public bool ShouldSerializeReceivedTime()
+        {
+            return !string.IsNullOrEmpty(ReceivedTime);
+        }
+        
+        public bool ShouldSerializeRefundAmount()
+        {
+            return RefundAmount.HasValue;
+        }
+        
+        public bool ShouldSerializeTime()
+        {
+            return !string.IsNullOrEmpty(Time);
+        }
+        
+        public bool ShouldSerializeTxid()
+        {
+            return !string.IsNullOrEmpty(Txid);
+        }
+        
+        public bool ShouldSerializeType()
+        {
+            return !string.IsNullOrEmpty(Type);
         }
     }
 }

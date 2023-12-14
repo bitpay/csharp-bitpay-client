@@ -447,12 +447,14 @@ namespace BitPayUnitTest
             Assert.Equal("john@doe.com", result.Buyer?.Email);
             Assert.Equal("https://merchantwebsite.com/shop/return", result.RedirectUrl);
             Assert.False(result.AutoRedirect);
-            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseURL);
-            Assert.False(result.RefundAddressRequestPending);
+            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseUrl);
+            Assert.Null(result.RefundAddressRequestPending);
             Assert.Equal("john@doe.com", result.BuyerProvidedEmail);
             Assert.Equal("john@doe.com", result.BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.BuyerProvidedInfo?.SelectedWallet);
             Assert.Equal("BTC", result.BuyerProvidedInfo?.SelectedTransactionCurrency);
+            Assert.Equal(false, result.SupportedTransactionCurrencies.GetSupportedCurrency("SHIB_m").Enabled);
+            Assert.Equal("Some Reason", result.SupportedTransactionCurrencies.GetSupportedCurrency("SHIB_m").Reason);
         }
 
         [Fact]
@@ -499,8 +501,8 @@ namespace BitPayUnitTest
             Assert.Equal("john@doe.com", result.Buyer?.Email);
             Assert.Equal("https://merchantwebsite.com/shop/return", result.RedirectUrl);
             Assert.False(result.AutoRedirect);
-            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseURL);
-            Assert.False(result.RefundAddressRequestPending);
+            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseUrl);
+            Assert.Null(result.RefundAddressRequestPending);
             Assert.Equal("john@doe.com", result.BuyerProvidedEmail);
             Assert.Equal("john@doe.com", result.BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.BuyerProvidedInfo?.SelectedWallet);
@@ -551,8 +553,8 @@ namespace BitPayUnitTest
             Assert.Equal("john@doe.com", result.Buyer?.Email);
             Assert.Equal("https://merchantwebsite.com/shop/return", result.RedirectUrl);
             Assert.False(result.AutoRedirect);
-            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseURL);
-            Assert.False(result.RefundAddressRequestPending);
+            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseUrl);
+            Assert.Null(result.RefundAddressRequestPending);
             Assert.Equal("john@doe.com", result.BuyerProvidedEmail);
             Assert.Equal("john@doe.com", result.BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.BuyerProvidedInfo?.SelectedWallet);
@@ -610,8 +612,8 @@ namespace BitPayUnitTest
             Assert.Equal("john@doe.com", result.First().Buyer?.Email);
             Assert.Equal("https://merchantwebsite.com/shop/return", result.First().RedirectUrl);
             Assert.False(result.First().AutoRedirect);
-            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.First().CloseURL);
-            Assert.False(result.First().RefundAddressRequestPending);
+            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.First().CloseUrl);
+            Assert.Null(result.First().RefundAddressRequestPending);
             Assert.Equal("john@doe.com", result.First().BuyerProvidedEmail);
             Assert.Equal("john@doe.com", result.First().BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.First().BuyerProvidedInfo?.SelectedWallet);
@@ -662,9 +664,9 @@ namespace BitPayUnitTest
             Assert.Equal("john@doe.com", result.Buyer?.Email);
             Assert.Equal("https://merchantwebsite.com/shop/return", result.RedirectUrl);
             Assert.False(result.AutoRedirect);
-            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseURL);
+            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseUrl);
             Assert.Equal(new List<dynamic>(), result.RefundAddresses);
-            Assert.False(result.RefundAddressRequestPending);
+            Assert.Null(result.RefundAddressRequestPending);
             Assert.Equal("john@doe.com", result.BuyerProvidedEmail);
             Assert.Equal("john@doe.com", result.BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.BuyerProvidedInfo?.SelectedWallet);
@@ -716,8 +718,8 @@ namespace BitPayUnitTest
             Assert.Equal("john@doe.com", result.Buyer?.Email);
             Assert.Equal("https://merchantwebsite.com/shop/return", result.RedirectUrl);
             Assert.False(result.AutoRedirect);
-            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseURL);
-            Assert.False(result.RefundAddressRequestPending);
+            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseUrl);
+            Assert.Null(result.RefundAddressRequestPending);
             Assert.Equal("john@doe.com", result.BuyerProvidedEmail);
             Assert.Equal("john@doe.com", result.BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.BuyerProvidedInfo?.SelectedWallet);
@@ -769,8 +771,8 @@ namespace BitPayUnitTest
             Assert.Equal("john@doe.com", result.Buyer?.Email);
             Assert.Equal("https://merchantwebsite.com/shop/return", result.RedirectUrl);
             Assert.False(result.AutoRedirect);
-            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseURL);
-            Assert.False(result.RefundAddressRequestPending);
+            Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseUrl);
+            Assert.Null(result.RefundAddressRequestPending);
             Assert.Equal("john@doe.com", result.BuyerProvidedEmail);
             Assert.Equal("john@doe.com", result.BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.BuyerProvidedInfo?.SelectedWallet);
@@ -886,10 +888,11 @@ namespace BitPayUnitTest
             
             // then
             Assert.Equal(3, result.Count);
-            Assert.Equal("1023", secondEntry.Code);
-            Assert.Equal("-8000000", secondEntry.Amount);
+            Assert.Equal(1023, secondEntry.Code);
+            Assert.Equal(-8000000, secondEntry.Amount);
             Assert.Equal("Invoice Fee", secondEntry.Description);
-            Assert.Equal("2021-05-10T20:08:52.919Z", secondEntry.Timestamp);
+            Assert.Equal("10.05.2021 20:08:52", secondEntry.Timestamp.ToString());
+            Assert.Equal(919, secondEntry.Timestamp.Value.Millisecond);
             Assert.Equal("Hpqc63wvE1ZjzeeH4kEycF", secondEntry.InvoiceId);
             Assert.Equal("2630 Hegal Place", secondEntry.Buyer?.Address1);
             Assert.Equal(10, secondEntry.InvoiceAmount);
@@ -918,30 +921,23 @@ namespace BitPayUnitTest
             var result = GetTestedClassAsPayout().SubmitPayout(GetPayoutExample()).Result;
             
             // then
-            Assert.Null(result.Account);
             Assert.Equal(10.0M, result.Amount);
-            Assert.Null(result.Btc);
             Assert.Equal("USD", result.Currency);
             Assert.Null(result.DateExecuted);
-            Assert.Null(result.DepositTotal);
             Assert.Equal(DateTime.Parse("2021-05-27T09:00:00.000Z").ToUniversalTime(), result.EffectiveDate);
             Assert.Equal("john@doe.com", result.Email);
             Assert.Null(result.ExchangeRates);
-            Assert.Null(result.Fee);
             Assert.Equal("JMwv8wQCXANoU2ZZQ9a9GH", result.Id);
             Assert.Equal("John Doe", result.Label);
             Assert.Equal("GBP", result.LedgerCurrency);
             Assert.Null(result.Message);
             Assert.Equal("merchant@email.com", result.NotificationEmail);
             Assert.Equal("https://yournotiticationURL.com/wed3sa0wx1rz5bg0bv97851eqx", result.NotificationUrl);
-            Assert.Null(result.PercentFee);
-            Assert.Null(result.Rate);
             Assert.Equal("LDxRZCGq174SF8AnQpdBPB", result.RecipientId);
             Assert.Equal("payout_20210527", result.Reference);
             Assert.Equal(DateTime.Parse("2021-05-27T10:47:37.834Z").ToUniversalTime(), result.RequestDate);
             Assert.Equal("7qohDf2zZnQK5Qanj8oyC2", result.ShopperId);
             Assert.Equal("new", result.Status);
-            Assert.Null(result.SupportPhone);
             Assert.Equal("6RZSTPtnzEaroAe2X4YijenRiqteRDNvzbT8NjtcHjUVd9FUFwa7dsX8RFgRDDC5SL", result.Token);
             Assert.Empty(result.Transactions!);
         }
@@ -971,28 +967,22 @@ namespace BitPayUnitTest
             Assert.NotEmpty(result.Payouts);
             var firstPayout = result.Payouts[0];
             Assert.Equal(10.0M, firstPayout.Amount);
-            Assert.Null(firstPayout.Btc);
             Assert.Equal("USD", firstPayout.Currency);
             Assert.Null(firstPayout.DateExecuted);
-            Assert.Null(firstPayout.DepositTotal);
             Assert.Equal(DateTime.Parse("2021-05-27T09:00:00.000Z").ToUniversalTime(), firstPayout.EffectiveDate);
             Assert.Equal("john@doe.com", firstPayout.Email);
             Assert.Null(firstPayout.ExchangeRates);
-            Assert.Null(firstPayout.Fee);
             Assert.Equal("JMwv8wQCXANoU2ZZQ9a9GH", firstPayout.Id);
             Assert.Equal("John Doe", firstPayout.Label);
             Assert.Equal("GBP", firstPayout.LedgerCurrency);
             Assert.Null(firstPayout.Message);
             Assert.Equal("merchant@email.com", firstPayout.NotificationEmail);
             Assert.Equal("https://yournotiticationURL.com/wed3sa0wx1rz5bg0bv97851eqx", firstPayout.NotificationUrl);
-            Assert.Null(firstPayout.PercentFee);
-            Assert.Null(firstPayout.Rate);
             Assert.Equal("LDxRZCGq174SF8AnQpdBPB", firstPayout.RecipientId);
             Assert.Equal("payout_20210527", firstPayout.Reference);
             Assert.Equal(DateTime.Parse("2021-05-27T10:47:37.834Z").ToUniversalTime(), firstPayout.RequestDate);
             Assert.Equal("7qohDf2zZnQK5Qanj8oyC2", firstPayout.ShopperId);
             Assert.Equal("new", firstPayout.Status);
-            Assert.Null(firstPayout.SupportPhone);
             Assert.Empty(firstPayout.Transactions!);
             
             Assert.NotEmpty(result.Failed);
@@ -1021,30 +1011,23 @@ namespace BitPayUnitTest
             var result = GetTestedClassAsPayout().GetPayout("JMwv8wQCXANoU2ZZQ9a9GH").Result;
             
             // then
-            Assert.Null(result.Account);
             Assert.Equal(10.0M, result.Amount);
-            Assert.Null(result.Btc);
             Assert.Equal("USD", result.Currency);
             Assert.Equal(DateTime.Parse("2021-05-27T09:00:00.000Z").ToUniversalTime(), result.DateExecuted);
-            Assert.Null(result.DepositTotal);
             Assert.Equal(DateTime.Parse("2021-05-27T09:00:00.000Z").ToUniversalTime(), result.EffectiveDate);
             Assert.Equal("john@doe.com", result.Email);
             Assert.Equal(27883.962246420004, result.ExchangeRates?["BTC"].Property("GBP").Value.Value);
-            Assert.Null(result.Fee);
             Assert.Equal("JMwv8wQCXANoU2ZZQ9a9GH", result.Id);
             Assert.Equal("John Doe", result.Label);
             Assert.Equal("GBP", result.LedgerCurrency);
             Assert.Null(result.Message);
             Assert.Equal("merchant@email.com", result.NotificationEmail);
             Assert.Equal("https://yournotiticationURL.com/wed3sa0wx1rz5bg0bv97851eqx", result.NotificationUrl);
-            Assert.Null(result.PercentFee);
-            Assert.Null(result.Rate);
             Assert.Equal("LDxRZCGq174SF8AnQpdBPB", result.RecipientId);
             Assert.Equal("payout_20210527", result.Reference);
             Assert.Equal(DateTime.Parse("2021-05-27T10:47:37.834Z").ToUniversalTime(), result.RequestDate);
             Assert.Equal("7qohDf2zZnQK5Qanj8oyC2", result.ShopperId);
             Assert.Equal("complete", result.Status);
-            Assert.Null(result.SupportPhone);
             Assert.Equal("6RZSTPtnzEaroAe2X4YijenRiqteRDNvzbT8NjtcHjUVd9FUFwa7dsX8RFgRDDC5SL", result.Token);
             Assert.Equal("db53d7e2bf3385a31257ce09396202d9c2823370a5ca186db315c45e24594057", result.Transactions?[0].Txid);
         }
@@ -1126,55 +1109,41 @@ namespace BitPayUnitTest
             var result = GetTestedClassAsPayout().GetPayouts(parameters).Result;
             
             //  then
-            Assert.Null(result.First().Account);
             Assert.Equal(10.0M, result.First().Amount);
-            Assert.Null(result.First().Btc);
             Assert.Equal("USD", result.First().Currency);
             Assert.Null(result.First().DateExecuted);
-            Assert.Null(result.First().DepositTotal);
             Assert.Equal(DateTime.Parse("2021-05-27T09:00:00.000Z").ToUniversalTime(), result.First().EffectiveDate);
             Assert.Equal("john@doe.com", result.First().Email);
-            Assert.Null(result.First().Fee);
             Assert.Equal("JMwv8wQCXANoU2ZZQ9a9GH", result.First().Id);
             Assert.Equal("John Doe", result.First().Label);
             Assert.Equal("GBP", result.First().LedgerCurrency);
             Assert.Null(result.First().Message);
             Assert.Equal("merchant@email.com", result.First().NotificationEmail);
             Assert.Equal("https://yournotiticationURL.com/wed3sa0wx1rz5bg0bv97851eqx", result.First().NotificationUrl);
-            Assert.Null(result.First().PercentFee);
-            Assert.Null(result.First().Rate);
             Assert.Equal("LDxRZCGq174SF8AnQpdBPB", result.First().RecipientId);
             Assert.Equal("payout_20210527", result.First().Reference);
             Assert.Equal(DateTime.Parse("2021-05-27T10:47:37.8340000Z").ToUniversalTime(), result.First().RequestDate);
             Assert.Equal("7qohDf2zZnQK5Qanj8oyC2", result.First().ShopperId);
             Assert.Equal("complete", result.First().Status);
-            Assert.Null(result.First().SupportPhone);
             Assert.Equal("9pVLfvdjt59q1JiY2JEsf2uzeeEpSqDwwfRAzuFr9CcrxZX25rTnP6HdRhsMBGLArz", result.First().Token);
             Assert.Equal("db53d7e2bf3385a31257ce09396202d9c2823370a5ca186db315c45e24594057", result.First().Transactions?[0].Txid);
 
-            Assert.Null(result[1].Account);
             Assert.Equal(10.0M, result[1].Amount);
-            Assert.Null(result[1].Btc);
             Assert.Equal("USD", result[1].Currency);
             Assert.Null(result[1].DateExecuted);
-            Assert.Null(result[1].DepositTotal);
             Assert.Equal(DateTime.Parse("2021-05-28T09:00:00.0000000Z").ToUniversalTime(), result[1].EffectiveDate);
             Assert.Equal("jane@doe.com", result[1].Email);
-            Assert.Null(result[1].Fee);
             Assert.Equal("KMXZeQigXG6T5abzCJmTcH", result[1].Id);
             Assert.Equal("Jane Doe", result[1].Label);
             Assert.Equal("GBP", result[1].LedgerCurrency);
             Assert.Null(result[1].Message);
             Assert.Equal("merchant@email.com", result[1].NotificationEmail);
             Assert.Equal("https://yournotiticationURL.com/wed3sa0wx1rz5bg0bv97851eqx", result[1].NotificationUrl);
-            Assert.Null(result[1].PercentFee);
-            Assert.Null(result[1].Rate);
             Assert.Equal("LDxRZCGq174SF8AnQpdBPB", result[1].RecipientId);
             Assert.Equal("payout_20210528", result[1].Reference);
             Assert.Equal(DateTime.Parse("2021-05-28T10:23:43.7650000Z").ToUniversalTime(), result[1].RequestDate);
             Assert.Equal("7qohDf2zZnQK5Qanj8oyC2", result[1].ShopperId);
             Assert.Equal("cancelled", result[1].Status);
-            Assert.Null(result[1].SupportPhone);
             Assert.Equal("9pVLfvdjt59q1JiY2JEsf2hr5FsjimfY4qRLFi85tMiXSCkJ9mQ2oSQqYKVangKaro", result[1].Token);
             Assert.Empty(result[1].Transactions!);
         }
@@ -1431,7 +1400,7 @@ namespace BitPayUnitTest
             HttpContent response = new StringContent(File.ReadAllText(GetJsonResponsePath() + "createRefundResponse.json"));
             _bitPayClient.Setup(b => b.Post(
                 "refunds",
-                "{\"token\":\"merchantToken\",\"amount\":10.00,\"preview\":false,\"immediate\":false,\"buyerPaysRefundFee\":false,\"guid\":\"37bd36bd-6fcb-409c-a907-47f9244302aa\"}",
+                "{\"token\":\"merchantToken\",\"amount\":10.00,\"guid\":\"37bd36bd-6fcb-409c-a907-47f9244302aa\"}",
                 true
             )).ReturnsAsync(new HttpResponseMessage
             {
@@ -1449,7 +1418,7 @@ namespace BitPayUnitTest
             Assert.Equal(10, result.Amount);
             Assert.Equal("USD", result.Currency);
             Assert.Equal("Hpqc63wvE1ZjzeeH4kEycF", result.Invoice);
-            Assert.False(result.Preview);
+            Assert.Null(result.Preview);
             Assert.False(result.Immediate);
             Assert.False(result.BuyerPaysRefundFee);
             Assert.Equal("Test refund", result.Reference);
@@ -1489,7 +1458,7 @@ namespace BitPayUnitTest
             Assert.Equal(10, result.Amount);
             Assert.Equal("USD", result.Currency);
             Assert.Equal("Hpqc63wvE1ZjzeeH4kEycF", result.Invoice);
-            Assert.False(result.Preview);
+            Assert.Null(result.Preview);
             Assert.False(result.Immediate);
             Assert.False(result.BuyerPaysRefundFee);
             Assert.Equal("Test refund", result.Reference);
@@ -1529,7 +1498,7 @@ namespace BitPayUnitTest
             Assert.Equal(10, result.Amount);
             Assert.Equal("USD", result.Currency);
             Assert.Equal("Hpqc63wvE1ZjzeeH4kEycF", result.Invoice);
-            Assert.False(result.Preview);
+            Assert.Null(result.Preview);
             Assert.False(result.Immediate);
             Assert.False(result.BuyerPaysRefundFee);
             Assert.Equal("Test refund", result.Reference);
@@ -1573,7 +1542,7 @@ namespace BitPayUnitTest
             Assert.Equal(5.0M, result[0].Amount);
             Assert.Equal("USD", result[0].Currency);
             Assert.Equal("Hpqc63wvE1ZjzeeH4kEycF", result[0].Invoice);
-            Assert.False(result[0].Preview);
+            Assert.Null(result[0].Preview);
             Assert.False(result[0].Immediate);
             Assert.False(result[0].BuyerPaysRefundFee);
             Assert.Equal("Test refund", result[0].Reference);
@@ -1589,7 +1558,7 @@ namespace BitPayUnitTest
             Assert.Equal(10, result[1].Amount);
             Assert.Equal("USD", result[1].Currency);
             Assert.Equal("Hpqc63wvE1ZjzeeH4kEycF", result[1].Invoice);
-            Assert.False(result[1].Preview);
+            Assert.Null(result[1].Preview);
             Assert.False(result[1].Immediate);
             Assert.False(result[1].BuyerPaysRefundFee);
             Assert.Equal("Test refund 2", result[1].Reference);
@@ -1695,7 +1664,7 @@ namespace BitPayUnitTest
             Assert.Equal(10, result.Amount);
             Assert.Equal("USD", result.Currency);
             Assert.Equal("Hpqc63wvE1ZjzeeH4kEycF", result.Invoice);
-            Assert.False(result.Preview);
+            Assert.Null(result.Preview);
             Assert.False(result.Immediate);
             Assert.False(result.BuyerPaysRefundFee);
             Assert.Equal("Test refund", result.Reference);
@@ -1731,7 +1700,7 @@ namespace BitPayUnitTest
             Assert.Equal(10, result.Amount);
             Assert.Equal("USD", result.Currency);
             Assert.Equal("Hpqc63wvE1ZjzeeH4kEycF", result.Invoice);
-            Assert.False(result.Preview);
+            Assert.Null(result.Preview);
             Assert.False(result.Immediate);
             Assert.False(result.BuyerPaysRefundFee);
             Assert.Equal("Test refund", result.Reference);

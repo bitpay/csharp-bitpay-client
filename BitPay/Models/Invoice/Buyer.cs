@@ -36,6 +36,56 @@ namespace BitPay.Models.Invoice
         public string? Phone { get; set; }
 
         [JsonProperty(PropertyName = "notify")]
-        public bool Notify { get; set; }
+        public bool? Notify { get; set; }
+        
+        public bool ShouldSerializeName()
+        {
+            return !string.IsNullOrEmpty(Name);
+        }
+        
+        public bool ShouldSerializeAddress1()
+        {
+            return !string.IsNullOrEmpty(Address1);
+        }
+        
+        public bool ShouldSerializeAddress2()
+        {
+            return !string.IsNullOrEmpty(Address2);
+        }
+        
+        public bool ShouldSerializeLocality()
+        {
+            return !string.IsNullOrEmpty(Locality);
+        }
+        
+        public bool ShouldSerializeRegion()
+        {
+            return !string.IsNullOrEmpty(Region);
+        }
+        
+        public bool ShouldSerializePostalCode()
+        {
+            return !string.IsNullOrEmpty(PostalCode);
+        }
+        
+        public bool ShouldSerializeCountry()
+        {
+            return !string.IsNullOrEmpty(Country);
+        }
+        
+        public bool ShouldSerializeEmail()
+        {
+            return !string.IsNullOrEmpty(Email);
+        }
+        
+        public bool ShouldSerializePhone()
+        {
+            return !string.IsNullOrEmpty(Phone);
+        }
+        
+        public bool ShouldSerializeNotify()
+        {
+            return Notify.GetValueOrDefault(false);
+        }
     }
 }

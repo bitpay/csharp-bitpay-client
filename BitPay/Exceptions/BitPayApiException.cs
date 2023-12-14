@@ -30,11 +30,5 @@ namespace BitPay.Exceptions
                 return _code;
             }
         }
-        
-        protected BitPayApiException(SerializationInfo serializationInfo, StreamingContext streamingContext) 
-            : base(serializationInfo, streamingContext)
-        {
-            _code = (string)serializationInfo.GetValue(nameof(_code), typeof(string))!;
-        }
     }
 }

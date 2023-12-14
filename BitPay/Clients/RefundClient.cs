@@ -52,9 +52,9 @@ namespace BitPay.Clients
             parameters.Add("amount", refundToCreate.Amount);
             if (refundToCreate.InvoiceId != null) parameters.Add("invoiceId", refundToCreate.InvoiceId);
             if (refundToCreate.Currency != null) parameters.Add("currency", refundToCreate.Currency);
-            parameters.Add("preview", refundToCreate.Preview);
-            parameters.Add("immediate", refundToCreate.Immediate);
-            parameters.Add("buyerPaysRefundFee", refundToCreate.BuyerPaysRefundFee);
+            if (refundToCreate.Preview != null) parameters.Add("preview", refundToCreate.Preview);
+            if (refundToCreate.Immediate != null) parameters.Add("immediate", refundToCreate.Immediate);
+            if (refundToCreate.BuyerPaysRefundFee != null) parameters.Add("buyerPaysRefundFee", refundToCreate.BuyerPaysRefundFee);
             if (refundToCreate.Reference != null) parameters.Add("reference", refundToCreate.Reference);
             parameters.Add("guid", refundToCreate.ResourceGuid);
 

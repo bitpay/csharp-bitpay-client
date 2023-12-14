@@ -11,5 +11,6 @@ namespace BitPay.Models.Invoice
         public const string Complete  = "complete";
         public const string Expired   = "expired";
         public const string Invalid   = "invalid";
+        public const string Declined  = "declined";
     }
 }

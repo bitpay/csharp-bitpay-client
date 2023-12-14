@@ -1,12 +1,18 @@
 // Copyright (c) 2019 BitPay.
 // All rights reserved.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+
 using BitPay;
 using BitPay.Models;
 using BitPay.Models.Bill;
 using BitPay.Models.Invoice;
 using BitPay.Models.Payout;
 
+using Xunit;
 using Xunit.Abstractions;
 
 using Environment = BitPay.Environment;

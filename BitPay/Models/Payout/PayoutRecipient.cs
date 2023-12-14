@@ -13,7 +13,7 @@ namespace BitPay.Models.Payout
          * @param email           string Recipient email address to which the invite shall be sent.
          * @param label           string Recipient nickname assigned by the merchant (Optional).
          */
-        public PayoutRecipient(string email, string label) {
+        public PayoutRecipient(string email, string? label) {
             Email = email;
             Label = label;
         }
@@ -28,18 +28,21 @@ namespace BitPay.Models.Payout
         //
 
         [JsonProperty(PropertyName = "label")]
-        public string Label { get; set; }
+        public string? Label { get; set; }
 
         [JsonProperty(PropertyName = "notificationURL")]
-        public string? NotificationURL { get; set; }
+        public string? NotificationUrl { get; set; }
 
         // Response fields
         //
 
+        [JsonProperty(PropertyName = "status")]
         public string? Status { get; set; }
 
+        [JsonProperty(PropertyName = "id")]
         public string? Id { get; set; }
 
+        [JsonProperty(PropertyName = "shopper")]
         public string? ShopperId { get; set; }
 
         [JsonProperty(PropertyName = "token")] public string? Token { get; set; }
@@ -52,11 +55,6 @@ namespace BitPay.Models.Payout
         public bool ShouldSerializeLabel()
         {
             return !string.IsNullOrEmpty(Label);
-        }
-
-        public bool ShouldSerializeNotificationURL()
-        {
-            return !string.IsNullOrEmpty(NotificationURL);
         }
 
         public bool ShouldSerializeStatus()
@@ -74,5 +72,9 @@ namespace BitPay.Models.Payout
             return false;
         }
 
+        public bool ShouldSerializeNotificationUrl()
+        {
+            return !string.IsNullOrEmpty(NotificationUrl);
+        }
     }
 }

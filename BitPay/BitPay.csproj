@@ -16,7 +16,7 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <Title>BitPay's API client</Title>
     <PackageTags>bitcoin bitpay cash payment gateway</PackageTags>
-    <PackageIconUrl>https://bitpay.com/_nuxt/img/1c0494b.svg</PackageIconUrl>
+    <PackageIcon>logo.png</PackageIcon>
     <PackageProjectUrl>https://bitpay.com</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -43,6 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\screenshots\logo.png" Pack="true" PackagePath="\"/>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) 2019 BitPay.
 // All rights reserved.
 
+using System.Numerics;
+
 using Newtonsoft.Json;
 
 namespace BitPay.Models
@@ -27,6 +29,16 @@ namespace BitPay.Models
         [JsonProperty(PropertyName = "sanctioned")] public bool Sanctioned { get; set; }
         
         [JsonProperty(PropertyName = "decimals")] public decimal Decimals { get; set; }
+        
+        [JsonProperty(PropertyName = "displayCode")] public string DisplayCode { get; set; }
+        
+        [JsonProperty(PropertyName = "chain")] public string? Chain { get; set; }
+
+        [JsonProperty(PropertyName = "maxSupply")] public BigInteger? MaxSupply { get; set; } 
+        
+        [JsonProperty(PropertyName = "trancheDecimals")] public int? TrancheDecimals { get; set; }
+        
+        [JsonProperty(PropertyName = "contractAddress")] public string? ContractAddress { get; set; } 
 
         // Crypto
         public const string BCH  = "BCH";
@@ -222,8 +234,8 @@ namespace BitPay.Models
             string alts,
             decimal minimum,
             bool sanctioned,
-            decimal decimals
-        )
+            decimal decimals,
+            string displayCode)
         {
             Code = code;
             Symbol = symbol;
@@ -234,6 +246,7 @@ namespace BitPay.Models
             Minimum = minimum;
             Sanctioned = sanctioned;
             Decimals = decimals;
+            DisplayCode = displayCode;
         }
 
         public static bool isValid(string value)

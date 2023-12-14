@@ -15,9 +15,5 @@ namespace BitPay.Exceptions
         public BitPayException(string message) : base(message)
         {
         }
-        
-        protected BitPayException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }
