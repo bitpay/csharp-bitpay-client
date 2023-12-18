@@ -891,7 +891,7 @@ namespace BitPayUnitTest
             Assert.Equal(1023, secondEntry.Code);
             Assert.Equal(-8000000, secondEntry.Amount);
             Assert.Equal("Invoice Fee", secondEntry.Description);
-            Assert.Equal("10.05.2021 20:08:52", secondEntry.Timestamp.ToString());
+            Assert.Equal("2021-05-10T20:08:52.919Z", secondEntry.Timestamp.Value.ToString("yyyy-MM-ddTHH:mm:ss.fffK"));
             Assert.Equal(919, secondEntry.Timestamp.Value.Millisecond);
             Assert.Equal("Hpqc63wvE1ZjzeeH4kEycF", secondEntry.InvoiceId);
             Assert.Equal("2630 Hegal Place", secondEntry.Buyer?.Address1);
