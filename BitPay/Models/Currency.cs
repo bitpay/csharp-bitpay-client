@@ -235,7 +235,8 @@ namespace BitPay.Models
             decimal minimum,
             bool sanctioned,
             decimal decimals,
-            string displayCode)
+            string displayCode
+        )
         {
             Code = code;
             Symbol = symbol;

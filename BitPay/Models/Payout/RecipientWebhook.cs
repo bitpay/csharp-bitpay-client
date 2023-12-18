@@ -21,7 +21,5 @@ namespace BitPay.Models.Payout
         
         [JsonProperty(PropertyName = "status")]
         public string? Status { get; set; }
-        
-
     }
 }
