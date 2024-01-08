@@ -14,7 +14,7 @@ namespace BitPay.Models
     {
         [JsonProperty(PropertyName = "code")] public string Code { get; set; }
         
-        [JsonProperty(PropertyName = "symbol")] public string Symbol { get; set; }
+        [JsonProperty(PropertyName = "symbol")] public string? Symbol { get; set; }
         
         [JsonProperty(PropertyName = "precision")] public int Precision { get; set; }
         
@@ -30,11 +30,11 @@ namespace BitPay.Models
         
         [JsonProperty(PropertyName = "decimals")] public decimal Decimals { get; set; }
         
-        [JsonProperty(PropertyName = "displayCode")] public string DisplayCode { get; set; }
+        [JsonProperty(PropertyName = "displayCode")] public string? DisplayCode { get; set; }
         
         [JsonProperty(PropertyName = "chain")] public string? Chain { get; set; }
 
-        [JsonProperty(PropertyName = "maxSupply")] public BigInteger? MaxSupply { get; set; } 
+        [JsonProperty(PropertyName = "maxSupply")] public decimal? MaxSupply { get; set; } 
         
         [JsonProperty(PropertyName = "trancheDecimals")] public int? TrancheDecimals { get; set; }
         
@@ -227,7 +227,6 @@ namespace BitPay.Models
 
         public Currency(
             string code,
-            string symbol,
             int precision,
             string name,
             string plural,
@@ -235,7 +234,7 @@ namespace BitPay.Models
             decimal minimum,
             bool sanctioned,
             decimal decimals,
-            string displayCode
+            string? symbol
         )
         {
             Code = code;
@@ -247,7 +246,6 @@ namespace BitPay.Models
             Minimum = minimum;
             Sanctioned = sanctioned;
             Decimals = decimals;
-            DisplayCode = displayCode;
         }
 
         public static bool isValid(string value)

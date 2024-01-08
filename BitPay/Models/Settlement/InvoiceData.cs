@@ -10,9 +10,6 @@ namespace BitPay.Models.Settlement
 {
     public class InvoiceData
     {
-        [JsonProperty(PropertyName = "amount")]
-        public decimal? Amount { get; set; }
-        
         [JsonProperty(PropertyName = "orderId")]
         public string? OrderId { get; set; }
         
@@ -28,13 +25,10 @@ namespace BitPay.Models.Settlement
         [JsonProperty(PropertyName = "transactionCurrency")]
         public string? TransactionCurrency { get; set; }
         
-        [JsonProperty(PropertyName = "overPaidAmount")]
+        [JsonProperty(PropertyName = "overpaidAmount")]
         public decimal? OverPaidAmount { get; set; }
         
         [JsonProperty(PropertyName = "payoutPercentage")]
-        public Dictionary<string, decimal>? PayoutPercentage { get; set; }
-
-        [JsonProperty(PropertyName = "refundInfo")]
-        public RefundInfo? RefundInfo { get; set; }
+        public Dictionary<string, int>? PayoutPercentage { get; set; }
     }
 }
