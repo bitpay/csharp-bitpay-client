@@ -1893,7 +1893,7 @@ namespace BitPayUnitTest
             Assert.Equal(5.0M, result.LedgerEntries?[0].InvoiceData?.Price);
             Assert.Equal("EUR", result.LedgerEntries?[0].InvoiceData?.Currency);
             Assert.Equal("BCH", result.LedgerEntries?[0].InvoiceData?.TransactionCurrency);
-            Assert.Equal(100.0M, result.LedgerEntries?[0].InvoiceData?.PayoutPercentage["USD"]);
+            Assert.Equal(100.0, result.LedgerEntries?[0].InvoiceData?.PayoutPercentage["USD"]);
         }
         
         [Fact]

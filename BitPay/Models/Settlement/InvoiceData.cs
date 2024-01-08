@@ -29,6 +29,6 @@ namespace BitPay.Models.Settlement
         public decimal? OverPaidAmount { get; set; }
         
         [JsonProperty(PropertyName = "payoutPercentage")]
-        public Dictionary<string, int>? PayoutPercentage { get; set; }
+        public Dictionary<string, double>? PayoutPercentage { get; set; }
     }
 }

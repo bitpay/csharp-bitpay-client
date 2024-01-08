@@ -34,7 +34,7 @@ namespace BitPay.Models
         
         [JsonProperty(PropertyName = "chain")] public string? Chain { get; set; }
 
-        [JsonProperty(PropertyName = "maxSupply")] public decimal? MaxSupply { get; set; } 
+        [JsonProperty(PropertyName = "maxSupply")] public string? MaxSupply { get; set; } 
         
         [JsonProperty(PropertyName = "trancheDecimals")] public int? TrancheDecimals { get; set; }
         
