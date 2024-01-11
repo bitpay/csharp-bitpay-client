@@ -44,13 +44,6 @@ namespace Examples.Pos
 
             var invoice = client.GetInvoice("myInvoiceId");
         }
-
-        public void RequestInvoiceWebhookToBeResent()
-        {
-            var client = GetClient();
-
-            var result = client.RequestInvoiceWebhookToBeResent("someInvoiceId");
-        }
         
         private static Client GetClient()
         {

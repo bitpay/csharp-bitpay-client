@@ -22,8 +22,6 @@ namespace Examples.Pos
             var client = GetClient();
 
             var bill = client.GetBill("someBillId");
-
-            var bills = client.GetBills("draft");
         }
         
         public void DeliverBillViaEmail()
