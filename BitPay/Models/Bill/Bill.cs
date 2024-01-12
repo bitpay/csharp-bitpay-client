@@ -14,7 +14,7 @@ namespace BitPay.Models.Bill
         private string _currency = "";
 
         // Creates a minimal bill request object.
-        public Bill(string number, string currency, string email, List<Item> items)
+        public Bill(string currency, string email, List<Item> items, string? number)
         {
             Number = number;
             Currency = currency;
@@ -54,7 +54,7 @@ namespace BitPay.Models.Bill
         //
 
         [JsonProperty(PropertyName = "number")]
-        public string Number { get; set; }
+        public string? Number { get; set; }
         
         [JsonProperty(PropertyName = "name")]
         public string? Name { get; set; }
@@ -92,20 +92,25 @@ namespace BitPay.Models.Bill
         // Response fields
         //
 
+        [JsonProperty(PropertyName = "status")]
         public string? Status { get; set; }
         
+        [JsonProperty(PropertyName = "url")]
         public string? Url { get; set; }
         
+        [JsonProperty(PropertyName = "createdDate")]
         public string? CreatedDate { get; set; }
         
+        [JsonProperty(PropertyName = "id")]
         public string? Id { get; set; }
         
+        [JsonProperty(PropertyName = "merchant")]
         public string? Merchant { get; set; }
         
         
         public bool ShouldSerializeItems()
         {
-            return (Items != null);
+            return (Items != null && Items.Count > 0);
         }
         
         public bool ShouldSerializeNumber()

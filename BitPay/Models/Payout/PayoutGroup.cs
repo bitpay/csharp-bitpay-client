@@ -5,14 +5,17 @@ using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
-namespace BitPay.Models.Payout;
-
-public class PayoutGroup
+namespace BitPay.Models.Payout
 {
-    [JsonProperty(PropertyName = "created")]
-    public List<Payout> Payouts { get; private set; } = new();
-    public List<PayoutGroupFailed> Failed { get; } = new();
+    public class PayoutGroup
+    {
+        [JsonProperty(PropertyName = "created")]
+        public List<Payout> Payouts { get; private set; } = new();
+        
+        [JsonProperty(PropertyName = "failed")]
+        public List<PayoutGroupFailed> Failed { get; } = new();
     
-    [JsonProperty(PropertyName = "cancelled")]
-    private List<Payout> Cancelled { set { Payouts = value; } }
+        [JsonProperty(PropertyName = "cancelled")]
+        private List<Payout> Cancelled { set { Payouts = value; } }
+    }
 }

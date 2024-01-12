@@ -5,11 +5,11 @@ namespace BitPay.Models.Payout
 {
     public static class RecipientStatus
     {
-        public const string INVITED = "invited";
-        public const string UNVERIFIED = "unverified";
-        public const string VERIFIED = "verified";
-        public const string ACTIVE = "active";
-        public const string PAUSED = "paused";
-        public const string REMOVED = "removed";
+        public const string Invited = "invited";
+        public const string Unverified = "unverified";
+        public const string Verified = "verified";
+        public const string Active = "active";
+        public const string Paused = "paused";
+        public const string Removed = "removed";
     }
 }

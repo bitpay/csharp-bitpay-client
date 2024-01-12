@@ -7,8 +7,10 @@ namespace BitPay.Models.Invoice
 {
    public class ItemizedDetails
     {
-        public int? Amount { get; set; }
+        [JsonProperty(PropertyName = "amount")]
+        public decimal? Amount { get; set; }
 
+        [JsonProperty(PropertyName = "description")]
         public string? Description { get; set; }
 
         [JsonProperty(PropertyName = "isFee")]

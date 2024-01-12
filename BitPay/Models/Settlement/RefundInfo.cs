@@ -1,20 +1,24 @@
 ﻿// Copyright (c) 2019 BitPay.
 // All rights reserved.
 
+using System.Collections.Generic;
+
+using Newtonsoft.Json;
+
 namespace BitPay.Models.Settlement
 {
     public class RefundInfo
     {
-        public string SupportRequest { get; set; }
-        public string Currency { get; set; }
-        public RefundAmount Amounts { get; set; }
-        public string? RefundRequestEid { get; set; }
+        [JsonProperty(PropertyName = "supportRequest")]
+        public string? SupportRequest { get; set; }
         
-        public RefundInfo(string supportRequest, string currency, RefundAmount amounts)
-        {
-            SupportRequest = supportRequest;
-            Currency = currency;
-            Amounts = amounts;
-        }
+        [JsonProperty(PropertyName = "currency")]
+        public string? Currency { get; set; }
+        
+        [JsonProperty(PropertyName = "amounts")]
+        public Dictionary<string, decimal>? Amounts { get; set; }
+        
+        [JsonProperty(PropertyName = "refundRequestEid")]
+        public string? RefundRequestEid { get; set; }
     }
 }

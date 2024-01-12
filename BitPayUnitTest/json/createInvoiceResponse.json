@@ -348,6 +348,10 @@
       },
       "WBTC": {
         "enabled": true
+      },
+      "SHIB_m": {
+        "enabled": false,
+        "reason": "Some Reason"
       }
     },
     "paymentCodes": {

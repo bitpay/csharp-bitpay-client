@@ -10,58 +10,55 @@ namespace BitPay.Models.Settlement
 {
     public class Settlement
     {
-        public string Id { get; set; }
-        public string AccountId { get; set; }
-        public string Currency { get; set; }
-        public PayoutInfo PayoutInfo { get; set; }
-        public string Status { get; set; }
-        public DateTime DateCreated { get; set; }
-        public DateTime DateExecuted { get; set; }
+        [JsonProperty(PropertyName = "id")]
+        public string? Id { get; set; }
+        
+        [JsonProperty(PropertyName = "accountId")]
+        public string? AccountId { get; set; }
+        
+        [JsonProperty(PropertyName = "currency")]
+        public string? Currency { get; set; }
+        
+        [JsonProperty(PropertyName = "payoutInfo")]
+        public PayoutInfo? PayoutInfo { get; set; }
+        
+        [JsonProperty(PropertyName = "status")]
+        public string? Status { get; set; }
+        
+        [JsonProperty(PropertyName = "dateCreated")]
+        public DateTime? DateCreated { get; set; }
+        
+        [JsonProperty(PropertyName = "dateExecuted")]
+        public DateTime? DateExecuted { get; set; }
+        
+        [JsonProperty(PropertyName = "dateCompleted")]
         public DateTime? DateCompleted { get; set; }
-        public DateTime OpeningDate { get; set; }
-        public DateTime ClosingDate { get; set; }
-        public decimal OpeningBalance { get; set; }
-        public decimal LedgerEntriesSum { get; set; }
+        
+        [JsonProperty(PropertyName = "openingDate")]
+        public DateTime? OpeningDate { get; set; }
+        
+        [JsonProperty(PropertyName = "closingDate")]
+        public DateTime? ClosingDate { get; set; }
+        
+        [JsonProperty(PropertyName = "openingBalance")]
+        public decimal? OpeningBalance { get; set; }
+        
+        [JsonProperty(PropertyName = "ledgerEntriesSum")]
+        public decimal? LedgerEntriesSum { get; set; }
 
         [JsonProperty(PropertyName = "withholdings")]
         public List<WithHoldings>? WithHoldings { get; set; }
 
         [JsonProperty(PropertyName = "withholdingsSum")]
-        public decimal WithHoldingsSum { get; set; }
+        public decimal? WithHoldingsSum { get; set; }
 
-        public decimal TotalAmount { get; set; }
+        [JsonProperty(PropertyName = "totalAmount")]
+        public decimal? TotalAmount { get; set; }
+        
+        [JsonProperty(PropertyName = "ledgerEntries")]
         public List<SettlementLedgerEntry>? LedgerEntries { get; set; }
+        
+        [JsonProperty(PropertyName = "token")]
         public string? Token { get; set; }
-
-        public Settlement(
-            string id,
-            string accountId,
-            string currency,
-            PayoutInfo payoutInfo,
-            string status,
-            DateTime dateCreated,
-            DateTime dateExecuted,
-            DateTime openingDate,
-            DateTime closingDate,
-            decimal openingBalance,
-            decimal ledgerEntriesSum,
-            decimal withHoldingsSum,
-            decimal totalAmount
-        )
-        {
-            Id = id;
-            AccountId = accountId;
-            Currency = currency;
-            PayoutInfo = payoutInfo;
-            Status = status;
-            DateCreated = dateCreated;
-            DateExecuted = dateExecuted;
-            OpeningDate = openingDate;
-            ClosingDate = closingDate;
-            OpeningBalance = openingBalance;
-            LedgerEntriesSum = ledgerEntriesSum;
-            WithHoldingsSum = withHoldingsSum;
-            TotalAmount = totalAmount;
-        }
     }
 }

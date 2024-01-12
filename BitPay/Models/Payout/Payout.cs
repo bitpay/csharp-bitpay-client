@@ -13,8 +13,6 @@ namespace BitPay.Models.Payout
 {
     public class Payout
     {
-        public const string MethodManual2 = "manual_2";
-
         private string _currency = "";
         private string _ledgerCurrency = "";
         private dynamic? _exchangeRates;
@@ -26,8 +24,6 @@ namespace BitPay.Models.Payout
         {
             Amount = 0.0M;
             Currency = "USD";
-            NotificationEmail = "";
-            NotificationUrl = "";
         }
 
         /// <summary>
@@ -102,10 +98,10 @@ namespace BitPay.Models.Payout
         public string? Reference { get; set; }
 
         [JsonProperty(PropertyName = "notificationEmail")]
-        public string NotificationEmail { get; set; }
+        public string? NotificationEmail { get; set; }
 
         [JsonProperty(PropertyName = "notificationURL")]
-        public string NotificationUrl { get; set; }
+        public string? NotificationUrl { get; set; }
 
         [JsonProperty(PropertyName = "email")]
         public string? Email { get; set; }
@@ -124,46 +120,42 @@ namespace BitPay.Models.Payout
         public DateTime? EffectiveDate { get; set; }
 
         [JsonProperty(PropertyName = "ignoreEmails")]
-        public bool IgnoreEmails { get; set; }
+        public bool? IgnoreEmails { get; set; }
         
         // Response fields
         //
 
+        [JsonProperty(PropertyName = "id")]
         public string? Id { get; set; }
+        
+        [JsonProperty(PropertyName = "code")]
+        public int? Code { get; set; }
 
+        [JsonProperty(PropertyName = "accountId")]
         public string? AccountId { get; set; }
 
-        public string? Account { get; set; }
-
-        public string? SupportPhone { get; set; }
-
+        [JsonProperty(PropertyName = "status")]
         public string? Status { get; set; }
-
-        public decimal? PercentFee { get; set; }
-
-        public decimal? Fee { get; set; }
-
-        public decimal? DepositTotal { get; set; }
-
-        public decimal? Rate { get; set; }
-
-        public decimal? Btc { get; set; }
 
         [JsonProperty(PropertyName = "message")]
         public string? Message { get; set; }
 
+        [JsonProperty(PropertyName = "requestDate")]
         [JsonConverter(typeof(DateStringConverter))]
         public DateTime? RequestDate { get; set; }
 
+        [JsonProperty(PropertyName = "dateExecuted")]
         [JsonConverter(typeof(DateStringConverter))]
         public DateTime? DateExecuted { get; set; }
 
+        [JsonProperty(PropertyName = "exchangeRates")]
         public dynamic? ExchangeRates
         {
             get => _exchangeRates;
             set => _exchangeRates = JsonConvert.DeserializeObject(value?.ToString(Formatting.None));
         }
         
+        [JsonProperty(PropertyName = "groupId")]
         public string? GroupId { get; set; }
         
         [JsonProperty(PropertyName = "transactions")]
@@ -282,6 +274,26 @@ namespace BitPay.Models.Payout
         public bool ShouldSerializeShopperId()
         {
             return !string.IsNullOrEmpty(ShopperId);
+        }
+
+        public bool ShouldSerializeCode()
+        {
+            return Code.HasValue;
+        }
+
+        public bool ShouldSerializeIgnoreEmails()
+        {
+            return IgnoreEmails.HasValue;
+        }
+
+        public bool ShouldSerializeMessage()
+        {
+            return !string.IsNullOrEmpty(Message);
+        }
+
+        public bool ShouldSerializeTransactions()
+        {
+            return (Transactions != null && Transactions.Count > 0);
         }
     }
 }

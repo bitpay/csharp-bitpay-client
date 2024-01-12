@@ -10,19 +10,28 @@ namespace BitPay.Models.Invoice
     public class InvoiceEventToken
     {
         [JsonProperty(PropertyName = "token")]
-        public string Token { get; set; }
+        public string? Token { get; set; }
         
         [JsonProperty(PropertyName = "events")]
-        public List<string> Events { get; set; }
+        public List<string>? Events { get; set; }
         
         [JsonProperty(PropertyName = "actions")]
-        public List<string> Actions { get; set; }
+        public List<string>? Actions { get; set; }
 
-        public InvoiceEventToken(string token, List<string> events, List<string> actions)
+        public bool ShouldSerializeToken()
         {
-            Token = token;
-            Events = events;
-            Actions = actions;
+            return !string.IsNullOrEmpty(Token);
         }
+        
+        public bool ShouldSerializeEvents()
+        {
+            return true;
+        }
+        
+        public bool ShouldSerializeActions()
+        {
+            return true;
+        }
+        
     }
 }

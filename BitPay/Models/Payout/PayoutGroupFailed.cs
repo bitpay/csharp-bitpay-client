@@ -1,18 +1,26 @@
 // Copyright (c) 2019 BitPay.
 // All rights reserved.
 
-namespace BitPay.Models.Payout;
+using Newtonsoft.Json;
 
-public class PayoutGroupFailed
+namespace BitPay.Models.Payout
 {
-    public string ErrMessage { get; }
-    public string? PayoutId { get; }
-    public string? Payee { get; }
-
-    public PayoutGroupFailed(string errMessage, string? payoutId = null, string? payee = null)
+    public class PayoutGroupFailed
     {
-        ErrMessage = errMessage;
-        PayoutId = payoutId;
-        Payee = payee;
+        [JsonProperty(PropertyName = "errMessage")]
+        public string ErrMessage { get; set; }
+    
+        [JsonProperty(PropertyName = "payoutId")]
+        public string? PayoutId { get; set; }
+    
+        [JsonProperty(PropertyName = "payee")]
+        public string? Payee { get; set; }
+
+        public PayoutGroupFailed(string errMessage, string? payoutId = null, string? payee = null)
+        {
+            ErrMessage = errMessage;
+            PayoutId = payoutId;
+            Payee = payee;
+        }
     }
 }

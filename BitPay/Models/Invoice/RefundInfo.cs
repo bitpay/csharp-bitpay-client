@@ -10,19 +10,12 @@ namespace BitPay.Models.Invoice
     public class RefundInfo
     {
         [JsonProperty(PropertyName = "supportRequest")]
-        public string SupportRequest { get; set; }
+        public string? SupportRequest { get; set; }
         
         [JsonProperty(PropertyName = "currency")]
-        public string Currency { get; set; }
+        public string? Currency { get; set; }
         
         [JsonProperty(PropertyName = "amounts")]
-        public Dictionary<string, decimal> Amounts { get; set; }
-        
-        public RefundInfo(string supportRequest, string currency, Dictionary<string, decimal> amounts)
-        {
-            SupportRequest = supportRequest;
-            Currency = currency;
-            Amounts = amounts;
-        }
+        public Dictionary<string, decimal>? Amounts { get; set; }
     }
 }

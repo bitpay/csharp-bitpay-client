@@ -16,28 +16,28 @@ namespace BitPay.Models.Invoice
         public string? InvoiceId { get; set; }
 
         [JsonProperty(PropertyName = "preview")]
-        public bool Preview { get; set; }
+        public bool? Preview { get; set; }
 
         [JsonProperty(PropertyName = "immediate")]
-        public bool Immediate { get; set; }
+        public bool? Immediate { get; set; }
 
         [JsonProperty(PropertyName = "buyerPaysRefundFee")]
-        public bool BuyerPaysRefundFee { get; set; }
+        public bool? BuyerPaysRefundFee { get; set; }
 
         [JsonProperty(PropertyName = "guid")]
         public string? ResourceGuid { get; set; }
 
-        [JsonProperty(PropertyName = "refundEmail")]
-        public string? RefundEmail { get; set; }
+        [JsonProperty(PropertyName = "refundAddress")]
+        public string? RefundAddress { get; set; }
 
         [JsonProperty(PropertyName = "amount")]
         public decimal? Amount { get; set; }
 
-        [JsonProperty(PropertyName = "token")]
-        public string? Token { get; set; }
-
         [JsonProperty(PropertyName = "currency")]
         public string? Currency { get; set; }
+        
+        [JsonProperty(PropertyName = "notificationURL")]
+        public string? NotificationUrl { get; set; }
 
         // Response fields
         //
@@ -60,9 +60,6 @@ namespace BitPay.Models.Invoice
         [JsonProperty(PropertyName = "status")]
         public string? Status { get; set; }
 
-        [JsonProperty(PropertyName = "params")]
-        public RefundParams? PaymentUrls { get; set; }
-        
         [JsonProperty(PropertyName = "reference")]
         public string? Reference { get; set; }
         
@@ -74,6 +71,15 @@ namespace BitPay.Models.Invoice
         
         [JsonProperty(PropertyName = "transactionRefundFee")]
         public decimal? TransactionRefundFee { get; set; }
+        
+        [JsonProperty(PropertyName = "supportRequest")]
+        public string? SupportRequest { get; set; }
+        
+        [JsonProperty(PropertyName = "txid")]
+        public string? Txid { get; set; }
+        
+        [JsonProperty(PropertyName = "type")]
+        public string? Type { get; set; }
 
         public Refund()
         {
@@ -110,24 +116,19 @@ namespace BitPay.Models.Invoice
             return (Invoice != null);
         }
 
-        public bool ShouldSerializePaymentUrls()
-        {
-            return (PaymentUrls != null);
-        }
-
         public bool ShouldSerializePreview()
         {
-            return false;
+            return Preview.HasValue;
         }
 
         public bool ShouldSerializeImmediate()
         {
-            return false;
+            return Immediate.HasValue;
         }
 
         public bool ShouldSerializeBuyerPaysRefundFee()
         {
-            return false;
+            return BuyerPaysRefundFee.HasValue;
         }
     }
 }

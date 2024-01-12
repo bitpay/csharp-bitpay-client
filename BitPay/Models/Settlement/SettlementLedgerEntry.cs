@@ -3,23 +3,31 @@
 
 using System;
 
+using Newtonsoft.Json;
+
 namespace BitPay.Models.Settlement
 {
     public class SettlementLedgerEntry
     {
+        [JsonProperty(PropertyName = "code")]
         public int Code { get; set; }
-        public string? InvoiceId { get; set; }
+        
+        [JsonProperty(PropertyName = "amount")]
         public decimal Amount { get; set; }
-        public DateTime Timestamp { get; set; }
-        public string? Description { get; set; }
-        public string? Reference { get; set; }
-        public InvoiceData? InvoiceData { get; set; }
 
-        public SettlementLedgerEntry(int code, decimal amount, DateTime timestamp)
-        {
-            Code = code;
-            Amount = amount;
-            Timestamp = timestamp;
-        }
+        [JsonProperty(PropertyName = "timestamp")]
+        public DateTime? Timestamp { get; set; }
+
+        [JsonProperty(PropertyName = "invoiceId")]
+        public string? InvoiceId { get; set; }
+
+        [JsonProperty(PropertyName = "description")]
+        public string? Description { get; set; }
+        
+        [JsonProperty(PropertyName = "reference")]
+        public string? Reference { get; set; }
+        
+        [JsonProperty(PropertyName = "invoiceData")]
+        public InvoiceData? InvoiceData { get; set; }
     }
 }
