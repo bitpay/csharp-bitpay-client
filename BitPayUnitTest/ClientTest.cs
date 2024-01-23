@@ -448,13 +448,14 @@ namespace BitPayUnitTest
             Assert.Equal("https://merchantwebsite.com/shop/return", result.RedirectUrl);
             Assert.False(result.AutoRedirect);
             Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseUrl);
-            Assert.Null(result.RefundAddressRequestPending);
+            Assert.False(result.RefundAddressRequestPending);
             Assert.Equal("john@doe.com", result.BuyerProvidedEmail);
             Assert.Equal("john@doe.com", result.BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.BuyerProvidedInfo?.SelectedWallet);
             Assert.Equal("BTC", result.BuyerProvidedInfo?.SelectedTransactionCurrency);
             Assert.Equal(false, result.SupportedTransactionCurrencies.GetSupportedCurrency("SHIB_m").Enabled);
             Assert.Equal("Some Reason", result.SupportedTransactionCurrencies.GetSupportedCurrency("SHIB_m").Reason);
+            Assert.Equal("08.01.2024 23:50:56", result.RefundAddresses[0]["n2MDYgEhxCAnuoVd1JpPmvxZShE6rQA6zv"].Date.ToString());
         }
 
         [Fact]
@@ -502,7 +503,7 @@ namespace BitPayUnitTest
             Assert.Equal("https://merchantwebsite.com/shop/return", result.RedirectUrl);
             Assert.False(result.AutoRedirect);
             Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseUrl);
-            Assert.Null(result.RefundAddressRequestPending);
+            Assert.False(result.RefundAddressRequestPending);
             Assert.Equal("john@doe.com", result.BuyerProvidedEmail);
             Assert.Equal("john@doe.com", result.BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.BuyerProvidedInfo?.SelectedWallet);
@@ -554,7 +555,7 @@ namespace BitPayUnitTest
             Assert.Equal("https://merchantwebsite.com/shop/return", result.RedirectUrl);
             Assert.False(result.AutoRedirect);
             Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseUrl);
-            Assert.Null(result.RefundAddressRequestPending);
+            Assert.False(result.RefundAddressRequestPending);
             Assert.Equal("john@doe.com", result.BuyerProvidedEmail);
             Assert.Equal("john@doe.com", result.BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.BuyerProvidedInfo?.SelectedWallet);
@@ -613,7 +614,7 @@ namespace BitPayUnitTest
             Assert.Equal("https://merchantwebsite.com/shop/return", result.First().RedirectUrl);
             Assert.False(result.First().AutoRedirect);
             Assert.Equal("https://merchantwebsite.com/shop/cancel", result.First().CloseUrl);
-            Assert.Null(result.First().RefundAddressRequestPending);
+            Assert.False(result.First().RefundAddressRequestPending);
             Assert.Equal("john@doe.com", result.First().BuyerProvidedEmail);
             Assert.Equal("john@doe.com", result.First().BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.First().BuyerProvidedInfo?.SelectedWallet);
@@ -666,7 +667,7 @@ namespace BitPayUnitTest
             Assert.False(result.AutoRedirect);
             Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseUrl);
             Assert.Equal(new List<dynamic>(), result.RefundAddresses);
-            Assert.Null(result.RefundAddressRequestPending);
+            Assert.False(result.RefundAddressRequestPending);
             Assert.Equal("john@doe.com", result.BuyerProvidedEmail);
             Assert.Equal("john@doe.com", result.BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.BuyerProvidedInfo?.SelectedWallet);
@@ -719,7 +720,7 @@ namespace BitPayUnitTest
             Assert.Equal("https://merchantwebsite.com/shop/return", result.RedirectUrl);
             Assert.False(result.AutoRedirect);
             Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseUrl);
-            Assert.Null(result.RefundAddressRequestPending);
+            Assert.False(result.RefundAddressRequestPending);
             Assert.Equal("john@doe.com", result.BuyerProvidedEmail);
             Assert.Equal("john@doe.com", result.BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.BuyerProvidedInfo?.SelectedWallet);
@@ -772,7 +773,7 @@ namespace BitPayUnitTest
             Assert.Equal("https://merchantwebsite.com/shop/return", result.RedirectUrl);
             Assert.False(result.AutoRedirect);
             Assert.Equal("https://merchantwebsite.com/shop/cancel", result.CloseUrl);
-            Assert.Null(result.RefundAddressRequestPending);
+            Assert.False(result.RefundAddressRequestPending);
             Assert.Equal("john@doe.com", result.BuyerProvidedEmail);
             Assert.Equal("john@doe.com", result.BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.BuyerProvidedInfo?.SelectedWallet);

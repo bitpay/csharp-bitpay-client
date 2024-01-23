@@ -41,5 +41,29 @@ namespace BitPay.Models.Invoice
         
         [JsonProperty(PropertyName = "supportRequest")]
         public string? SupportRequest { get; set; }
+        
+        [JsonProperty(PropertyName = "reference")]
+        public string? Reference { get; set; }
+
+        [JsonProperty(PropertyName = "guid")]
+        public string? ResourceGuid { get; set; }
+
+        [JsonProperty(PropertyName = "refundAddress")]
+        public string? RefundAddress { get; set; }
+
+        [JsonProperty(PropertyName = "type")]
+        public string? Type { get; set; }
+
+        [JsonProperty(PropertyName = "txid")]
+        public string? Txid { get; set; }
+
+        [JsonProperty(PropertyName = "transactionCurrency")]
+        public string? TransactionCurrency { get; set; }
+
+        [JsonProperty(PropertyName = "transactionAmount")]
+        public double? TransactionAmount { get; set; }
+
+        [JsonProperty(PropertyName = "transactionRefundFee")]
+        public double? TransactionRefundFee { get; set; }
     }
 }

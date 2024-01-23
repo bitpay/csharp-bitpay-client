@@ -11,7 +11,7 @@ namespace BitPay.Models.Ledger
     {
         [JsonProperty(PropertyName = "type")] public string? Type { get; set; }
 
-        [JsonProperty(PropertyName = "amount")] public int? Amount { get; set; }
+        [JsonProperty(PropertyName = "amount")] public string? Amount { get; set; }
         
         [JsonProperty(PropertyName = "code")] public int? Code { get; set; }
 
