@@ -15,8 +15,7 @@ namespace BitPay.Models.Invoice
     {
         private string _currency = "";
         private dynamic? _exchangeRates;
-        private InvoiceRefundAddresses? _refundAddresses;
-        
+
         // Creates a minimal invoice request object.
         public Invoice(decimal price, string currency)
         {
