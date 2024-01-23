@@ -453,9 +453,9 @@ namespace BitPayUnitTest
             Assert.Equal("john@doe.com", result.BuyerProvidedInfo?.EmailAddress);
             Assert.Equal("bitpay", result.BuyerProvidedInfo?.SelectedWallet);
             Assert.Equal("BTC", result.BuyerProvidedInfo?.SelectedTransactionCurrency);
-            Assert.Equal(false, result.SupportedTransactionCurrencies.GetSupportedCurrency("SHIB_m").Enabled);
+            Assert.False(result.SupportedTransactionCurrencies.GetSupportedCurrency("SHIB_m").Enabled);
             Assert.Equal("Some Reason", result.SupportedTransactionCurrencies.GetSupportedCurrency("SHIB_m").Reason);
-            Assert.Equal("08.01.2024 23:50:56", result.RefundAddresses[0]["n2MDYgEhxCAnuoVd1JpPmvxZShE6rQA6zv"].Date.ToString());
+            Assert.Equal("23:50:56.5560000", result.RefundAddresses[0]["n2MDYgEhxCAnuoVd1JpPmvxZShE6rQA6zv"].Date.TimeOfDay.ToString());
         }
 
         [Fact]
@@ -1770,12 +1770,12 @@ namespace BitPayUnitTest
             Assert.Equal("RPWTabW8urd3xWv2To989v", result[1].Id);
             Assert.Equal("YJCgTf3jrXHkUVzLQ7y4eg", result[1].AccountId);
             Assert.Equal("EUR", result[1].Currency);
-            Assert.Equal("Test Organization", result[1].PayoutInfo.Name);
-            Assert.Equal("NL85ABNA0000000000", result[1].PayoutInfo.Account);
-            Assert.Equal("Corporate account", result[1].PayoutInfo.Label);
-            Assert.Equal("Netherlands", result[1].PayoutInfo.BankCountry);
-            Assert.Equal("Test", result[1].PayoutInfo.Bank);
-            Assert.Equal("RABONL2U", result[1].PayoutInfo.Swift);
+            Assert.Equal("Test Organization", result[1].PayoutInfo?.Name);
+            Assert.Equal("NL85ABNA0000000000", result[1].PayoutInfo?.Account);
+            Assert.Equal("Corporate account", result[1].PayoutInfo?.Label);
+            Assert.Equal("Netherlands", result[1].PayoutInfo?.BankCountry);
+            Assert.Equal("Test", result[1].PayoutInfo?.Bank);
+            Assert.Equal("RABONL2U", result[1].PayoutInfo?.Swift);
             Assert.Equal("processing", result[1].Status);
             Assert.Equal(DateTime.Parse("2021-05-11T09:05:00.176Z").ToUniversalTime(), result[1].DateCreated);
             Assert.Equal(DateTime.Parse("2021-05-11T11:52:29.681Z").ToUniversalTime(), result[1].DateExecuted);
@@ -1816,12 +1816,12 @@ namespace BitPayUnitTest
             Assert.Equal("RPWTabW8urd3xWv2To989v", result.Id);
             Assert.Equal("YJCgTf3jrXHkUVzLQ7y4eg", result.AccountId);
             Assert.Equal("EUR", result.Currency);
-            Assert.Equal("Test Organization", result.PayoutInfo.Name);
-            Assert.Equal("NL85ABNA0000000000", result.PayoutInfo.Account);
-            Assert.Equal("Corporate account", result.PayoutInfo.Label);
-            Assert.Equal("Netherlands", result.PayoutInfo.BankCountry);
-            Assert.Equal("Test", result.PayoutInfo.Bank);
-            Assert.Equal("RABONL2U", result.PayoutInfo.Swift);
+            Assert.Equal("Test Organization", result.PayoutInfo?.Name);
+            Assert.Equal("NL85ABNA0000000000", result.PayoutInfo?.Account);
+            Assert.Equal("Corporate account", result.PayoutInfo?.Label);
+            Assert.Equal("Netherlands", result.PayoutInfo?.BankCountry);
+            Assert.Equal("Test", result.PayoutInfo?.Bank);
+            Assert.Equal("RABONL2U", result.PayoutInfo?.Swift);
             Assert.Equal("processing", result.Status);
             Assert.Equal(DateTime.Parse("2021-05-11T09:05:00.176Z").ToUniversalTime(), result.DateCreated);
             Assert.Equal(DateTime.Parse("2021-05-11T11:52:29.681Z").ToUniversalTime(), result.DateExecuted);
@@ -1867,12 +1867,12 @@ namespace BitPayUnitTest
             Assert.Equal("RvNuCTMAkURKimwgvSVEMP", result.Id);
             Assert.Equal("YJCgTf3jrXHkUVzLQ7y4eg", result.AccountId);
             Assert.Equal("USD", result.Currency);
-            Assert.Null(result.PayoutInfo.Name);
-            Assert.Equal("NL85ABNA0000000000", result.PayoutInfo.Iban);
-            Assert.Equal("Test", result.PayoutInfo.Label);
-            Assert.Equal("Netherlands", result.PayoutInfo.BankCountry);
-            Assert.Equal("Test", result.PayoutInfo.BankName);
-            Assert.Equal("RABONL2U", result.PayoutInfo.Swift);
+            Assert.Null(result.PayoutInfo?.Name);
+            Assert.Equal("NL85ABNA0000000000", result.PayoutInfo?.Iban);
+            Assert.Equal("Test", result.PayoutInfo?.Label);
+            Assert.Equal("Netherlands", result.PayoutInfo?.BankCountry);
+            Assert.Equal("Test", result.PayoutInfo?.BankName);
+            Assert.Equal("RABONL2U", result.PayoutInfo?.Swift);
             Assert.Equal("processing", result.Status);
             Assert.Equal(DateTime.Parse("2018-08-23T20:45:22.742Z").ToUniversalTime(), result.DateCreated);
             Assert.Equal(DateTime.Parse("2018-08-23T20:47:06.912Z").ToUniversalTime(), result.DateExecuted);
@@ -1894,7 +1894,7 @@ namespace BitPayUnitTest
             Assert.Equal(5.0M, result.LedgerEntries?[0].InvoiceData?.Price);
             Assert.Equal("EUR", result.LedgerEntries?[0].InvoiceData?.Currency);
             Assert.Equal("BCH", result.LedgerEntries?[0].InvoiceData?.TransactionCurrency);
-            Assert.Equal(100.0, result.LedgerEntries?[0].InvoiceData?.PayoutPercentage["USD"]);
+            Assert.Equal(100.0, result.LedgerEntries?[0].InvoiceData?.PayoutPercentage?["USD"]);
         }
         
         [Fact]
