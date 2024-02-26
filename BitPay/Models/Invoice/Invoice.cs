@@ -15,8 +15,7 @@ namespace BitPay.Models.Invoice
     {
         private string _currency = "";
         private dynamic? _exchangeRates;
-        private dynamic? _refundAddresses;
-        
+
         // Creates a minimal invoice request object.
         public Invoice(decimal price, string currency)
         {
@@ -187,13 +186,9 @@ namespace BitPay.Models.Invoice
         public string? ExceptionStatus { get; set; }
 
         [JsonProperty(PropertyName = "refundAddresses")]
-        public dynamic? RefundAddresses
-        {
-            get => _refundAddresses;
-            set => _refundAddresses = JsonConvert.DeserializeObject(value?.ToString(Formatting.None));
-        }
-
-        [JsonProperty(PropertyName = "refundAddressRequestPendin")]
+        public List<Dictionary<string, InvoiceRefundAddresses>>? RefundAddresses { get; set; }
+        
+        [JsonProperty(PropertyName = "refundAddressRequestPending")]
         public bool? RefundAddressRequestPending { get; set; }
 
         [JsonProperty(PropertyName = "buyerProvidedEmail")]

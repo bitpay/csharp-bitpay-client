@@ -19,7 +19,7 @@ namespace BitPay.Models.Payout
         public DateTime? Date { get; set; }
         
         [JsonProperty(PropertyName = "confirmations")]
-        public string? Confirmations { get; set; }
+        public int? Confirmations { get; set; }
 
         public PayoutInstructionTransaction(decimal amount)
         {

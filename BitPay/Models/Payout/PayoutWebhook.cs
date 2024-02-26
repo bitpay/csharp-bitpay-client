@@ -59,7 +59,14 @@ namespace BitPay.Models.Payout
         
         [JsonProperty(PropertyName = "transactions")]
         public List<InvoiceTransaction>? Transactions { get; set; }
-        
 
+        [JsonProperty(PropertyName = "accountId")]
+        public string? AccountId { get; set; }
+
+        [JsonProperty(PropertyName = "dateExecuted")]
+        public DateTime? DateExecuted { get; set; }
+
+        [JsonProperty(PropertyName = "groupId")]
+        public string? GroupId { get; set; }
     }
 }
