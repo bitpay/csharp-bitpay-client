@@ -79,6 +79,40 @@ namespace BitPay.Clients
                 BitPayExceptionProvider.ThrowApiExceptionWithMessage(value!.ToString(), code!.ToString());
             }
 
+#pragma warning disable CA1865
+            if (jObj.TryGetValue("errors", out value))
+            {
+                var finalMessage = "";
+                foreach (var errorItem in value.Children().ToList())
+                {
+                    JObject jObjectErrorItem = (JObject)errorItem;
+                    string errorValue = (string) (jObjectErrorItem.ContainsKey("error") ? errorItem["error"] : "")!;
+                    string paramValue = (string) (jObjectErrorItem.ContainsKey("param") ? errorItem["param"] : "")!;
+                    
+                    if (errorValue.EndsWith(".", System.StringComparison.Ordinal))
+                    {
+                        errorValue = errorValue.Substring(0, errorValue.Length - 1);
+                    }
+                    
+                    string errorMessage = $"{errorValue} {paramValue}".Trim();
+                    
+                    if (!errorMessage.EndsWith(".", System.StringComparison.Ordinal))
+                    {
+                        errorMessage += ".";
+                    }
+                    
+                    if (finalMessage.Length > 0)
+                    {
+                        errorMessage = " " + errorMessage;
+                    }
+
+                    finalMessage += errorMessage;
+                }
+
+                BitPayExceptionProvider.ThrowApiExceptionWithMessage(finalMessage);
+            }
+#pragma warning restore CA1865
+
             if (jObj.ContainsKey("status") && jObj.ContainsKey("data"))
             {
                 if(jObj.TryGetValue("data", out value))
