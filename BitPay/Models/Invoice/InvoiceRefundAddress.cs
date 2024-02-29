@@ -7,9 +7,9 @@ using Newtonsoft.Json;
 
 namespace BitPay.Models.Invoice
 {
-    public class InvoiceRefundAddresses
+    public class InvoiceRefundAddress
     {
-        public InvoiceRefundAddresses(string type, DateTime date)
+        public InvoiceRefundAddress(string type, DateTime date)
         {
             Type = type;
             Date = date;

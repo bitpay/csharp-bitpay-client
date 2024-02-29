@@ -186,7 +186,7 @@ namespace BitPay.Models.Invoice
         public string? ExceptionStatus { get; set; }
 
         [JsonProperty(PropertyName = "refundAddresses")]
-        public List<Dictionary<string, InvoiceRefundAddresses>>? RefundAddresses { get; set; }
+        public List<Dictionary<string, InvoiceRefundAddress>>? RefundAddresses { get; set; }
         
         [JsonProperty(PropertyName = "refundAddressRequestPending")]
         public bool? RefundAddressRequestPending { get; set; }
