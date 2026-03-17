@@ -8,7 +8,7 @@ namespace BitPay.Models.Invoice
     public class MinerFeesItem
     {
         [JsonProperty(PropertyName = "satoshisPerByte")]
-        public int? SatoshisPerByte { get; set; }
+        public decimal? SatoshisPerByte { get; set; }
         
         [JsonProperty(PropertyName = "totalFee")]
         public int? TotalFee { get; set; }
