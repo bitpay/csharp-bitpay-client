@@ -8,23 +8,22 @@ on:
 jobs:
   build-release-package:
     runs-on: windows-2022
-    strategy:
-      fail-fast: false
-      matrix:
-        dotnet-version: ['8.0', '9.0', '48']
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup .NET ${{ matrix.dotnet-version }}
-        if: matrix.dotnet-version != '48'
+      - name: Setup .NET 8.0
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: ${{ matrix.dotnet-version }}
-
+          dotnet-version: '8.0'
+          
+      - name: Setup .NET 9.0
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0'
+      
       - name: Setup MSBuild for .NET Framework 4.8
-        if: matrix.dotnet-version == '48'
         uses: microsoft/setup-msbuild@v3
 
       - name: Restore dependencies
@@ -33,8 +32,14 @@ jobs:
       - name: Build for all targets
         run: dotnet build --configuration Release --no-restore
 
-      - name: Run tests for ${{ matrix.dotnet-version }}
-        run: dotnet test BitPayUnitTest --configuration Release --no-build --verbosity normal -f net${{ matrix.dotnet-version }}
+      - name: Run tests for net8.0
+        run: dotnet test BitPayUnitTest --configuration Release --no-build --verbosity normal -f net8.0
+      
+      - name: Run tests for net9.0
+        run: dotnet test BitPayUnitTest --configuration Release --no-build --verbosity normal -f net9.0
+      
+      - name: Run tests for net48
+        run: dotnet test BitPayUnitTest --configuration Release --no-build --verbosity normal -f net48
 
       - name: Pack NuGet package
         run: dotnet pack BitPay/BitPay.csproj --configuration Release --no-build --output ./artifacts
