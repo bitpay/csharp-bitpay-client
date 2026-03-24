@@ -6,117 +6,48 @@ on:
       - published
 
 jobs:
-  build:
-    runs-on: windows-2022
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup .NET 8.0
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0'
-          
-      - name: Setup .NET 9.0
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '9.0'
-      
-      - name: Setup MSBuild for .NET Framework 4.8
-        uses: microsoft/setup-msbuild@v2
-        with:
-          dotNetVersion: '4.8.x'
-      
-      - name: Restore dependencies
-        run: dotnet restore
-      
-      - name: Build for all targets
-        run: dotnet build --configuration Release --no-restore
-      
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: |
-            **/bin/Release/**
-            !**/bin/Release/**/ref/**
-          retention-days: 1
-  
-  test:
-    needs: build
+  build-release-package:
     runs-on: windows-2022
     strategy:
       fail-fast: false
       matrix:
-        framework: ['net8.0', 'net48']
-    
+        dotnet-version: ['8.0', '9.0', '48']
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup .NET 8.0
-        uses: actions/setup-dotnet@v4
+        uses: actions/checkout@v6
+
+      - name: Setup .NET ${{ matrix.dotnet-version }}
+        if: matrix.dotnet-version != '48'
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '8.0'
-      
+          dotnet-version: ${{ matrix.dotnet-version }}
+
       - name: Setup MSBuild for .NET Framework 4.8
-        if: matrix.framework == 'net48'
-        uses: microsoft/setup-msbuild@v2
-        with:
-          dotNetVersion: '4.8.x'
-      
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-      
-      - name: Run tests for ${{ matrix.framework }}
-        run: dotnet test BitPayUnitTest --configuration Release --no-build --verbosity normal -f ${{ matrix.framework }}
-  
-  package:
-    needs: test
-    runs-on: windows-2022
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup .NET 8.0
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0'
-          
-      - name: Setup .NET 9.0
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '9.0'
-      
-      - name: Setup MSBuild for .NET Framework 4.8
-        uses: microsoft/setup-msbuild@v2
-        with:
-          dotNetVersion: '4.8.x'
-      
+        if: matrix.dotnet-version == '48'
+        uses: microsoft/setup-msbuild@v3
+
       - name: Restore dependencies
         run: dotnet restore
-      
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-      
+
+      - name: Build for all targets
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests for ${{ matrix.dotnet-version }}
+        run: dotnet test BitPayUnitTest --configuration Release --no-build --verbosity normal -f net${{ matrix.dotnet-version }}
+
       - name: Pack NuGet package
         run: dotnet pack BitPay/BitPay.csproj --configuration Release --no-build --output ./artifacts
-      
+
       - name: Upload NuGet package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bitpay-nuget-package
           path: ./artifacts/*.nupkg
           retention-days: 90
-      
+
       - name: Upload symbol package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bitpay-symbol-package
           path: ./artifacts/*.snupkg
