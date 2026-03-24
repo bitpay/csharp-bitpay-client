@@ -1,0 +1,61 @@
+name: Release Build
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  build-release-package:
+    runs-on: windows-2022
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET 8.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0'
+          
+      - name: Setup .NET 9.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0'
+      
+      - name: Setup MSBuild for .NET Framework 4.8
+        uses: microsoft/setup-msbuild@v2
+        with:
+          dotNetVersion: '4.8.x'
+      
+      - name: Restore dependencies
+        run: dotnet restore
+      
+      - name: Build for all targets
+        run: dotnet build --configuration Release --no-restore
+      
+      - name: Run tests for net8.0
+        run: dotnet test BitPayUnitTest --configuration Release --no-build --verbosity normal -f net8.0
+      
+      - name: Run tests for net9.0
+        run: dotnet test BitPayUnitTest --configuration Release --no-build --verbosity normal -f net9.0
+      
+      - name: Run tests for net48
+        run: dotnet test BitPayUnitTest --configuration Release --no-build --verbosity normal -f net48
+      
+      - name: Pack NuGet package
+        run: dotnet pack BitPay/BitPay.csproj --configuration Release --no-build --output ./artifacts
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bitpay-nuget-package
+          path: ./artifacts/*.nupkg
+          retention-days: 90
+      
+      - name: Upload symbol packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: bitpay-symbol-package
+          path: ./artifacts/*.snupkg
+          retention-days: 90
