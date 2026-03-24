@@ -6,7 +6,7 @@ on:
       - published
 
 jobs:
-  build-release-package:
+  build:
     runs-on: windows-2022
     
     steps:
@@ -34,26 +34,75 @@ jobs:
       - name: Build for all targets
         run: dotnet build --configuration Release --no-restore
       
-      - name: Run tests for net8.0
-        run: dotnet test BitPayUnitTest --configuration Release --no-build --verbosity normal -f net8.0
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            **/bin/Release/**
+            !**/bin/Release/**/ref/**
+          retention-days: 1
+  
+  test:
+    needs: build
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        framework: ['net8.0', 'net48']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       
-      - name: Run tests for net9.0
-        run: dotnet test BitPayUnitTest --configuration Release --no-build --verbosity normal -f net9.0
+      - name: Setup .NET 8.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0'
       
-      - name: Run tests for net48
-        run: dotnet test BitPayUnitTest --configuration Release --no-build --verbosity normal -f net48
+      - name: Setup MSBuild for .NET Framework 4.8
+        if: matrix.framework == 'net48'
+        uses: microsoft/setup-msbuild@v2
+        with:
+          dotNetVersion: '4.8.x'
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+      
+      - name: Run tests for ${{ matrix.framework }}
+        run: dotnet test BitPayUnitTest --configuration Release --no-build --verbosity normal -f ${{ matrix.framework }}
+  
+  package:
+    needs: test
+    runs-on: windows-2022
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET 8.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0'
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
       
       - name: Pack NuGet package
         run: dotnet pack BitPay/BitPay.csproj --configuration Release --no-build --output ./artifacts
       
-      - name: Upload artifacts
+      - name: Upload NuGet package
         uses: actions/upload-artifact@v4
         with:
           name: bitpay-nuget-package
           path: ./artifacts/*.nupkg
           retention-days: 90
       
-      - name: Upload symbol packages
+      - name: Upload symbol package
         uses: actions/upload-artifact@v4
         with:
           name: bitpay-symbol-package
