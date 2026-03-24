@@ -86,6 +86,19 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0'
+          
+      - name: Setup .NET 9.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0'
+      
+      - name: Setup MSBuild for .NET Framework 4.8
+        uses: microsoft/setup-msbuild@v2
+        with:
+          dotNetVersion: '4.8.x'
+      
+      - name: Restore dependencies
+        run: dotnet restore
       
       - name: Download build artifacts
         uses: actions/download-artifact@v4
