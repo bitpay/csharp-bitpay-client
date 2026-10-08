@@ -90,7 +90,7 @@ namespace BitPay
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(PrivateKeyFile)!);
             }
-            using (var fs = new FileStream(PrivateKeyFile!, FileMode.Create, FileAccess.Write))
+            using (var fs = CreateOwnerOnlyFile(PrivateKeyFile!))
             {
 #pragma warning disable CA1835
                 await fs.WriteAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
@@ -326,6 +326,37 @@ namespace BitPay
                 sr.Close();
                 return line;
             }
+        }
+
+        /// <summary>
+        /// Creates (or overwrites) a file that only its owner can read and write.
+        /// </summary>
+        /// <remarks>
+        /// On Linux and macOS the file gets mode 0600. An existing file is changed to 0600 before it is
+        /// overwritten, because the create mode only applies to new files. On Windows, and on .NET
+        /// Framework, the file keeps the permissions it inherits from its folder.
+        /// </remarks>
+        private static FileStream CreateOwnerOnlyFile(string path)
+        {
+#if NET7_0_OR_GREATER
+            if (!OperatingSystem.IsWindows())
+            {
+                const UnixFileMode ownerOnly = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+
+                if (File.Exists(path))
+                {
+                    File.SetUnixFileMode(path, ownerOnly);
+                }
+
+                return new FileStream(path, new FileStreamOptions
+                {
+                    Mode = FileMode.Create,
+                    Access = FileAccess.Write,
+                    UnixCreateMode = ownerOnly,
+                });
+            }
+#endif
+            return new FileStream(path, FileMode.Create, FileAccess.Write);
         }
     }
 }
