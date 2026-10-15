@@ -22,6 +22,7 @@ using SystemEnvironment = System.Environment;
 
 namespace BitPayUnitTest
 {
+    [Collection(KeyUtilsTest.StaticStateCollection)]
     public class ClientTest
     {
         const string Identity = "someIdentity";

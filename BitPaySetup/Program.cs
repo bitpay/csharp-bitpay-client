@@ -828,13 +828,45 @@ namespace BitPaySetup
             }
 
             // serialize JSON directly to a new config file
-            using (var file = File.CreateText(newConfFilePath))
+            using (var file = new StreamWriter(CreateOwnerOnlyFile(newConfFilePath)))
             {
                 var serializer = new JsonSerializer {Formatting = Formatting.Indented};
                 serializer.Serialize(file, appConfig);
             }
 
             confFilePath = newConfFilePath;
+        }
+
+        /// <summary>
+        /// Creates (or overwrites) a file that only its owner can read and write. The config file
+        /// holds the API tokens, and with the "plain text" option it also holds the private key.
+        /// </summary>
+        /// <remarks>
+        /// On Linux and macOS the file gets mode 0600. An existing file is changed to 0600 before it is
+        /// overwritten, because the create mode only applies to new files. On Windows, and on .NET
+        /// Framework, the file keeps the permissions it inherits from its folder.
+        /// </remarks>
+        private static FileStream CreateOwnerOnlyFile(string path)
+        {
+#if NET7_0_OR_GREATER
+            if (!OperatingSystem.IsWindows())
+            {
+                const UnixFileMode ownerOnly = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+
+                if (File.Exists(path))
+                {
+                    File.SetUnixFileMode(path, ownerOnly);
+                }
+
+                return new FileStream(path, new FileStreamOptions
+                {
+                    Mode = FileMode.Create,
+                    Access = FileAccess.Write,
+                    UnixCreateMode = ownerOnly,
+                });
+            }
+#endif
+            return new FileStream(path, FileMode.Create, FileAccess.Write);
         }
     }
 }
